@@ -1,5 +1,5 @@
-import {addDoc, collection, doc, Firestore, getDocs, orderBy, query, updateDoc} from '@angular/fire/firestore';
-import {DocumentData} from '@firebase/firestore';
+import {addDoc, collection, doc, Firestore, getDoc, getDocs, orderBy, query, updateDoc} from '@angular/fire/firestore';
+import {DocumentData, OrderByDirection} from '@firebase/firestore';
 import {Injectable} from '@angular/core';
 
 export interface Deletable {
@@ -14,6 +14,16 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
   protected collectionName = '';
 
   constructor(private firestore: Firestore) {
+  }
+
+  async get(id: string): Promise<T> {
+    const docRef = doc(this.firestore, this.collectionName, id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return docSnap.data() as T;
+    }
+    throw new Error(`Document ${id} not found`);
   }
 
   async add(item: Omit<T, 'id'>): Promise<string> {
@@ -44,10 +54,10 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
     // await deleteDoc(docRef);
   }
 
-  async getList(orderField = 'name'): Promise<T[]> {
+  async getList(orderField = 'name', orderDirection: OrderByDirection = 'asc'): Promise<T[]> {
     const q = query(
       collection(this.firestore, this.collectionName),
-      orderBy(orderField),
+      orderBy(orderField, orderDirection),
     );
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({

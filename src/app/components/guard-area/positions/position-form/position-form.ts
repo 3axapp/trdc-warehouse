@@ -7,7 +7,7 @@ import {TuiCardLarge} from '@taiga-ui/layout';
 import {TuiChevron, TuiDataListWrapper, TuiSelect} from '@taiga-ui/kit';
 import {PositionTypePipe} from '../../../../pipes/position-type-pipe';
 
-const positionNames = new PositionTypePipe();
+const names = new PositionTypePipe();
 
 @Component({
   selector: 'app-position-form',
@@ -22,7 +22,7 @@ const positionNames = new PositionTypePipe();
   ],
   providers: [
     tuiItemsHandlersProvider({
-      stringify: signal(positionNames.transform.bind(positionNames)),
+      stringify: signal(names.transform.bind(names)),
       // identityMatcher: signal((a: PositionType, b: PositionType) => a.id === b.id),
       // disabledItemHandler: signal((x: PositionType) => x.name.includes('Trevor')),
     }),

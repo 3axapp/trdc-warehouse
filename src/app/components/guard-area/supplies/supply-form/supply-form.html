@@ -1,0 +1,58 @@
+<form [formGroup]="form"
+      tuiCardLarge
+      (ngSubmit)="submit()">
+
+  <tui-textfield>
+    <label tuiLabel>Дата поставки</label>
+    <input
+      tuiInputDate
+      formControlName="date"
+    />
+    <tui-calendar *tuiTextfieldDropdown/>
+  </tui-textfield>
+
+  <tui-textfield tuiChevron>
+    <label tuiLabel>Позиция</label>
+    <input
+      tuiSelect
+      formControlName="position"
+    />
+
+    <tui-data-list-wrapper
+      *tuiTextfieldDropdown
+      new
+      [items]="positions()"
+    />
+  </tui-textfield>
+  <tui-textfield tuiChevron>
+    <label tuiLabel>Поставщик</label>
+    <input
+      tuiSelect
+      formControlName="supplier"
+    />
+
+    <tui-data-list-wrapper
+      *tuiTextfieldDropdown
+      new
+      [items]="suppliers()"
+    />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Количество</label>
+
+    <input
+      tuiInputNumber
+      formControlName="quantity"
+    />
+  </tui-textfield>
+  <footer>
+    <button
+      tuiButton
+      type="submit"
+      [disabled]="form.invalid"
+    >
+      Сохранить
+    </button>
+  </footer>
+</form>

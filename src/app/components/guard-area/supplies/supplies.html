@@ -1,0 +1,62 @@
+<button
+  tuiButton
+  iconEnd="@tui.plus"
+  type="button"
+  size="m"
+  (click)="add()"
+>
+  Новая поставка
+</button>
+
+<table
+  tuiTable
+  class="table table-striped table-hover"
+  [style.width.%]="100"
+  [columns]="columns"
+>
+  <thead>
+  <tr tuiThGroup>
+    <th tuiTh>Id</th>
+    <th tuiTh>Позиция</th>
+    <th tuiTh>Поставщик</th>
+    <th tuiTh>Дата</th>
+    <th tuiTh>Количество</th>
+    <th tuiTh>Брак</th>
+    <th tuiTh>Остаток</th>
+    <th tuiTh>Статус КК</th>
+    <th tuiTh>Лот</th>
+    <th tuiTh [maxWidth]="100" [minWidth]="100">&nbsp;</th>
+  </tr>
+  </thead>
+  <tbody
+    tuiTbody
+    [data]="data()"
+  >
+  <tr tuiTr *ngFor="let item of data()" [class.row_deleted]="item.deleted">
+    @let position = item.positionId | position | async;
+    <td *tuiCell="'date'" tuiTd>{{ item.date | date : 'yyyy-MM-dd' }}</td>
+    <td *tuiCell="'positionId'" tuiTd>{{ position?.name }}</td>
+    <td *tuiCell="'supplierId'" tuiTd>{{ (item.supplierId | supplier | async)?.name }}</td>
+    <td *tuiCell="'qualityControlStatus'" tuiTd>{{ item.qualityControlStatus | qualityControlStatus: position! }}</td>
+    <td
+      *tuiCell="'actions'"
+      tuiTd
+    >
+      <div class="table-actions">
+        @if (item.deleted) {
+          <button tuiButton type="button" tuiHint="Восстановить" (click)="restore(item)">
+            <tui-icon icon="@tui.archive-restore"></tui-icon>
+          </button>
+        } @else {
+          <button tuiButton type="button" tuiHint="Изменить" (click)="edit(item)">
+            <tui-icon icon="@tui.edit"></tui-icon>
+          </button>
+          <button tuiButton type="button" appearance="accent" tuiHint="Удалить" (click)="remove(item)">
+            <tui-icon icon="@tui.archive-x"></tui-icon>
+          </button>
+        }
+      </div>
+    </td>
+  </tr>
+  </tbody>
+</table>

@@ -1,6 +1,6 @@
 import {Routes} from '@angular/router';
 import {Login} from './components/login/login';
-import {Warehouse} from './components/guard-area/warehouse/warehouse';
+import {Supplies} from './components/guard-area/supplies/supplies';
 import {AuthGuard, redirectLoggedInTo, redirectUnauthorizedTo} from '@angular/fire/auth-guard';
 import {Layout} from './components/guard-area/layout/layout';
 import {Positions} from './components/guard-area/positions/positions';
@@ -17,7 +17,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: {authGuardPipe: redirectUnauthorizedToLogin},
     children: [
-      {path: '', component: Warehouse},
+      {path: '', component: Supplies},
       {path: 'positions', component: Positions},
       {path: 'suppliers', component: Suppliers},
       {path: 'executors', component: Executors},
