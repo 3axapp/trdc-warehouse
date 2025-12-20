@@ -1,0 +1,24 @@
+<tui-tabs-with-more>
+  @for (url of urls; track $index) {
+    <a
+      *tuiItem
+      routerLinkActive="active"
+      tuiTab
+      [routerLink]="url.route"
+      [routerLinkActiveOptions]="{exact: true}"
+    >
+      {{ url.title }}
+    </a>
+  }
+  <button
+    iconStart="@tui.log-out"
+    *tuiItem
+    tuiTab
+    type="button"
+    tuiHint="Выход"
+    (click)="logout()"
+    class="logout-btn"
+  ></button>
+</tui-tabs-with-more>
+
+<router-outlet/>

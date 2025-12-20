@@ -1,0 +1,48 @@
+<form
+  (ngSubmit)="onSubmit()"
+  tuiAppearance="floating"
+  tuiCardLarge
+  tuiForm="m"
+  [formGroup]="loginForm"
+>
+  <header tuiHeader>
+    <h2 tuiTitle>{{ isLoginMode ? 'Вход' : 'Регистрация' }}</h2>
+  </header>
+  <tui-textfield>
+    <label tuiLabel>Email</label>
+    <input tuiTextfield type="email" formControlName="email" required>
+    <tui-icon icon="@tui.mail" />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Пароль</label>
+    <input tuiTextfield type="password" formControlName="password" required>
+    <tui-icon icon="@tui.key" />
+  </tui-textfield>
+
+  @if (!isLoginMode) {
+    <tui-textfield>
+      <label tuiLabel>Пароль</label>
+      <input tuiTextfield type="password" formControlName="confirmPassword" required>
+      <tui-icon icon="@tui.key" />
+    </tui-textfield>
+  }
+
+  <footer>
+    <button
+      tuiButton
+      [disabled]="!loginForm.valid"
+      type="submit"
+    >
+      {{ isLoginMode ? 'Войти' : 'Зарегистрироваться' }}
+    </button>
+    <button
+      appearance="flat"
+      tuiButton
+      type="button"
+      (click)="toggleMode()"
+    >
+      => {{ isLoginMode ? 'Зарегистрироваться' : 'Войти' }}
+    </button>
+  </footer>
+</form>
