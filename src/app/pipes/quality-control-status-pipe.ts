@@ -1,6 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
 import {QualityControlStatus} from '../services/supplies.service';
-import {Position, PositionType} from '../services/positions.service';
 
 @Pipe({
   name: 'qualityControlStatus',
@@ -11,10 +10,7 @@ export class QualityControlStatusPipe implements PipeTransform {
     [QualityControlStatus.Completed]: 'Обработан',
   };
 
-  transform(value: QualityControlStatus, position: Position): string {
-    if (!position || position.type !== PositionType.Checked) {
-      return '';
-    }
+  transform(value: QualityControlStatus): string {
     value = value || QualityControlStatus.Pending;
     if (!this.names[value]) {
       return 'Неизвестно';

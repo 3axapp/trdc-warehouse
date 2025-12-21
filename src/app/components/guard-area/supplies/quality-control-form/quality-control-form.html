@@ -1,0 +1,44 @@
+<form [formGroup]="form"
+      tuiCardLarge
+      (ngSubmit)="submit()">
+
+  <tui-textfield>
+    <label tuiLabel>Дата поставки</label>
+    <input
+      tuiInputDate
+      formControlName="qualityControlDate"
+    />
+    <tui-calendar *tuiTextfieldDropdown/>
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Лот</label>
+
+    <input
+      tuiInputNumber
+      formControlName="lot"
+      [min]="1"
+    />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Брак</label>
+
+    <input
+      tuiInputNumber
+      [max]="context.data!.quantity"
+      [min]="0"
+      [step]="1"
+      formControlName="brokenQuantity"
+    />
+  </tui-textfield>
+  <footer>
+    <button
+      tuiButton
+      type="submit"
+      [disabled]="form.invalid"
+    >
+      Подтвердить
+    </button>
+  </footer>
+</form>

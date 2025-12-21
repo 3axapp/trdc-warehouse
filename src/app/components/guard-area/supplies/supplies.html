@@ -37,7 +37,17 @@
     <td *tuiCell="'date'" tuiTd>{{ item.date | date : 'yyyy-MM-dd' }}</td>
     <td *tuiCell="'positionId'" tuiTd>{{ position?.name }}</td>
     <td *tuiCell="'supplierId'" tuiTd>{{ (item.supplierId | supplier | async)?.name }}</td>
-    <td *tuiCell="'qualityControlStatus'" tuiTd>{{ item.qualityControlStatus | qualityControlStatus: position! }}</td>
+    <td *tuiCell="'remainingQuantity'" tuiTd>{{ item.quantity - item.brokenQuantity - item.usedQuantity }}</td>
+    <td *tuiCell="'qualityControlStatus'" tuiTd>
+      @if (position?.type === PositionType.Checked) {
+        {{ item.qualityControlStatus | qualityControlStatus }}
+        @if (!item.deleted && item.qualityControlStatus !== QualityControlStatus.Completed) {
+          <button tuiButton type="button" tuiHint="Обработать" (click)="qualityControl(item)">
+            <tui-icon icon="@tui.notebook-pen"></tui-icon>
+          </button>
+        }
+      }
+    </td>
     <td
       *tuiCell="'actions'"
       tuiTd

@@ -23,9 +23,11 @@ export interface Supply extends Deletable {
   date: Date;
   quantity: number;
   brokenQuantity: number;
-  remainingQuantity: number;
+  usedQuantity: number;
+  qualityControlDate?: Date;
+  qualityControlUserId?: string;
   qualityControlStatus: QualityControlStatus;
-  lot: string;
+  lot: number;
 }
 
 export enum QualityControlStatus {

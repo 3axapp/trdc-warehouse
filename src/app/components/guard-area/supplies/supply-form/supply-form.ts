@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {injectContext} from '@taiga-ui/polymorpheus';
 import {TuiButton, TuiCalendar, TuiDialogContext, tuiItemsHandlersProvider, TuiTextfield} from '@taiga-ui/core';
 import {Position, PositionsService, PositionType} from '../../../../services/positions.service';
@@ -34,7 +34,7 @@ import {TuiDay} from '@taiga-ui/cdk';
   templateUrl: './supply-form.html',
   styleUrl: './supply-form.scss',
 })
-export class SupplyForm {
+export class SupplyForm implements OnInit {
   public readonly context = injectContext<TuiDialogContext<Partial<Supply>, Supply | undefined>>();
   protected readonly positions = signal<Position[]>([]);
   protected readonly suppliers = signal<Supplier[]>([]);
@@ -56,6 +56,7 @@ export class SupplyForm {
     PositionType.Checked,
     PositionType.Produced,
   ];
+  protected min = 1;
 
   public ngOnInit(): void {
     this.positionsService.getList().then(list => {
@@ -79,6 +80,7 @@ export class SupplyForm {
       quantity: this.context.data.quantity,
       date: TuiDay.fromUtcNativeDate(this.context.data.date),
     });
+    this.min = Math.max((this.context.data?.brokenQuantity || 0) + (this.context.data?.usedQuantity || 0), this.min);
   }
 
   protected get data(): Supply | undefined {

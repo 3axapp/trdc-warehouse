@@ -3,7 +3,7 @@ import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from '
 import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
 import {Observable, switchMap} from 'rxjs';
 import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
-import {SuppliesService, Supply} from '../../../services/supplies.service';
+import {QualityControlStatus, SuppliesService, Supply} from '../../../services/supplies.service';
 import {AsyncPipe, DatePipe, NgForOf} from '@angular/common';
 import {
   TuiTableCell,
@@ -18,8 +18,9 @@ import {QualityControlStatusPipe} from '../../../pipes/quality-control-status-pi
 import {PositionPipe} from '../../../pipes/position-pipe';
 import {SupplierPipe} from '../../../pipes/supplier-pipe';
 import {CacheService} from '../../../services/cache.service';
-import {PositionsService} from '../../../services/positions.service';
+import {PositionsService, PositionType} from '../../../services/positions.service';
 import {SuppliersService} from '../../../services/suppliers.service';
+import {Auth} from '@angular/fire/auth';
 
 
 @Component({
@@ -57,6 +58,11 @@ export class Supplies implements OnInit {
   private readonly cache = inject(CacheService);
   private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly alerts = inject(TuiAlertService);
+  private readonly auth = inject(Auth);
+
+  protected readonly PositionType = PositionType;
+
+  protected readonly QualityControlStatus = QualityControlStatus;
 
   protected columns = [
     'id',
@@ -141,6 +147,8 @@ export class Supplies implements OnInit {
     dialog(supply).subscribe({
       next: async (data) => {
         if (supply?.id) {
+          data.brokenQuantity = 0;
+          data.usedQuantity = 0;
           await this.supplies.update(supply.id, data);
         } else {
           await this.supplies.add(data);
@@ -167,6 +175,29 @@ export class Supplies implements OnInit {
   private async load(): Promise<void> {
     return this.supplies.getList().then(supplies => {
       this.data.set(supplies.sort((a, b) => (a.deleted ? 1 : 0) - (b.deleted ? 1 : 0)));
+    });
+  }
+
+  protected async qualityControl(supply: Supply) {
+    const {QualityControlForm} = await import('./quality-control-form/quality-control-form');
+
+    const dialog = tuiDialog(QualityControlForm, {
+      injector: this.injector,
+      dismissible: true,
+      label: 'Контроль качества',
+    });
+
+    dialog(supply).subscribe({
+      next: async (data) => {
+        data.qualityControlStatus = QualityControlStatus.Completed;
+        data.qualityControlUserId = this.auth.currentUser!.uid;
+        await this.supplies.update(supply.id, data);
+        await this.load();
+        console.info(`Dialog emitted data = `, data);
+      },
+      complete: () => {
+        console.info('Dialog closed');
+      },
     });
   }
 }
