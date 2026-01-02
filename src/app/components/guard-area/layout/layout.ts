@@ -23,7 +23,7 @@ export class Layout {
 
   protected readonly urls = [
     {route: '', title: 'Склад'},
-    {route: '', title: 'Производство'},
+    {route: 'manufacturing', title: 'Производство'},
     {route: '', title: 'Упаковка'},
     {route: '', title: 'Отгрузка'},
     {route: '/positions', title: 'Позиции'},

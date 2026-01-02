@@ -6,6 +6,7 @@ import {Layout} from './components/guard-area/layout/layout';
 import {Positions} from './components/guard-area/positions/positions';
 import {Suppliers} from './components/guard-area/suppliers/suppliers';
 import {Executors} from './components/guard-area/executors/executors';
+import {Manufacturing} from './components/guard-area/manufacturing/manufacturing';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['login']);
 const redirectLoggedInToItems = () => redirectLoggedInTo(['']);
@@ -18,6 +19,7 @@ export const routes: Routes = [
     data: {authGuardPipe: redirectUnauthorizedToLogin},
     children: [
       {path: '', component: Supplies},
+      {path: 'manufacturing', component: Manufacturing},
       {path: 'positions', component: Positions},
       {path: 'suppliers', component: Suppliers},
       {path: 'executors', component: Executors},

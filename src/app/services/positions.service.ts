@@ -15,6 +15,7 @@ export enum PositionType {
 }
 
 export interface Position extends Deletable {
+  code: string;
   name: string;
   type: PositionType;
 }

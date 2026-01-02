@@ -1,6 +1,6 @@
 import {addDoc, collection, doc, Firestore, getDoc, getDocs, orderBy, query, updateDoc} from '@angular/fire/firestore';
 import {DocumentData, OrderByDirection} from '@firebase/firestore';
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 
 export interface Deletable {
   id: string;
@@ -13,8 +13,7 @@ export interface Deletable {
 export abstract class AbstractCollection<T extends Deletable = Deletable> {
   protected collectionName = '';
 
-  constructor(private firestore: Firestore) {
-  }
+  private firestore = inject(Firestore);
 
   async get(id: string): Promise<T> {
     const docRef = doc(this.firestore, this.collectionName, id);

@@ -29,6 +29,7 @@ export class Positions implements OnInit {
 
   protected columns = [
     'id',
+    'code',
     'name',
     'type',
     'actions',

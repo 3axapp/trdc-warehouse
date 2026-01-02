@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SupplyForm } from './supply-form';
+import {provideZonelessChangeDetection} from '@angular/core';
 
 describe('SupplyForm', () => {
   let component: SupplyForm;
@@ -8,7 +9,10 @@ describe('SupplyForm', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SupplyForm]
+      imports: [SupplyForm],
+      providers: [
+        provideZonelessChangeDetection()
+      ],
     })
     .compileComponents();
 

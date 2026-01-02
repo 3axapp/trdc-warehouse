@@ -1,0 +1,37 @@
+<form [formGroup]="form"
+      tuiCardLarge
+      (ngSubmit)="submit()">
+  <tui-textfield tuiChevron>
+    <label tuiLabel>Исполнитель</label>
+    <input
+      tuiSelect
+      formControlName="executorId"
+    />
+
+    <tui-data-list-wrapper
+      *tuiTextfieldDropdown
+      new
+      [items]="data!.executors"
+    />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Количество</label>
+
+    <input
+      tuiInputNumber
+      formControlName="quantity"
+      placeholder="Максимум: {{data?.availability!.available}}"
+    />
+  </tui-textfield>
+
+  <footer>
+    <button
+      tuiButton
+      type="submit"
+      [disabled]="form.invalid"
+    >
+      Сохранить
+    </button>
+  </footer>
+</form>

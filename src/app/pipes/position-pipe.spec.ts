@@ -1,6 +1,6 @@
-import { PositionPipe } from './position-name-pipe';
+import { PositionPipe } from './position-pipe';
 
-describe('PositionNamePipe', () => {
+describe('PositionPipe', () => {
   it('create an instance', () => {
     const pipe = new PositionPipe();
     expect(pipe).toBeTruthy();

@@ -8,7 +8,7 @@ import {CacheService} from '../services/cache.service';
 export class SupplierPipe implements PipeTransform {
   private readonly cache = inject(CacheService);
 
-  transform(value: string): Promise<Supplier> {
-    return this.cache.get('suppliers', value)!;
+  async transform(value?: string): Promise<Supplier|null> {
+    return value ? await this.cache.get('suppliers', value)! : null;
   }
 }

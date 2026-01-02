@@ -37,6 +37,7 @@ export class PositionForm implements OnInit {
   private fb = inject(FormBuilder);
 
   protected positionForm = this.fb.group({
+    code: ['', [Validators.required]],
     name: ['', [Validators.required]],
     type: [PositionType.Normal, [Validators.required]],
   });
@@ -52,6 +53,7 @@ export class PositionForm implements OnInit {
       return;
     }
     this.positionForm.setValue({
+      code: this.context.data.code || '',
       name: this.context.data.name,
       type: this.context.data.type,
     });
@@ -66,6 +68,7 @@ export class PositionForm implements OnInit {
       return;
     }
     this.context.completeWith({
+      code: this.positionForm.value.code!,
       name: this.positionForm.value.name!,
       type: this.positionForm.value.type!,
     });

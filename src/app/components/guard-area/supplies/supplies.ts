@@ -67,6 +67,7 @@ export class Supplies implements OnInit {
   protected columns = [
     'id',
     'positionId',
+    'positionCode',
     'supplierId',
     'date',
     'quantity',
@@ -95,7 +96,7 @@ export class Supplies implements OnInit {
 
   public async remove(supply: Supply): Promise<void> {
     const data: TuiConfirmData = {
-      content: `Удалить позицию "${supply.name}"?`,
+      content: `Удалить поставку "${supply.id}"?`,
       yes: 'Да',
       no: 'Нет',
     };
@@ -112,14 +113,14 @@ export class Supplies implements OnInit {
         }
         await this.supplies.archive(supply.id);
         await this.load();
-        return this.alerts.open('Позиция удалена');
+        return this.alerts.open('Поставка удалена');
       }))
       .subscribe();
   }
 
   public async restore(supply: Supply): Promise<void> {
     const data: TuiConfirmData = {
-      content: `Восстановить позицию "${supply.name}"?`,
+      content: `Восстановить поставку "${supply.id}"?`,
       yes: 'Да',
       no: 'Нет',
     };
@@ -136,7 +137,7 @@ export class Supplies implements OnInit {
         }
         await this.supplies.unarchive(supply.id);
         await this.load();
-        return this.alerts.open('Позиция восстановлена');
+        return this.alerts.open('Поставка восстановлена');
       }))
       .subscribe();
   }
@@ -147,10 +148,10 @@ export class Supplies implements OnInit {
     dialog(supply).subscribe({
       next: async (data) => {
         if (supply?.id) {
-          data.brokenQuantity = 0;
-          data.usedQuantity = 0;
           await this.supplies.update(supply.id, data);
         } else {
+          data.brokenQuantity = 0;
+          data.usedQuantity = 0;
           await this.supplies.add(data);
         }
         await this.load();

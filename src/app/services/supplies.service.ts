@@ -17,17 +17,16 @@ export class SuppliesService extends AbstractCollection<Supply> {
 }
 
 export interface Supply extends Deletable {
-  name: string;
   positionId: string;
-  supplierId: string;
+  supplierId?: string;
   date: Date;
   quantity: number;
   brokenQuantity: number;
   usedQuantity: number;
   qualityControlDate?: Date;
   qualityControlUserId?: string;
-  qualityControlStatus: QualityControlStatus;
-  lot: number;
+  qualityControlStatus?: QualityControlStatus;
+  lot?: number;
 }
 
 export enum QualityControlStatus {
