@@ -18,33 +18,33 @@ import {TuiCard} from '@taiga-ui/layout';
 })
 export class ExecutorForm implements OnInit {
 
-public readonly context = injectContext<TuiDialogContext<Partial<Supplier>, Supplier | undefined>>();
+  public readonly context = injectContext<TuiDialogContext<Partial<Supplier>, Supplier | undefined>>();
 
-private fb = inject(FormBuilder);
+  private fb = inject(FormBuilder);
 
-protected positionForm = this.fb.group({
+  public positionForm = this.fb.group({
     name: ['', [Validators.required]],
   });
 
-public ngOnInit(): void {
+  public ngOnInit(): void {
     if (!this.context.data) {
-    return;
+      return;
+    }
+    this.positionForm.setValue({
+      name: this.context.data.name,
+    });
   }
-  this.positionForm.setValue({
-    name: this.context.data.name,
-  });
-}
 
-protected get data(): Supplier | undefined {
+  protected get data(): Supplier | undefined {
     return this.context.data;
   }
 
-protected submit(): void {
+  public submit(): void {
     if (this.positionForm.invalid) {
-    return;
+      return;
+    }
+    this.context.completeWith({
+      name: this.positionForm.value.name!,
+    });
   }
-  this.context.completeWith({
-    name: this.positionForm.value.name!,
-  });
-}
 }

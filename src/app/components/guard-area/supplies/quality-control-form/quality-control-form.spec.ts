@@ -1,6 +1,7 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { QualityControlForm } from './quality-control-form';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {QualityControlForm} from './quality-control-form';
+import {provideZonelessChangeDetection} from '@angular/core';
+import {POLYMORPHEUS_CONTEXT} from '@taiga-ui/polymorpheus';
 
 describe('QualityControlForm', () => {
   let component: QualityControlForm;
@@ -8,9 +9,16 @@ describe('QualityControlForm', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [QualityControlForm]
+      imports: [QualityControlForm],
+      providers: [
+        provideZonelessChangeDetection(),
+        {
+          provide: POLYMORPHEUS_CONTEXT,
+          useValue: {data: {quantity: 5}},
+        },
+      ],
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(QualityControlForm);
     component = fixture.componentInstance;

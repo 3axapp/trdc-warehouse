@@ -1,6 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { SupplierForm } from './supplier-form';
+import {SupplierForm} from './supplier-form';
+import {provideZonelessChangeDetection} from '@angular/core';
+import {POLYMORPHEUS_CONTEXT} from '@taiga-ui/polymorpheus';
 
 describe('SupplierForm', () => {
   let component: SupplierForm;
@@ -8,9 +10,16 @@ describe('SupplierForm', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SupplierForm]
+      imports: [SupplierForm],
+      providers: [
+        provideZonelessChangeDetection(),
+        {
+          provide: POLYMORPHEUS_CONTEXT,
+          useValue: {},
+        },
+      ],
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(SupplierForm);
     component = fixture.componentInstance;

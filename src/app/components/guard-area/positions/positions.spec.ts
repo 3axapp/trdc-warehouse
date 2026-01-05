@@ -2,16 +2,21 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {Positions} from './positions';
 import {provideZonelessChangeDetection} from '@angular/core';
+import {Position, PositionsService} from '../../../services/positions.service';
 
 describe('Positions', () => {
   let component: Positions;
   let fixture: ComponentFixture<Positions>;
+  let mockPositionsService: jasmine.SpyObj<PositionsService>;
 
   beforeEach(async () => {
+    mockPositionsService = jasmine.createSpyObj('PositionsService', ['getList']);
+    mockPositionsService.getList.and.resolveTo([]);
     await TestBed.configureTestingModule({
       imports: [Positions],
       providers: [
         provideZonelessChangeDetection(),
+        {provide: PositionsService, useValue: mockPositionsService},
       ],
     })
       .compileComponents();
