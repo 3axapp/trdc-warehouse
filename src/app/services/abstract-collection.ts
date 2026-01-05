@@ -13,14 +13,16 @@ export interface Deletable {
 export abstract class AbstractCollection<T extends Deletable = Deletable> {
   protected collectionName = '';
 
-  private firestore = inject(Firestore);
+  protected firestore = inject(Firestore);
 
   async get(id: string): Promise<T> {
     const docRef = doc(this.firestore, this.collectionName, id);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      return docSnap.data() as T;
+      const data = docSnap.data() as T;
+      data.id = docSnap.id;
+      return data;
     }
     throw new Error(`Document ${id} not found`);
   }

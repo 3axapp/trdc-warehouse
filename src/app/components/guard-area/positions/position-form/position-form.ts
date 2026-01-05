@@ -1,7 +1,7 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
-import {TuiButton, TuiDialogContext, tuiItemsHandlersProvider, TuiTextfield} from '@taiga-ui/core';
+import {TuiAlertService, TuiButton, TuiDialogContext, tuiItemsHandlersProvider, TuiTextfield} from '@taiga-ui/core';
 import {injectContext} from '@taiga-ui/polymorpheus';
-import {Position, PositionType} from '../../../../services/positions.service';
+import {Position, PositionsService, PositionType} from '../../../../services/positions.service';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {TuiCardLarge} from '@taiga-ui/layout';
 import {TuiChevron, TuiDataListWrapper, TuiSelect} from '@taiga-ui/kit';
@@ -31,6 +31,10 @@ const names = new PositionTypePipe();
   styleUrl: './position-form.scss',
 })
 export class PositionForm implements OnInit {
+
+  private positions = inject(PositionsService);
+
+  private readonly alerts = inject(TuiAlertService);
 
   public readonly context = injectContext<TuiDialogContext<Partial<Position>, Position | undefined>>();
 
@@ -63,14 +67,26 @@ export class PositionForm implements OnInit {
     return this.context.data;
   }
 
-  protected submit(): void {
+  protected async submit() {
     if (this.positionForm.invalid) {
       return;
     }
-    this.context.completeWith({
+
+    const data = {
       code: this.positionForm.value.code!,
       name: this.positionForm.value.name!,
       type: this.positionForm.value.type!,
-    });
+    };
+
+    try {
+      if (this.data?.id) {
+        await this.positions.update(this.data.id, data);
+      } else {
+        await this.positions.add(data);
+      }
+      this.context.completeWith(data);
+    } catch (e: any) {
+      this.alerts.open(e.message || 'Неизвестная ошибка',{appearance: 'negative'}).subscribe();
+    }
   }
 }

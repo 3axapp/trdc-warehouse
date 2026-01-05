@@ -102,17 +102,15 @@ export class Positions implements OnInit {
 
     dialog(position).subscribe({
       next: async (data) => {
-        if (position?.id) {
-          await this.positions.update(position.id, data);
-        } else {
-          await this.positions.add(data);
-        }
         await this.load();
         console.info(`Dialog emitted data = `, data);
       },
       complete: () => {
         console.info('Dialog closed');
       },
+      error: (e)=>{
+        console.log(e, '33')
+      }
     });
   }
 
