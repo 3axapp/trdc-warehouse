@@ -16,8 +16,8 @@ export class CacheService {
     });
   }
 
-  async get<T>(collection: string, key: string): Promise<T> {
-    return this.cache[collection]?.then(i => i[key] as T);
+  async get<T>(collection: string, key: string): Promise<T | null> {
+    return this.cache[collection]?.then(i => i[key] as T || null);
   }
 
 }

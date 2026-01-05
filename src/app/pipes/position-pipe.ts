@@ -8,7 +8,7 @@ import {CacheService} from '../services/cache.service';
 export class PositionPipe implements PipeTransform {
   private readonly cache = inject(CacheService);
 
-  transform(value: string): Promise<Position> {
+  transform(value: string): Promise<Position | null> {
     return this.cache.get('positions', value);
   }
 }
