@@ -1,5 +1,10 @@
 import {Component, inject} from '@angular/core';
-import {ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet} from "@angular/router";
+import {
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import {TuiTabs} from '@taiga-ui/kit';
 import {TuiHint} from '@taiga-ui/core';
 import {AuthService} from '../../../services/auth.service';
@@ -19,7 +24,6 @@ import {AuthService} from '../../../services/auth.service';
 export class Layout {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  protected readonly activatedRoute = inject(ActivatedRoute);
 
   protected readonly urls = [
     {route: '', title: 'Склад'},
