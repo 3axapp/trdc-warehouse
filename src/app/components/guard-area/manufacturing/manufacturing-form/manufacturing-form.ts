@@ -46,7 +46,7 @@ export class ManufacturingForm {
   private fb = inject(FormBuilder);
 
   protected form = this.fb.group({
-    executorId: [null as unknown as string, [Validators.required]],
+    executor: [null as unknown as Executor, [Validators.required]],
     quantity: [null as unknown as number, [Validators.required, Validators.min(1), Validators.max(this.data!.availability!.available)]],
   });
 
@@ -59,7 +59,7 @@ export class ManufacturingForm {
       return;
     }
     this.context.completeWith({
-      executorId: this.form.value.executorId!,
+      executorId: this.form.value.executor!.id,
       quantity: this.form.value.quantity!,
     });
   }

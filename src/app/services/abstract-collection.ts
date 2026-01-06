@@ -1,4 +1,15 @@
-import {addDoc, collection, doc, Firestore, getDoc, getDocs, orderBy, query, updateDoc} from '@angular/fire/firestore';
+import {
+  collection,
+  doc,
+  Firestore,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+  Transaction,
+  updateDoc,
+} from '@angular/fire/firestore';
 import {
   DocumentData,
   FirestoreDataConverter,
@@ -32,17 +43,25 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
     throw new Error(`Document ${id} not found`);
   }
 
-  async add(item: Omit<T, 'id'>): Promise<string> {
-    const docRef = await addDoc(
-      collection(this.firestore, this.collectionName),
-      item,
-    );
+  async add(item: Omit<T, 'id'>, transaction?: Transaction): Promise<string> {
+    const docRef = doc(this.getCollection());
+
+    if (transaction) {
+      await transaction.set(docRef, item);
+    } else {
+      await setDoc(docRef, item);
+    }
+
     return docRef.id;
   }
 
-  async update(id: string, item: Partial<T>): Promise<void> {
-    const docRef = doc(this.firestore, this.collectionName, id);
-    await updateDoc(docRef, item as DocumentData);
+  async update(id: string, item: WithFieldValue<Partial<T>>, transaction?: Transaction): Promise<void> {
+    const docRef = doc(this.getCollection(), id);
+    if (transaction) {
+      await transaction.update(docRef, item as DocumentData);
+    } else {
+      await updateDoc(docRef, item as DocumentData);
+    }
   }
 
   async archive(id: string): Promise<void> {

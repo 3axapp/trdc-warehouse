@@ -1,7 +1,6 @@
-import {inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {AbstractCollection, Deletable} from './abstract-collection';
 import {OrderByDirection, QueryDocumentSnapshot, SnapshotOptions} from '@firebase/firestore';
-import {Auth} from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root',
@@ -19,14 +18,16 @@ export class SuppliesService extends AbstractCollection<Supply> {
     converter.fromFirestore = (
       snapshot: QueryDocumentSnapshot, options?: SnapshotOptions): Supply => {
       const data = snapshot.data(options) as Supply;
-      return {
+      const result = {
         ...data,
         id: snapshot.id,
         date: new Date((data.date as any).seconds * 1000),
-        qualityControlDate: data.qualityControlDate
-          ? new Date((data.qualityControlDate as any).seconds * 1000)
-          : data.qualityControlDate,
       };
+
+      if (data.qualityControlDate) {
+        result.qualityControlDate = new Date((data.qualityControlDate as any).seconds * 1000);
+      }
+      return result;
     };
     return converter;
   }
@@ -43,6 +44,7 @@ export interface Supply extends Deletable {
   qualityControlUserId?: string;
   qualityControlStatus?: QualityControlStatus;
   lot?: number;
+  manufacturingCode?: string;
 }
 
 export enum QualityControlStatus {

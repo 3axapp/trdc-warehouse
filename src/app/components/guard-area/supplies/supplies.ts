@@ -68,6 +68,7 @@ export class Supplies implements OnInit {
     'supplierId',
     'date',
     'quantity',
+    'usedQuantity',
     'brokenQuantity',
     'remainingQuantity',
     'qualityControlStatus',

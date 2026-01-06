@@ -2,6 +2,18 @@ import {inject, Injectable} from '@angular/core';
 import {Position, PositionsService, PositionType} from './positions.service';
 import {QualityControlStatus, SuppliesService, Supply} from './supplies.service';
 import {Result} from '../components/guard-area/manufacturing/manufacturing-form/manufacturing-form';
+import {
+  collection,
+  doc,
+  DocumentReference,
+  DocumentSnapshot,
+  Firestore,
+  increment,
+  runTransaction,
+  Transaction,
+} from '@angular/fire/firestore';
+import {DocumentData} from '@firebase/firestore';
+import {generateCombinations, UsedLot} from './manufacturing/combination';
 
 @Injectable({
   providedIn: 'root',
@@ -10,9 +22,13 @@ export class ManufacturingService {
 
   private positions = inject(PositionsService);
   private supplies = inject(SuppliesService);
+  private firestore = inject(Firestore);
+
+  private manufacturingLotsCollectionName = 'manufacturingLots';
+  private manufacturingProductionCollectionName = 'manufacturingProduction';
 
   public async getAvailability(receipt: Receipt): Promise<AvailabilityResult> {
-    const [positions, supplies] = await Promise.all([this.positions.getList(), this.supplies.getList()]);
+    const [positions, supplies] = await Promise.all([this.positions.getList(), this.supplies.getList('lot', 'asc')]);
     this.findReceiptPositions(receipt, positions);
     const receiptSupplies = this.filterReceiptSupplies(receipt, supplies);
 
@@ -35,7 +51,7 @@ export class ManufacturingService {
   }
 
   private filterReceiptSupplies(receipt: Receipt, supplies: Supply[]) {
-    const map: ReceiptSupplies = {};
+    const map: ReceiptSupplies = {[receipt.id!]: {type: PositionType.Produced, quantity: 0, supplies: []}};
     for (const item of receipt.items) {
       if (!item.id) {
         continue;
@@ -58,7 +74,7 @@ export class ManufacturingService {
     return map;
   }
 
-  private calculateAvailability(receipt: Receipt, supplies: ReceiptSupplies) {
+  private calculateAvailability(receipt: Receipt, supplies: ReceiptSupplies): AvailabilityResult {
     let available = Number.MAX_SAFE_INTEGER;
     let message;
 
@@ -73,25 +89,37 @@ export class ManufacturingService {
       available = Math.min(available, Math.floor(itemSupplies.quantity / item.quantity));
     }
 
+    const nextId = Math.max(...(supplies[receipt.id!].supplies.map(i => i.lot!)), 0);
+
+    delete supplies[receipt.id!];
+
     return {
       available,
       supplies,
       message,
+      nextId,
     };
   }
 
-  public async create(receipt: Receipt, availability: AvailabilityResult, data: Result) {
-    const usedLots = this.reserveComponents(receipt, availability.supplies, data.quantity);
-    this.recordProduction(receipt, usedLots, data.executorId);
-  }
+  public async create(receipt: Receipt, data: Result) {
+    await runTransaction(this.firestore, async (transaction) => {
+      const availability = await this.getAvailability(receipt);
+      if (availability.available < data.quantity || !(data.quantity > 0)) {
+        throw new Error(`Неправильное количество. Максимум ${availability.available}`);
+      }
 
+      const usedLots = this.reserveComponents(receipt, availability.supplies, data.quantity);
+      await this.recordProduction(receipt, {usedLots, nextId: availability.nextId}, data.executorId, transaction);
+      await this.updateComponents(usedLots, transaction);
+    });
+  }
 
   private reserveComponents(receipt: Receipt, componentsData: ReceiptSupplies, quantityToProduce: number) {
     const usedLots: Record<string, UsedLot[]> = {};
 
     for (const item of receipt.items) {
       usedLots[item.id!] = [];
-      let remainingToTake = quantityToProduce;
+      let remainingToTake = quantityToProduce * item.quantity;
 
       // Проходим по всем доступным лотам компонента
       const components = componentsData[item.id!].supplies;
@@ -101,11 +129,13 @@ export class ManufacturingService {
           break;
         }
 
-        const takeAmount = Math.min(component.quantity, remainingToTake);
+        const takeAmount = Math.min(component.quantity - component.brokenQuantity - component.usedQuantity,
+          remainingToTake);
 
         if (takeAmount > 0) {
           // Сохраняем информацию о взятом количестве из каждого лота
           usedLots[item.id!].push({
+            supplyId: component.id,
             lot: component.lot!,
             taken: takeAmount,
             originalTaken: takeAmount, // Сохраняем для возможного использования
@@ -121,130 +151,93 @@ export class ManufacturingService {
     return usedLots;
   }
 
-  private recordProduction(receipt: Receipt, usedLots: Record<string, UsedLot[]>, executorId: string) {
+  private async recordProduction(
+    receipt: Receipt, a: { nextId: number, usedLots: Record<string, UsedLot[]> }, executorId: string,
+    transaction: Transaction,
+  ) {
     // Получаем все возможные комбинации лотов
-    const lotCombinations = this.generateLotCombinations(receipt, usedLots);
-    const productionRecords = [];
-
+    const lotCombinations = this.generateLotCombinations(receipt, a.usedLots);
+    const productionRecords: ProductionRecord[] = [];
+    let nextId = a.nextId;
+    const combinationDocs: { ref: DocumentReference, doc: DocumentSnapshot<DocumentData> }[] = [];
     for (const combination of lotCombinations) {
-      const combinationQuantity = combination.quantity!;
-      const componentLots: number[] = [];
-      for (let i = 0; i < receipt.items.length; i++) {
-        componentLots.push(combination[i]);
-      }
+      const combinationId = `${receipt.code}_${combination.items.map(i => i.lot).join('')}`;
+      const combinationRef = doc(this.getLotCollection(), combinationId);
+      const combinationDoc = await transaction.get(combinationRef);
+      combinationDocs.push({ref: combinationRef, doc: combinationDoc});
+    }
 
-      const combinationId = `${receipt.code}_${componentLots.join('_')}`;
-      // @todo поиск по combinationId
-      const isExist = false;
-      if(isExist){
-        ///
-      }else{
-        const nextId = 1; // @todo получение следующего id getNextLotNumber
-        this.supplies.add({
+    for (const [i, combination] of lotCombinations.entries()) {
+      let supplyId: string;
+      const quantity = combination.quantity!;
+
+      const combinationRef = combinationDocs[i].ref;
+      const combinationDoc = combinationDocs[i].doc;
+
+      if (combinationDoc.exists()) {
+        const combination = combinationDoc.data() as CombinationLot;
+        supplyId = combination.id;
+        await this.supplies.update(supplyId, {
+          quantity: increment(quantity),
+        }, transaction);
+      } else {
+        supplyId = await this.supplies.add({
           positionId: receipt.id!,
           // supplierId: string,
+          manufacturingCode: combinationRef.id,
           date: new Date(),
-          quantity: combinationQuantity,
+          quantity,
           brokenQuantity: 0,
           usedQuantity: 0,
-          lot: nextId,
-        });
+          lot: ++nextId,
+        }, transaction);
+        await transaction.set(combinationRef, {id: supplyId});
       }
+
+      productionRecords.push({supplyId, quantity});
     }
+
+    this.recordProductionLog(productionRecords, executorId, transaction);
   }
 
   private generateLotCombinations(receipt: Receipt, usedLots: Record<string, UsedLot[]>) {
-    // const requiredComponents = [1, 2, 3, 4, 5];
-    const allCombinations: Combination[] = [];
-
-    // Создаем массивы лотов для каждого компонента
-    const componentLotsArray: Record<string, UsedLot[]> = {};
-    for (const {id} of receipt.items) {
-      componentLotsArray[id!] = usedLots[id!];
+    const cells: string[] = [];
+    for (const item of receipt.items) {
+      cells.push(...Array(item.quantity).fill(item.id!));
     }
 
-    // Рекурсивная функция для генерации всех комбинаций
-    function generateRecursive(currentCombination: Combination, componentIndex: number) {
-      const componentId = receipt.items[componentIndex].id!;
-      const lots = componentLotsArray[componentId];
-
-      // Для каждого лота текущего компонента
-      for (const lotInfo of lots) {
-        const newCombination: Combination = {...currentCombination};
-        newCombination[componentId] = lotInfo.lot;
-
-        // Если это не последний компонент, продолжаем рекурсию
-        if (componentIndex < receipt.items.length - 1) {
-          generateRecursive(newCombination, componentIndex + 1);
-        } else {
-          // Это последний компонент - вычисляем минимальное количество для этой комбинации
-          const minQuantity = calculateMinQuantityForCombination(receipt, newCombination, usedLots);
-          if (minQuantity > 0) {
-            newCombination.quantity = minQuantity;
-            allCombinations.push(newCombination);
-
-            // Вычитаем использованное количество
-            subtractUsedQuantity(receipt, usedLots, newCombination, minQuantity);
-          }
-        }
-      }
-    }
-
-    // Запускаем генерацию с первого компонента
-    generateRecursive({}, 0);
-
-    return allCombinations;
+    return generateCombinations(cells, usedLots);
   }
-}
 
-/**
- * Вычисляет минимальное количество изделий для конкретной комбинации лотов
- */
-function calculateMinQuantityForCombination(receipt: Receipt, combination: Combination, usedLots: Record<string, UsedLot[]>) {
-  let minQuantity = Infinity;
+  private getLotCollection() {
+    return collection(this.firestore, this.manufacturingLotsCollectionName);
+  }
 
-  for (const {id} of receipt.items) {
-    const targetLot = combination[id!];
-    const componentLots = usedLots[id!];
+  private getProductionCollection() {
+    return collection(this.firestore, this.manufacturingProductionCollectionName);
+  }
 
-    // Находим лот в массиве usedLots
-    const lotInfo = componentLots.find(item => item.lot === targetLot && item.taken > 0);
-
-    if (lotInfo) {
-      minQuantity = Math.min(minQuantity, lotInfo.taken);
-    } else {
-      return 0; // Если лот не найден или количество 0
+  private recordProductionLog(productionRecords: ProductionRecord[], executorId: string, transaction: Transaction) {
+    const docRef = doc(this.getProductionCollection());
+    for (const record of productionRecords) {
+      transaction.set(docRef, {
+        executorId,
+        supplyId: record.supplyId,
+        quantity: record.quantity,
+        date: new Date(),
+      });
     }
   }
 
-  return minQuantity === Infinity ? 0 : minQuantity;
-}
-
-
-/**
- * Вычитает использованное количество из usedLots
- */
-function subtractUsedQuantity(receipt: Receipt, usedLots: Record<string, UsedLot[]>, combination: Combination, quantity: number) {
-  // const requiredComponents = [1, 2, 3, 4, 5];
-  for (const {id} of receipt.items) {
-    const targetLot = combination[id!];
-    const componentLots = usedLots[id!];
-
-    // Находим и обновляем соответствующий лот
-    for (const lotInfo of componentLots) {
-      if (lotInfo.lot === targetLot && lotInfo.taken >= quantity) {
-        lotInfo.taken -= quantity;
-        break;
+  private async updateComponents(usedLots: Record<string, UsedLot[]>, transaction: Transaction) {
+    for (const lots of Object.values(usedLots)) {
+      for (const lot of lots) {
+        await this.supplies.update(lot.supplyId, {
+          usedQuantity: increment(lot.originalTaken),
+        }, transaction);
       }
     }
   }
-}
-
-
-interface UsedLot {
-  lot: number;
-  taken: number;
-  originalTaken: number;
 }
 
 export interface Receipt {
@@ -267,9 +260,17 @@ type ReceiptSupplies = Record<string, {
 }>;
 
 export interface AvailabilityResult {
+  nextId: number;
   available: number;
   supplies: ReceiptSupplies;
   message?: string;
 }
 
-type Combination = Record<string, number> & {quantity?: number};
+interface CombinationLot {
+  id: string;
+}
+
+interface ProductionRecord {
+  supplyId: string;
+  quantity: number;
+}

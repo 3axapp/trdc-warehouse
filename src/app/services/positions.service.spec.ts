@@ -70,7 +70,7 @@ describe('PositionsService', () => {
     });
     await service.archive(id);
     const position = await service.get(id);
-    console.log(position);
+
     expect(position).toEqual({
       id,
       code: 'archive_code',

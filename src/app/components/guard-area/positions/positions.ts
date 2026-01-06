@@ -108,9 +108,6 @@ export class Positions implements OnInit {
       complete: () => {
         console.info('Dialog closed');
       },
-      error: (e)=>{
-        console.log(e, '33')
-      }
     });
   }
 

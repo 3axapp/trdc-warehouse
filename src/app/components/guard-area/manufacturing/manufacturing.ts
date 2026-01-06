@@ -43,6 +43,7 @@ export class Manufacturing {
 
     if (availability.available === 0) {
       this.alerts.open(availability.message).subscribe();
+      this.block.set(false);
       return;
     }
 
@@ -54,7 +55,7 @@ export class Manufacturing {
 
     dialog({executors, availability}).subscribe({
       next: async (data) => {
-        await this.manufacturing.create(receipt, availability, data);
+        await this.manufacturing.create(receipt, data);
         console.info(`Dialog emitted data = `, data);
       },
       complete: () => {

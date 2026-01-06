@@ -1,40 +1,37 @@
 import {TestBed} from '@angular/core/testing';
-
 import {ManufacturingService, Receipt} from './manufacturing.service';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {Position, PositionsService, PositionType} from './positions.service';
+import {PositionsService, PositionType} from './positions.service';
 import {QualityControlStatus, SuppliesService, Supply} from './supplies.service';
+import {clearFirestoreEmulator, provideFirebaseAppTest, provideFirestoreTest} from '../../tests/utils';
+import {doc, Firestore, getDoc} from '@angular/fire/firestore';
 
 describe('ManufacturingService', () => {
   let service: ManufacturingService;
-  let mockPositionsService: jasmine.SpyObj<PositionsService>;
-  let mockSuppliesService: jasmine.SpyObj<SuppliesService>;
-
-  let mockPositions: Position[];
+  let suppliesService: SuppliesService;
   let receipt: Receipt;
-  let nextId: number;
+  let firestore: any;
+  const positions = [
+    {id: '', code: 'P001', name: 'Position 1', type: PositionType.Produced},
+    {id: '', code: 'P002', name: 'Position 2', type: PositionType.Checked},
+    {id: '', code: 'P003', name: 'Position 3', type: PositionType.Checked},
+    {id: '', code: 'P004', name: 'Position 4', type: PositionType.Checked},
+  ];
 
-  beforeEach(() => {
-    const positionsSpy = jasmine.createSpyObj<PositionsService>('PositionsService', ['getList']);
-    const suppliesSpy = jasmine.createSpyObj<SuppliesService>('SuppliesService', ['getList', 'add', 'update']);
+  beforeEach(async () => {
+    await clearFirestoreEmulator();
 
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        {provide: PositionsService, useValue: positionsSpy},
-        {provide: SuppliesService, useValue: suppliesSpy},
+        provideFirebaseAppTest(),
+        provideFirestoreTest(),
       ],
     });
     service = TestBed.inject(ManufacturingService);
-    mockPositionsService = TestBed.inject(PositionsService) as jasmine.SpyObj<PositionsService>;
-    mockSuppliesService = TestBed.inject(SuppliesService) as jasmine.SpyObj<SuppliesService>;
-    nextId = 5;
-    mockPositions = [
-      {id: '1', code: 'P001', name: 'Position 1', type: PositionType.Produced},
-      {id: '2', code: 'P002', name: 'Position 2', type: PositionType.Checked},
-      {id: '3', code: 'P003', name: 'Position 3', type: PositionType.Checked},
-      {id: '4', code: 'P004', name: 'Position 4', type: PositionType.Checked},
-    ];
+    firestore = TestBed.inject(Firestore);
+    suppliesService = TestBed.inject(SuppliesService);
+
     receipt = {
       code: 'P001',
       items: [
@@ -43,6 +40,11 @@ describe('ManufacturingService', () => {
         {code: 'P003', quantity: 2},
       ],
     };
+
+    const positionService = TestBed.inject(PositionsService);
+    for (const position of positions) {
+      position.id = await positionService.add(position);
+    }
   });
 
   it('should be created', () => {
@@ -50,61 +52,62 @@ describe('ManufacturingService', () => {
   });
 
   it('Товар поставлен, но не проверен', async () => {
-    const mockSupplies: Supply[] = [
+    const supplies: Supply[] = [
       {
-        id: '11', positionId: '2', quantity: 10,
-        date: new Date(),
-        supplierId: "",
+        id: '', positionId: positions[1].id, quantity: 10,
+        date: new Date('2025-01-03'),
+        supplierId: '',
         brokenQuantity: 0,
         usedQuantity: 0,
+        lot: 2,
         qualityControlStatus: QualityControlStatus.Completed,
       },
       {
-        id: '13', positionId: '2', quantity: 10,
-        date: new Date(),
-        supplierId: "",
+        id: '', positionId: positions[1].id, quantity: 10,
+        date: new Date('2025-01-02'),
+        supplierId: '',
         brokenQuantity: 3,
         usedQuantity: 2,
+        lot: 1,
         qualityControlStatus: QualityControlStatus.Completed,
       },
       {
-        id: '12', positionId: '3', quantity: 7,
-        date: new Date(),
-        supplierId: "",
+        id: '', positionId: positions[2].id, quantity: 7,
+        date: new Date('2025-01-01'),
+        supplierId: '',
         brokenQuantity: 0,
         usedQuantity: 0,
       },
     ];
 
-    mockPositionsService.getList.and.resolveTo(mockPositions);
-    mockSuppliesService.getList.and.resolveTo(mockSupplies);
+    for (const supply of supplies) {
+      supply.id = await suppliesService.add(supply);
+    }
 
     const result = await service.getAvailability(receipt);
 
-    expect(mockPositionsService.getList).toHaveBeenCalled();
-    expect(mockSuppliesService.getList).toHaveBeenCalled();
-
-    expect(receipt.id).toEqual('1');
-    expect(receipt.items[0].id).toEqual('2');
-    expect(receipt.items[1].id).toEqual('4');
-    expect(receipt.items[2].id).toEqual('3');
+    expect(receipt.id).toEqual(positions[0].id);
+    expect(receipt.items[0].id).toEqual(positions[1].id);
+    expect(receipt.items[1].id).toEqual(positions[3].id);
+    expect(receipt.items[2].id).toEqual(positions[2].id);
 
     expect(result).toEqual({
+      nextId: 0,
       available: 0, supplies: {
-        '2': {
+        [positions[1].id]: {
           quantity: 15,
           type: PositionType.Checked,
           supplies: [
-            mockSupplies[0],
-            mockSupplies[1],
+            supplies[1],
+            supplies[0],
           ],
         },
-        '3': {
+        [positions[2].id]: {
           quantity: 0,
           type: PositionType.Checked,
           supplies: [],
         },
-        '4': {
+        [positions[3].id]: {
           quantity: 0,
           type: PositionType.Checked,
           supplies: [],
@@ -114,68 +117,174 @@ describe('ManufacturingService', () => {
   });
 
   it('Товар поставлен, и проверен', async () => {
-    const mockSupplies: Supply[] = [
+    const supplies: Supply[] = [
       {
-        id: '11', positionId: '2', quantity: 10,
-        date: new Date(),
-        supplierId: "",
+        id: '', positionId: positions[1].id, quantity: 10,
+        date: new Date('2025-01-03'),
+        supplierId: '',
         brokenQuantity: 0,
-        usedQuantity: 0,
+        usedQuantity: 1,
+        lot: 2,
         qualityControlStatus: QualityControlStatus.Completed,
       },
       {
-        id: '12', positionId: '2', quantity: 10,
-        date: new Date(),
-        supplierId: "",
+        id: '', positionId: positions[1].id, quantity: 10,
+        date: new Date('2025-01-02'),
+        supplierId: '',
         brokenQuantity: 3,
         usedQuantity: 2,
+        lot: 1,
         qualityControlStatus: QualityControlStatus.Completed,
       },
       {
-        id: '13', positionId: '3', quantity: 9,
-        date: new Date(),
-        supplierId: "",
+        id: '', positionId: positions[2].id, quantity: 9,
+        date: new Date('2025-01-01'),
+        supplierId: '',
         brokenQuantity: 0,
         usedQuantity: 0,
+        lot: 1,
         qualityControlStatus: QualityControlStatus.Completed,
       },
       {
-        id: '14', positionId: '4', quantity: 9,
-        date: new Date(),
-        supplierId: "",
+        id: '', positionId: positions[3].id, quantity: 9,
+        date: new Date('2024-12-31'),
+        supplierId: '',
         brokenQuantity: 0,
         usedQuantity: 0,
+        lot: 1,
         qualityControlStatus: QualityControlStatus.Completed,
       },
     ];
 
-    mockPositionsService.getList.and.resolveTo(mockPositions);
-    mockSuppliesService.getList.and.resolveTo(mockSupplies);
-    mockSuppliesService.add.and.callFake(async (item: Supply) => {
-      item.id = String(nextId++);
-      mockSupplies.push(item);
-      return item.id;
-    });
-    mockSuppliesService.update.and.callFake(async () => {
-    });
+    for (const supply of supplies) {
+      supply.id = await suppliesService.add(supply);
+    }
 
     const result = await service.getAvailability(receipt);
 
-    expect(mockPositionsService.getList).toHaveBeenCalled();
-    expect(mockSuppliesService.getList).toHaveBeenCalled();
     expect(result.available).toEqual(4);
 
-    await service.create(receipt, result, {executorId: "1", quantity: 1});
-    const newLot = mockSupplies.find(i => i.id === '5');
-    expect(newLot).toEqual({
-      id: '5', positionId: '1', quantity: 1,
-      date: newLot?.date,
-      brokenQuantity: 0,
-      usedQuantity: 0,
-      lot: 1,
-    } as any);
-    // await service.create(receipt, result, {executorId: "1", quantity: 30});
+    await service.create(receipt, {executorId: '1', quantity: 1});
+
+    const suppliesState: Record<string, Supply> = {};
+    for (const supply of await suppliesService.getList()) {
+      suppliesState[supply.id] = supply;
+    }
+
+    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_111111')).then(d => d.exists()))
+      .toBeResolvedTo(true);
+    const newLots = Object.values(suppliesState).filter(i => i.positionId === positions[0].id);
+    expect(newLots.length).toEqual(1);
+    expect(newLots[0].lot).toEqual(1);
+    expect(newLots[0].quantity).toEqual(1);
+    expect(newLots[0].brokenQuantity).toEqual(0);
+    expect(newLots[0].usedQuantity).toEqual(0);
+
+    const expectedState = [
+      {
+        id: supplies[0].id,
+        quantity: supplies[0].quantity,
+        brokenQuantity: supplies[0].brokenQuantity,
+        usedQuantity: supplies[0].usedQuantity,
+      },
+      {
+        id: supplies[1].id,
+        quantity: supplies[1].quantity,
+        brokenQuantity: supplies[1].brokenQuantity,
+        usedQuantity: supplies[1].usedQuantity + 3,
+      },
+      {
+        id: supplies[2].id,
+        quantity: supplies[2].quantity,
+        brokenQuantity: supplies[2].brokenQuantity,
+        usedQuantity: supplies[2].usedQuantity + 2,
+      },
+      {
+        id: supplies[3].id,
+        quantity: supplies[3].quantity,
+        brokenQuantity: supplies[3].brokenQuantity,
+        usedQuantity: supplies[3].usedQuantity + 1,
+      },
+    ];
+
+    for (const expectedItem of expectedState) {
+      const state = suppliesState[expectedItem.id];
+      expect({
+        id: state.id,
+        quantity: state.quantity,
+        brokenQuantity: state.brokenQuantity,
+        usedQuantity: state.usedQuantity,
+      }).toEqual(expectedItem);
+    }
+
+    const result2 = await service.getAvailability(receipt);
+    expect(result2.available).toEqual(3);
+    await expectAsync(service.create(receipt, {executorId: '2', quantity: 4}))
+      .toBeRejectedWithError('Неправильное количество. Максимум 3');
+
+    await service.create(receipt, {executorId: '2', quantity: 2});
+    await service.create(receipt, {executorId: '2', quantity: 1});
+
+    const suppliesState2: Record<string, Supply> = {};
+    const supplies2 = await suppliesService.getList('lot');
+    for (const supply of supplies2) {
+      suppliesState2[supply.id] = supply;
+    }
+
+    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_112111')).then(d => d.exists()))
+      .toBeResolvedTo(true);
+    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_222111')).then(d => d.exists()))
+      .toBeResolvedTo(true);
+
+    const newLots2 = supplies2.filter(i => i.positionId === positions[0].id);
+    expect(newLots2.length).toEqual(3);
+    expect(newLots2[0].manufacturingCode).toEqual('P001_222111');
+    expect(newLots2[0].lot).toEqual(3);
+    expect(newLots2[0].quantity).toEqual(2);
+    expect(newLots2[0].brokenQuantity).toEqual(0);
+    expect(newLots2[0].usedQuantity).toEqual(0);
+    expect(newLots2[1].manufacturingCode).toEqual('P001_112111');
+    expect(newLots2[1].lot).toEqual(2);
+    expect(newLots2[1].quantity).toEqual(1);
+    expect(newLots2[2].manufacturingCode).toEqual('P001_111111');
+    expect(newLots2[2].lot).toEqual(1);
+    expect(newLots2[2].quantity).toEqual(1);
+
+    const expectedState2 = [
+      {
+        id: supplies[0].id,
+        quantity: supplies[0].quantity,
+        brokenQuantity: supplies[0].brokenQuantity,
+        usedQuantity: supplies[0].usedQuantity + 3 + 1 + 3,
+      },
+      {
+        id: supplies[1].id,
+        quantity: supplies[1].quantity,
+        brokenQuantity: supplies[1].brokenQuantity,
+        usedQuantity: supplies[1].usedQuantity + 3 + 2,
+      },
+      {
+        id: supplies[2].id,
+        quantity: supplies[2].quantity,
+        brokenQuantity: supplies[2].brokenQuantity,
+        usedQuantity: supplies[2].usedQuantity + 2 + 2 + 2 + 2,
+      },
+      {
+        id: supplies[3].id,
+        quantity: supplies[3].quantity,
+        brokenQuantity: supplies[3].brokenQuantity,
+        usedQuantity: supplies[3].usedQuantity + 1 + 1 + 1 + 1,
+      },
+    ];
+
+    for (const expectedItem of expectedState2) {
+      const state = suppliesState2[expectedItem.id];
+      expect({
+        id: state.id,
+        quantity: state.quantity,
+        brokenQuantity: state.brokenQuantity,
+        usedQuantity: state.usedQuantity,
+      }).toEqual(expectedItem);
+    }
   });
-
-
 });
