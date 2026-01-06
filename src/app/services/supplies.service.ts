@@ -1,6 +1,7 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {AbstractCollection, Deletable} from './abstract-collection';
-import {OrderByDirection} from '@firebase/firestore';
+import {OrderByDirection, QueryDocumentSnapshot, SnapshotOptions} from '@firebase/firestore';
+import {Auth} from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root',
@@ -8,11 +9,26 @@ import {OrderByDirection} from '@firebase/firestore';
 export class SuppliesService extends AbstractCollection<Supply> {
   protected override collectionName = 'supplies';
 
-  public override async getList(orderField: string = 'date', orderDirection: OrderByDirection = 'desc'): Promise<Supply[]> {
-    return super.getList(orderField, orderDirection).then(supplies => supplies.map(supply => ({
-      ...supply,
-      date: new Date((supply.date as any).seconds * 1000),
-    })));
+  public override async getList(
+    orderField: string = 'date', orderDirection: OrderByDirection = 'desc'): Promise<Supply[]> {
+    return super.getList(orderField, orderDirection);
+  }
+
+  protected override getConverter() {
+    const converter = super.getConverter()!;
+    converter.fromFirestore = (
+      snapshot: QueryDocumentSnapshot, options?: SnapshotOptions): Supply => {
+      const data = snapshot.data(options) as Supply;
+      return {
+        ...data,
+        id: snapshot.id,
+        date: new Date((data.date as any).seconds * 1000),
+        qualityControlDate: data.qualityControlDate
+          ? new Date((data.qualityControlDate as any).seconds * 1000)
+          : data.qualityControlDate,
+      };
+    };
+    return converter;
   }
 }
 

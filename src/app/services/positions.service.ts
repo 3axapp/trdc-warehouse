@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AbstractCollection, Deletable} from './abstract-collection';
-import {collection, doc, runTransaction} from '@angular/fire/firestore';
+import {doc, runTransaction} from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +12,7 @@ export class PositionsService extends AbstractCollection<Position> {
 
   public override async add(item: Omit<Position, 'id'>): Promise<string> {
     const uniqueRef = doc(this.firestore, this.codeUnique, item.code);
-    const position = doc(collection(this.firestore, this.collectionName));
+    const position = doc(this.getCollection());
 
     await runTransaction(this.firestore, async (transaction) => {
       const checkUnique = await transaction.get(uniqueRef);
@@ -28,7 +28,7 @@ export class PositionsService extends AbstractCollection<Position> {
   }
 
   public override async update(id: string, item: Partial<Position>): Promise<void> {
-    const position = doc(collection(this.firestore, this.collectionName), id);
+    const position = doc(this.getCollection(), id);
 
     await runTransaction(this.firestore, async (transaction) => {
       if (item.code) {

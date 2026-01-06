@@ -1,52 +1,22 @@
 import {TestBed} from '@angular/core/testing';
-
 import {PositionsService, PositionType} from './positions.service';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {FirebaseApp, initializeApp} from '@angular/fire/app';
-import {connectFirestoreEmulator, doc, Firestore, getDoc, getFirestore} from '@angular/fire/firestore';
-import {environment} from '../../environments/environment.development';
+import {doc, Firestore, getDoc} from '@angular/fire/firestore';
+import {clearFirestoreEmulator, provideFirebaseAppTest, provideFirestoreTest} from '../../tests/utils';
 
 describe('PositionsService', () => {
   let service: PositionsService;
-  let app: FirebaseApp;
-  let firestoreInstance: any;
 
   beforeAll(async () => {
     await clearFirestoreEmulator();
-    // Инициализация Firebase с тестовым конфигом
-    app = initializeApp(environment.firebaseConfig);
-
-    firestoreInstance = getFirestore(app);
-    connectFirestoreEmulator(firestoreInstance, 'localhost', 8080);
   });
-
-  async function clearFirestoreEmulator(): Promise<void> {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/emulator/v1/projects/${environment.firebaseConfig.projectId}/databases/(default)/documents`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      if (response.ok) {
-        console.log('🧹 Firestore emulator data cleared');
-      } else {
-        console.warn(`⚠️ Failed to clear emulator: ${response.status}`);
-      }
-    } catch (error) {
-      console.warn('⚠️ Could not clear emulator:', error);
-    }
-  }
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        {provide: Firestore, useValue: firestoreInstance},
+        provideFirebaseAppTest(),
+        provideFirestoreTest(),
       ],
     });
     service = TestBed.inject(PositionsService);
@@ -100,7 +70,7 @@ describe('PositionsService', () => {
     });
     await service.archive(id);
     const position = await service.get(id);
-    console.log(position)
+    console.log(position);
     expect(position).toEqual({
       id,
       code: 'archive_code',
@@ -150,7 +120,7 @@ describe('PositionsService', () => {
       type: PositionType.Normal,
     });
 
-    const oldUniqueRef = doc(firestoreInstance, 'positionCodes', 'unique_code2');
+    const oldUniqueRef = doc(TestBed.inject(Firestore), 'positionCodes', 'unique_code2');
     const oldUnique = await getDoc(oldUniqueRef);
     expect(oldUnique.exists()).toBeFalse();
   });

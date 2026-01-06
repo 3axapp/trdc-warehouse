@@ -1,5 +1,12 @@
 import {addDoc, collection, doc, Firestore, getDoc, getDocs, orderBy, query, updateDoc} from '@angular/fire/firestore';
-import {DocumentData, OrderByDirection} from '@firebase/firestore';
+import {
+  DocumentData,
+  FirestoreDataConverter,
+  OrderByDirection,
+  QueryDocumentSnapshot,
+  SnapshotOptions,
+  WithFieldValue,
+} from '@firebase/firestore';
 import {inject, Injectable} from '@angular/core';
 
 export interface Deletable {
@@ -16,13 +23,11 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
   protected firestore = inject(Firestore);
 
   async get(id: string): Promise<T> {
-    const docRef = doc(this.firestore, this.collectionName, id);
+    const docRef = doc(this.getCollection(), id);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      const data = docSnap.data() as T;
-      data.id = docSnap.id;
-      return data;
+      return docSnap.data() as T;
     }
     throw new Error(`Document ${id} not found`);
   }
@@ -57,13 +62,29 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
 
   async getList(orderField = 'name', orderDirection: OrderByDirection = 'asc'): Promise<T[]> {
     const q = query(
-      collection(this.firestore, this.collectionName),
+      this.getCollection(),
       orderBy(orderField, orderDirection),
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    } as T));
+    return querySnapshot.docs.map(doc => doc.data() as T);
+  }
+
+  public getCollection() {
+    return collection(this.firestore, this.collectionName).withConverter(this.getConverter());
+  }
+
+  protected getConverter(): FirestoreDataConverter<T, DocumentData> {
+    return {
+      toFirestore(modelObject: WithFieldValue<T>): WithFieldValue<DocumentData> {
+        const dbModel = modelObject as Partial<T>;
+        delete dbModel.id;
+        return dbModel;
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData, DocumentData>, options?: SnapshotOptions): T {
+        const data = snapshot.data(options) as T;
+        data.id = snapshot.id;
+        return data;
+      },
+    };
   }
 }

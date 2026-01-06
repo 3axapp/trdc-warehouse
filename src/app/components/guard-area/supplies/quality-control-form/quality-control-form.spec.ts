@@ -2,6 +2,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {QualityControlForm} from './quality-control-form';
 import {provideZonelessChangeDetection} from '@angular/core';
 import {POLYMORPHEUS_CONTEXT} from '@taiga-ui/polymorpheus';
+import {provideAuthTest, provideFirebaseAppTest, provideFirestoreTest} from '../../../../../tests/utils';
 
 describe('QualityControlForm', () => {
   let component: QualityControlForm;
@@ -12,6 +13,9 @@ describe('QualityControlForm', () => {
       imports: [QualityControlForm],
       providers: [
         provideZonelessChangeDetection(),
+        provideFirebaseAppTest(),
+        provideFirestoreTest(),
+        provideAuthTest(),
         {
           provide: POLYMORPHEUS_CONTEXT,
           useValue: {data: {quantity: 5}},

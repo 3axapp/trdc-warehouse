@@ -20,8 +20,6 @@ import {SupplierPipe} from '../../../pipes/supplier-pipe';
 import {CacheService} from '../../../services/cache.service';
 import {PositionsService, PositionType} from '../../../services/positions.service';
 import {SuppliersService} from '../../../services/suppliers.service';
-import {Auth} from '@angular/fire/auth';
-
 
 @Component({
   selector: 'app-warehouse',
@@ -58,7 +56,6 @@ export class Supplies implements OnInit {
   private readonly cache = inject(CacheService);
   private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly alerts = inject(TuiAlertService);
-  private readonly auth = inject(Auth);
 
   protected readonly PositionType = PositionType;
 
@@ -190,9 +187,6 @@ export class Supplies implements OnInit {
 
     dialog(supply).subscribe({
       next: async (data) => {
-        data.qualityControlStatus = QualityControlStatus.Completed;
-        data.qualityControlUserId = this.auth.currentUser!.uid;
-        await this.supplies.update(supply.id, data);
         await this.load();
         console.info(`Dialog emitted data = `, data);
       },
