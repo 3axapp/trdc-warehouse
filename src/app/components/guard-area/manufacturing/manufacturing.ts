@@ -15,11 +15,13 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
-import {DatePipe, NgFor} from '@angular/common';
+import {AsyncPipe, DatePipe, NgFor} from '@angular/common';
 import {
   ManufacturingProductionCollection,
   ProductionItem,
 } from '../../../services/collections/manufacturing-production.collection';
+import {CacheService} from '../../../services/cache.service';
+import {ExecutorPipe} from '../../../pipes/executor-pipe';
 
 const receipt: Receipt = {
   code: 'chip',
@@ -36,6 +38,8 @@ const receipt: Receipt = {
   selector: 'app-manufacturing',
   imports: [
     DatePipe,
+    ExecutorPipe,
+    AsyncPipe,
     TuiButton,
     TuiTableCell,
     TuiTableDirective,
@@ -55,6 +59,7 @@ export class Manufacturing implements OnInit {
   private readonly executors = inject(ExecutorsCollection);
   private readonly manufacturingProduction = inject(ManufacturingProductionCollection);
   private readonly positions = inject(PositionsCollection);
+  private readonly cache = inject(CacheService);
   private readonly alerts = inject(TuiAlertService);
 
   protected block = signal(false);
@@ -62,6 +67,7 @@ export class Manufacturing implements OnInit {
   protected columns = ['date', 'executorId', 'lot', 'quantity'];
 
   public async ngOnInit() {
+    this.cache.add('executors', this.executors.getList());
     receipt.id = await this.positions.getList('name', 'asc', where('code', '==', receipt.code))
       .then(list => list[0]?.id);
     await this.load();
@@ -70,7 +76,7 @@ export class Manufacturing implements OnInit {
   protected async add() {
     this.block.set(true);
     const [executors, availability] = await Promise.all([
-      this.executors.getList(),
+      this.cache.getList<Executor>('executors'),
       this.manufacturing.getAvailability(receipt),
     ]);
 

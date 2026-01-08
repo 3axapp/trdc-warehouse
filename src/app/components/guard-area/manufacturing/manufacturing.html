@@ -28,6 +28,7 @@
   >
   <tr tuiTr *ngFor="let item of data()" [class.row_deleted]="item.deleted">
     <td *tuiCell="'date'" tuiTd>{{ item.date | date : 'yyyy-MM-dd HH:mm' }}</td>
+    <td *tuiCell="'executorId'" tuiTd>{{ (item.executorId | executor | async)?.name }}</td>
   </tr>
   </tbody>
 </table>
