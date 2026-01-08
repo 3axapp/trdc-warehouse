@@ -2,7 +2,7 @@ import {PositionPipe} from './position-pipe';
 import {CacheService} from '../services/cache.service';
 import {TestBed} from '@angular/core/testing';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {Position, PositionType} from '../services/positions.service';
+import {Position, PositionType} from '../services/collections/positions.collection';
 
 describe('PositionPipe', () => {
   let mockCacheService: jasmine.SpyObj<CacheService>;

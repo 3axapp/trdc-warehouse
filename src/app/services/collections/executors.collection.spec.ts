@@ -1,10 +1,10 @@
 import {TestBed} from '@angular/core/testing';
-import {ExecutorsService} from './executors.service';
+import {ExecutorsCollection} from './executors.collection';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {provideFirebaseAppTest, provideFirestoreTest} from '../../tests/utils';
+import {provideFirebaseAppTest, provideFirestoreTest} from '../../../tests/utils';
 
-describe('ExecutorsService', () => {
-  let service: ExecutorsService;
+describe('ExecutorsCollection', () => {
+  let service: ExecutorsCollection;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -14,7 +14,7 @@ describe('ExecutorsService', () => {
         provideFirestoreTest(),
       ],
     });
-    service = TestBed.inject(ExecutorsService);
+    service = TestBed.inject(ExecutorsCollection);
   });
 
   it('should be created', () => {

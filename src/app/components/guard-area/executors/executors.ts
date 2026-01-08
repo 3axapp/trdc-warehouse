@@ -3,7 +3,7 @@ import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
 import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
 import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
 import {Observable, switchMap} from 'rxjs';
-import {Executor, ExecutorsService} from '../../../services/executors.service';
+import {Executor, ExecutorsCollection} from '../../../services/collections/executors.collection';
 import {NgForOf} from '@angular/common';
 import {
   TuiTableCell,
@@ -35,7 +35,7 @@ import {
 })
 export class Executors implements OnInit {
   private readonly injector = inject(INJECTOR);
-  private executors = inject(ExecutorsService);
+  private executors = inject(ExecutorsCollection);
   private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly alerts = inject(TuiAlertService);
 

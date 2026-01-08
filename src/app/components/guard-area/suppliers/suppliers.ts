@@ -13,7 +13,7 @@ import {
 import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
 import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
 import {Observable, switchMap} from 'rxjs';
-import {Supplier, SuppliersService} from '../../../services/suppliers.service';
+import {Supplier, SuppliersCollection} from '../../../services/collections/suppliers.collection';
 
 @Component({
   selector: 'app-suppliers',
@@ -35,7 +35,7 @@ import {Supplier, SuppliersService} from '../../../services/suppliers.service';
 })
 export class Suppliers implements OnInit {
   private readonly injector = inject(INJECTOR);
-  private suppliers = inject(SuppliersService);
+  private suppliers = inject(SuppliersCollection);
   private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly alerts = inject(TuiAlertService);
 

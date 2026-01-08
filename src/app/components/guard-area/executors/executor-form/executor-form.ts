@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {injectContext} from '@taiga-ui/polymorpheus';
 import {TuiButton, TuiDialogContext, TuiTextfield} from '@taiga-ui/core';
-import {Supplier} from '../../../../services/suppliers.service';
+import {Supplier} from '../../../../services/collections/suppliers.collection';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {TuiCard} from '@taiga-ui/layout';
 

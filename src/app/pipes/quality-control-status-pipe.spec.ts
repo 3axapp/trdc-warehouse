@@ -1,5 +1,5 @@
 import {QualityControlStatusPipe} from './quality-control-status-pipe';
-import {QualityControlStatus} from '../services/supplies.service';
+import {QualityControlStatus} from '../services/collections/supplies.collection';
 
 describe('QualityControlStatusPipe', () => {
   it('create an instance', () => {

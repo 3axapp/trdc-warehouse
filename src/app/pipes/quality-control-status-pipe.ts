@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {QualityControlStatus} from '../services/supplies.service';
+import {QualityControlStatus} from '../services/collections/supplies.collection';
 
 @Pipe({
   name: 'qualityControlStatus',

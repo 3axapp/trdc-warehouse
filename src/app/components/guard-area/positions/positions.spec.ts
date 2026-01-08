@@ -2,12 +2,12 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {Positions} from './positions';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {Position, PositionsService} from '../../../services/positions.service';
+import {Position, PositionsCollection} from '../../../services/collections/positions.collection';
 
 describe('Positions', () => {
   let component: Positions;
   let fixture: ComponentFixture<Positions>;
-  let mockPositionsService: jasmine.SpyObj<PositionsService>;
+  let mockPositionsService: jasmine.SpyObj<PositionsCollection>;
 
   beforeEach(async () => {
     mockPositionsService = jasmine.createSpyObj('PositionsService', ['getList']);
@@ -16,7 +16,7 @@ describe('Positions', () => {
       imports: [Positions],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: PositionsService, useValue: mockPositionsService},
+        {provide: PositionsCollection, useValue: mockPositionsService},
       ],
     })
       .compileComponents();

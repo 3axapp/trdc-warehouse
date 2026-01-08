@@ -1,13 +1,13 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {injectContext} from '@taiga-ui/polymorpheus';
 import {TuiButton, TuiCalendar, TuiDialogContext, tuiItemsHandlersProvider, TuiTextfield} from '@taiga-ui/core';
-import {Position, PositionsService, PositionType} from '../../../../services/positions.service';
+import {Position, PositionsCollection, PositionType} from '../../../../services/collections/positions.collection';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Supply} from '../../../../services/supplies.service';
+import {Supply} from '../../../../services/collections/supplies.collection';
 import {TuiChevron, TuiDataListWrapperComponent, TuiInputDate, TuiInputNumber, TuiSelectDirective} from '@taiga-ui/kit';
 import {TuiCardLarge} from '@taiga-ui/layout';
-import {Supplier, SuppliersService} from '../../../../services/suppliers.service';
-import {Deletable} from '../../../../services/abstract-collection';
+import {Supplier, SuppliersCollection} from '../../../../services/collections/suppliers.collection';
+import {Deletable} from '../../../../services/collections/abstract.collection';
 import {TuiDay} from '@taiga-ui/cdk';
 
 @Component({
@@ -39,8 +39,8 @@ export class SupplyForm implements OnInit {
   protected readonly positions = signal<Position[]>([]);
   protected readonly suppliers = signal<Supplier[]>([]);
 
-  private readonly positionsService = inject(PositionsService);
-  private readonly suppliersService = inject(SuppliersService);
+  private readonly positionsService = inject(PositionsCollection);
+  private readonly suppliersService = inject(SuppliersCollection);
 
   private fb = inject(FormBuilder);
 

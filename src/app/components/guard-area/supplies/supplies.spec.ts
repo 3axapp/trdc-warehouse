@@ -2,9 +2,9 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {Supplies} from './supplies';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {SuppliesService} from '../../../services/supplies.service';
-import {PositionsService} from '../../../services/positions.service';
-import {SuppliersService} from '../../../services/suppliers.service';
+import {SuppliesCollection} from '../../../services/collections/supplies.collection';
+import {PositionsCollection} from '../../../services/collections/positions.collection';
+import {SuppliersCollection} from '../../../services/collections/suppliers.collection';
 import {CacheService} from '../../../services/cache.service';
 import {AuthService} from '../../../services/auth.service';
 import {Auth} from '@angular/fire/auth';
@@ -12,9 +12,9 @@ import {Auth} from '@angular/fire/auth';
 describe('Supplies', () => {
   let component: Supplies;
   let fixture: ComponentFixture<Supplies>;
-  let mockSuppliesService: jasmine.SpyObj<SuppliesService>;
-  let mockPositionsService: jasmine.SpyObj<PositionsService>;
-  let mockSuppliersService: jasmine.SpyObj<SuppliersService>;
+  let mockSuppliesService: jasmine.SpyObj<SuppliesCollection>;
+  let mockPositionsService: jasmine.SpyObj<PositionsCollection>;
+  let mockSuppliersService: jasmine.SpyObj<SuppliersCollection>;
   let mockCacheService: jasmine.SpyObj<CacheService>;
   let mockAuth: jasmine.SpyObj<Auth>;
 
@@ -33,9 +33,9 @@ describe('Supplies', () => {
       imports: [Supplies],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: SuppliesService, useValue: mockSuppliesService},
-        {provide: PositionsService, useValue: mockPositionsService},
-        {provide: SuppliersService, useValue: mockSuppliersService},
+        {provide: SuppliesCollection, useValue: mockSuppliesService},
+        {provide: PositionsCollection, useValue: mockPositionsService},
+        {provide: SuppliersCollection, useValue: mockSuppliersService},
         {provide: CacheService, useValue: mockCacheService},
         {provide: Auth, useValue: mockAuth},
       ],

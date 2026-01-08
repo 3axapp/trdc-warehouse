@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
-import {AbstractCollection, Deletable} from './abstract-collection';
+import {AbstractCollection, Deletable} from './abstract.collection';
 
 @Injectable({
   providedIn: 'root',
 })
-export class SuppliersService extends AbstractCollection<Supplier> {
+export class SuppliersCollection extends AbstractCollection<Supplier> {
   protected override collectionName = 'suppliers';
 }
 

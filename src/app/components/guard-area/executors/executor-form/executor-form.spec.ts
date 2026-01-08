@@ -1,7 +1,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ExecutorForm} from './executor-form';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {Supplier} from '../../../../services/suppliers.service';
+import {Supplier} from '../../../../services/collections/suppliers.collection';
 import {POLYMORPHEUS_CONTEXT} from '@taiga-ui/polymorpheus';
 
 describe('ExecutorForm', () => {

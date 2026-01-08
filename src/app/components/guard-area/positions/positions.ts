@@ -1,6 +1,6 @@
 import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
 import {TuiTable} from '@taiga-ui/addon-table';
-import {Position, PositionsService} from '../../../services/positions.service';
+import {Position, PositionsCollection} from '../../../services/collections/positions.collection';
 import {TuiAlertService, TuiButton, tuiDialog, TuiHint, TuiIcon} from '@taiga-ui/core';
 import {Observable, switchMap} from 'rxjs';
 import {NgForOf} from '@angular/common';
@@ -23,7 +23,7 @@ import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
 })
 export class Positions implements OnInit {
   private readonly injector = inject(INJECTOR);
-  private positions = inject(PositionsService);
+  private positions = inject(PositionsCollection);
   private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly alerts = inject(TuiAlertService);
 

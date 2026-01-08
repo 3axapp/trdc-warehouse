@@ -1,14 +1,14 @@
 import {TestBed} from '@angular/core/testing';
 import {ManufacturingService, Receipt} from './manufacturing.service';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {PositionsService, PositionType} from './positions.service';
-import {QualityControlStatus, SuppliesService, Supply} from './supplies.service';
+import {PositionsCollection, PositionType} from './collections/positions.collection';
+import {QualityControlStatus, SuppliesCollection, Supply} from './collections/supplies.collection';
 import {clearFirestoreEmulator, provideFirebaseAppTest, provideFirestoreTest} from '../../tests/utils';
 import {doc, Firestore, getDoc} from '@angular/fire/firestore';
 
 describe('ManufacturingService', () => {
   let service: ManufacturingService;
-  let suppliesService: SuppliesService;
+  let suppliesService: SuppliesCollection;
   let receipt: Receipt;
   let firestore: any;
   const positions = [
@@ -30,7 +30,7 @@ describe('ManufacturingService', () => {
     });
     service = TestBed.inject(ManufacturingService);
     firestore = TestBed.inject(Firestore);
-    suppliesService = TestBed.inject(SuppliesService);
+    suppliesService = TestBed.inject(SuppliesCollection);
 
     receipt = {
       code: 'P001',
@@ -41,7 +41,7 @@ describe('ManufacturingService', () => {
       ],
     };
 
-    const positionService = TestBed.inject(PositionsService);
+    const positionService = TestBed.inject(PositionsCollection);
     for (const position of positions) {
       position.id = await positionService.add(position);
     }

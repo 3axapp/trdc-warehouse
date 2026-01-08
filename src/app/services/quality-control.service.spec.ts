@@ -6,8 +6,8 @@ import {provideZonelessChangeDetection} from '@angular/core';
 import {Firestore} from '@angular/fire/firestore';
 import {AuthService} from './auth.service';
 import {Auth} from '@angular/fire/auth';
-import {PositionsService, PositionType} from './positions.service';
-import {QualityControlStatus, SuppliesService, Supply} from './supplies.service';
+import {PositionsCollection, PositionType} from './collections/positions.collection';
+import {QualityControlStatus, SuppliesCollection, Supply} from './collections/supplies.collection';
 
 describe('QualityControlService', () => {
   let service: QualityControlService;
@@ -15,7 +15,7 @@ describe('QualityControlService', () => {
   let userId: string;
   let position1Id: string;
   let position2Id: string;
-  let supplies: SuppliesService;
+  let supplies: SuppliesCollection;
 
   const TEST_USER = 'test@unit.email';
 
@@ -33,7 +33,7 @@ describe('QualityControlService', () => {
       ],
     });
     firestore = TestBed.inject(Firestore);
-    supplies = TestBed.inject(SuppliesService);
+    supplies = TestBed.inject(SuppliesCollection);
     service = TestBed.inject(QualityControlService);
 
     if (!userId) {
@@ -50,7 +50,7 @@ describe('QualityControlService', () => {
       userId = auth.currentUser!.uid;
     }
     if (!position1Id) {
-      const positions = TestBed.inject(PositionsService);
+      const positions = TestBed.inject(PositionsCollection);
       position1Id = await positions.add(
         {code: 'quality_control_position', name: 'quality_control_position', type: PositionType.Checked},
       );

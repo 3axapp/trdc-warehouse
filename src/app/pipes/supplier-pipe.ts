@@ -1,5 +1,5 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import {Supplier} from '../services/suppliers.service';
+import {Supplier} from '../services/collections/suppliers.collection';
 import {CacheService} from '../services/cache.service';
 
 @Pipe({

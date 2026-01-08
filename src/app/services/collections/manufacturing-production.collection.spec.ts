@@ -1,10 +1,11 @@
 import {TestBed} from '@angular/core/testing';
-import {SuppliersService} from './suppliers.service';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {provideFirebaseAppTest, provideFirestoreTest} from '../../tests/utils';
 
-describe('SuppliersService', () => {
-  let service: SuppliersService;
+import {ManufacturingProductionCollection} from './manufacturing-production.collection';
+import {provideZonelessChangeDetection} from '@angular/core';
+import {provideFirebaseAppTest, provideFirestoreTest} from '../../../tests/utils';
+
+describe('ManufacturingProductionCollection', () => {
+  let service: ManufacturingProductionCollection;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -14,7 +15,7 @@ describe('SuppliersService', () => {
         provideFirestoreTest(),
       ],
     });
-    service = TestBed.inject(SuppliersService);
+    service = TestBed.inject(ManufacturingProductionCollection);
   });
 
   it('should be created', () => {

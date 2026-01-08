@@ -1,11 +1,11 @@
 import {TestBed} from '@angular/core/testing';
-import {PositionsService, PositionType} from './positions.service';
+import {PositionsCollection, PositionType} from './positions.collection';
 import {provideZonelessChangeDetection} from '@angular/core';
 import {doc, Firestore, getDoc} from '@angular/fire/firestore';
-import {clearFirestoreEmulator, provideFirebaseAppTest, provideFirestoreTest} from '../../tests/utils';
+import {clearFirestoreEmulator, provideFirebaseAppTest, provideFirestoreTest} from '../../../tests/utils';
 
-describe('PositionsService', () => {
-  let service: PositionsService;
+describe('PositionsCollection', () => {
+  let service: PositionsCollection;
 
   beforeAll(async () => {
     await clearFirestoreEmulator();
@@ -19,7 +19,7 @@ describe('PositionsService', () => {
         provideFirestoreTest(),
       ],
     });
-    service = TestBed.inject(PositionsService);
+    service = TestBed.inject(PositionsCollection);
   });
 
   it('Создание сервиса', () => {

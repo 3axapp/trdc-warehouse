@@ -1,7 +1,7 @@
 import {TestBed} from '@angular/core/testing';
-import {AbstractCollection} from './abstract-collection';
+import {AbstractCollection} from './abstract.collection';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {provideFirebaseAppTest, provideFirestoreTest} from '../../tests/utils';
+import {provideFirebaseAppTest, provideFirestoreTest} from '../../../tests/utils';
 
 describe('AbstractCollection', () => {
   let service: AbstractCollection;

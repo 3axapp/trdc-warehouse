@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {PositionType} from '../services/positions.service';
+import {PositionType} from '../services/collections/positions.collection';
 
 @Pipe({
   name: 'positionType',

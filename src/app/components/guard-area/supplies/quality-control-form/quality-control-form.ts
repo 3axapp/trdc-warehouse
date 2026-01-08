@@ -9,7 +9,7 @@ import {
   TuiTextfield,
   TuiTextfieldComponent,
 } from '@taiga-ui/core';
-import {Supply} from '../../../../services/supplies.service';
+import {Supply} from '../../../../services/collections/supplies.collection';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {TuiDay} from '@taiga-ui/cdk';
 import {TuiCardLarge} from '@taiga-ui/layout';

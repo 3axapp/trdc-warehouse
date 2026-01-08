@@ -1,5 +1,5 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import {Position} from '../services/positions.service';
+import {Position} from '../services/collections/positions.collection';
 import {CacheService} from '../services/cache.service';
 
 @Pipe({

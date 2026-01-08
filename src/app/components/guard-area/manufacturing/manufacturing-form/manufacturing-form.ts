@@ -8,9 +8,9 @@ import {
   TuiTextfield,
   TuiTextfieldComponent,
 } from '@taiga-ui/core';
-import {Executor} from '../../../../services/executors.service';
+import {Executor} from '../../../../services/collections/executors.collection';
 import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Deletable} from '../../../../services/abstract-collection';
+import {Deletable} from '../../../../services/collections/abstract.collection';
 import {TuiCardLarge} from '@taiga-ui/layout';
 import {TuiChevron, TuiDataListWrapperComponent, TuiInputNumberDirective, TuiSelectDirective} from '@taiga-ui/kit';
 import {AvailabilityResult} from '../../../../services/manufacturing.service';

@@ -3,7 +3,7 @@ import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from '
 import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
 import {Observable, switchMap} from 'rxjs';
 import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
-import {QualityControlStatus, SuppliesService, Supply} from '../../../services/supplies.service';
+import {QualityControlStatus, SuppliesCollection, Supply} from '../../../services/collections/supplies.collection';
 import {AsyncPipe, DatePipe, NgForOf} from '@angular/common';
 import {
   TuiTableCell,
@@ -18,8 +18,8 @@ import {QualityControlStatusPipe} from '../../../pipes/quality-control-status-pi
 import {PositionPipe} from '../../../pipes/position-pipe';
 import {SupplierPipe} from '../../../pipes/supplier-pipe';
 import {CacheService} from '../../../services/cache.service';
-import {PositionsService, PositionType} from '../../../services/positions.service';
-import {SuppliersService} from '../../../services/suppliers.service';
+import {PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
+import {SuppliersCollection} from '../../../services/collections/suppliers.collection';
 
 @Component({
   selector: 'app-warehouse',
@@ -42,7 +42,6 @@ import {SuppliersService} from '../../../services/suppliers.service';
     SupplierPipe,
     AsyncPipe,
     DatePipe,
-
   ],
   templateUrl: './supplies.html',
   styleUrl: './supplies.scss',
@@ -50,9 +49,9 @@ import {SuppliersService} from '../../../services/suppliers.service';
 export class Supplies implements OnInit {
 
   private readonly injector = inject(INJECTOR);
-  private readonly supplies = inject(SuppliesService);
-  private readonly positions = inject(PositionsService);
-  private readonly suppliers = inject(SuppliersService);
+  private readonly supplies = inject(SuppliesCollection);
+  private readonly positions = inject(PositionsCollection);
+  private readonly suppliers = inject(SuppliersCollection);
   private readonly cache = inject(CacheService);
   private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly alerts = inject(TuiAlertService);

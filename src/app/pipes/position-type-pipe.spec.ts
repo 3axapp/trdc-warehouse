@@ -1,5 +1,5 @@
 import {PositionTypePipe} from './position-type-pipe';
-import {PositionType} from '../services/positions.service';
+import {PositionType} from '../services/collections/positions.collection';
 
 describe('PositionTypePipe', () => {
   it('create an instance', () => {

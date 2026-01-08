@@ -1,7 +1,7 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {TuiAlertService, TuiButton, TuiDialogContext, tuiItemsHandlersProvider, TuiTextfield} from '@taiga-ui/core';
 import {injectContext} from '@taiga-ui/polymorpheus';
-import {Position, PositionsService, PositionType} from '../../../../services/positions.service';
+import {Position, PositionsCollection, PositionType} from '../../../../services/collections/positions.collection';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {TuiCardLarge} from '@taiga-ui/layout';
 import {TuiChevron, TuiDataListWrapper, TuiSelect} from '@taiga-ui/kit';
@@ -32,7 +32,7 @@ const names = new PositionTypePipe();
 })
 export class PositionForm implements OnInit {
 
-  private positions = inject(PositionsService);
+  private positions = inject(PositionsCollection);
 
   private readonly alerts = inject(TuiAlertService);
 

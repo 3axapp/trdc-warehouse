@@ -2,13 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PositionForm } from './position-form';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {PositionsService} from '../../../../services/positions.service';
+import {PositionsCollection} from '../../../../services/collections/positions.collection';
 import {POLYMORPHEUS_CONTEXT} from '@taiga-ui/polymorpheus';
 
 describe('PositionForm', () => {
   let component: PositionForm;
   let fixture: ComponentFixture<PositionForm>;
-  let mockPositionsService: jasmine.SpyObj<PositionsService>;
+  let mockPositionsService: jasmine.SpyObj<PositionsCollection>;
 
   beforeEach(async () => {
     mockPositionsService = jasmine.createSpyObj('PositionsService', ['getList']);
@@ -17,7 +17,7 @@ describe('PositionForm', () => {
       imports: [PositionForm],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: PositionsService, useValue: mockPositionsService},
+        {provide: PositionsCollection, useValue: mockPositionsService},
         {
           provide: POLYMORPHEUS_CONTEXT,
           useValue: {},

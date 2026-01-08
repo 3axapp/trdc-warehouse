@@ -1,16 +1,16 @@
 import {inject, Injectable} from '@angular/core';
 import {Auth} from '@angular/fire/auth';
-import {QualityControlStatus, SuppliesService, Supply} from './supplies.service';
+import {QualityControlStatus, SuppliesCollection, Supply} from './collections/supplies.collection';
 import {doc, Firestore, runTransaction} from '@angular/fire/firestore';
-import {PositionsService} from './positions.service';
+import {PositionsCollection} from './collections/positions.collection';
 
 @Injectable({
   providedIn: 'root',
 })
 export class QualityControlService {
   private auth = inject(Auth);
-  private supplies = inject(SuppliesService);
-  private positions = inject(PositionsService);
+  private supplies = inject(SuppliesCollection);
+  private positions = inject(PositionsCollection);
   private firestore = inject(Firestore);
 
   private positionLotUnique = 'positionLots';

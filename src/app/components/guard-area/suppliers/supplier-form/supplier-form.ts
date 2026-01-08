@@ -3,7 +3,7 @@ import {injectContext} from '@taiga-ui/polymorpheus';
 import {TuiButton, TuiDialogContext, TuiTextfield} from '@taiga-ui/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {TuiCard} from '@taiga-ui/layout';
-import {Supplier} from '../../../../services/suppliers.service';
+import {Supplier} from '../../../../services/collections/suppliers.collection';
 
 @Component({
   selector: 'app-supplier-form',

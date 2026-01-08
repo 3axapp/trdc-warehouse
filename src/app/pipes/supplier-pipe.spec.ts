@@ -2,7 +2,7 @@ import {SupplierPipe} from './supplier-pipe';
 import {CacheService} from '../services/cache.service';
 import {TestBed} from '@angular/core/testing';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {Supplier} from '../services/suppliers.service';
+import {Supplier} from '../services/collections/suppliers.collection';
 
 describe('SupplierPipe', () => {
   let mockCacheService: jasmine.SpyObj<CacheService>;

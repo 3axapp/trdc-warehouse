@@ -1,11 +1,11 @@
 import {Injectable} from '@angular/core';
-import {AbstractCollection, Deletable} from './abstract-collection';
+import {AbstractCollection, Deletable} from './abstract.collection';
 import {doc, runTransaction} from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PositionsService extends AbstractCollection<Position> {
+export class PositionsCollection extends AbstractCollection<Position> {
   protected override collectionName = 'positions';
 
   private codeUnique = 'positionCodes';

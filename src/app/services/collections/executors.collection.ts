@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
-import {AbstractCollection, Deletable} from './abstract-collection';
+import {AbstractCollection, Deletable} from './abstract.collection';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ExecutorsService extends AbstractCollection<Executor> {
+export class ExecutorsCollection extends AbstractCollection<Executor> {
   protected override collectionName = 'executors';
 }
 

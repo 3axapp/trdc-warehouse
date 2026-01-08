@@ -2,14 +2,14 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {SupplyForm} from './supply-form';
 import {provideZonelessChangeDetection} from '@angular/core';
 import {POLYMORPHEUS_CONTEXT} from '@taiga-ui/polymorpheus';
-import {PositionsService} from '../../../../services/positions.service';
-import {SuppliersService} from '../../../../services/suppliers.service';
+import {PositionsCollection} from '../../../../services/collections/positions.collection';
+import {SuppliersCollection} from '../../../../services/collections/suppliers.collection';
 
 describe('SupplyForm', () => {
   let component: SupplyForm;
   let fixture: ComponentFixture<SupplyForm>;
-  let mockPositionsService: jasmine.SpyObj<PositionsService>;
-  let mockSuppliersService: jasmine.SpyObj<SuppliersService>;
+  let mockPositionsService: jasmine.SpyObj<PositionsCollection>;
+  let mockSuppliersService: jasmine.SpyObj<SuppliersCollection>;
 
   beforeEach(async () => {
     mockPositionsService = jasmine.createSpyObj('PositionsService', ['getList']);
@@ -20,8 +20,8 @@ describe('SupplyForm', () => {
       imports: [SupplyForm],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: PositionsService, useValue: mockPositionsService},
-        {provide: SuppliersService, useValue: mockSuppliersService},
+        {provide: PositionsCollection, useValue: mockPositionsService},
+        {provide: SuppliersCollection, useValue: mockSuppliersService},
         {
           provide: POLYMORPHEUS_CONTEXT,
           useValue: {},

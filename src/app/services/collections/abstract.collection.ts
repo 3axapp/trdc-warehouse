@@ -6,6 +6,7 @@ import {
   getDocs,
   orderBy,
   query,
+  QueryConstraint,
   setDoc,
   Transaction,
   updateDoc,
@@ -33,9 +34,9 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
 
   protected firestore = inject(Firestore);
 
-  async get(id: string): Promise<T> {
+  async get(id: string, transaction?: Transaction): Promise<T> {
     const docRef = doc(this.getCollection(), id);
-    const docSnap = await getDoc(docRef);
+    const docSnap = await (transaction ? transaction.get(docRef) : getDoc(docRef));
 
     if (docSnap.exists()) {
       return docSnap.data() as T;
@@ -79,10 +80,13 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
     // await deleteDoc(docRef);
   }
 
-  async getList(orderField = 'name', orderDirection: OrderByDirection = 'asc'): Promise<T[]> {
+  async getList(
+    orderField = 'name', orderDirection: OrderByDirection = 'asc', ...queryConstraints: QueryConstraint[]
+  ): Promise<T[]> {
     const q = query(
       this.getCollection(),
       orderBy(orderField, orderDirection),
+      ...queryConstraints,
     );
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => doc.data() as T);
