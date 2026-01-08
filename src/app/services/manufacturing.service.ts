@@ -225,8 +225,8 @@ export class ManufacturingService {
   }
 
   private recordProductionLog(productionRecords: ProductionRecord[], executorId: string, transaction: Transaction) {
-    const docRef = doc(this.getProductionCollection());
     for (const record of productionRecords) {
+      const docRef = doc(this.getProductionCollection());
       transaction.set(docRef, {
         ...record,
         executorId,

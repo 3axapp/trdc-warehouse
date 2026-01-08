@@ -88,7 +88,8 @@ export class Manufacturing implements OnInit {
 
     dialog({executors, availability}).subscribe({
       next: async (data) => {
-        await Promise.all([this.manufacturing.create(receipt, data), this.load()]);
+        await this.manufacturing.create(receipt, data);
+        await this.load();
         console.info(`Dialog emitted data = `, data);
       },
       complete: () => {

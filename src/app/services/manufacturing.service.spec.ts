@@ -5,10 +5,12 @@ import {PositionsCollection, PositionType} from './collections/positions.collect
 import {QualityControlStatus, SuppliesCollection, Supply} from './collections/supplies.collection';
 import {clearFirestoreEmulator, provideFirebaseAppTest, provideFirestoreTest} from '../../tests/utils';
 import {doc, Firestore, getDoc} from '@angular/fire/firestore';
+import {ManufacturingProductionCollection} from './collections/manufacturing-production.collection';
 
 describe('ManufacturingService', () => {
   let service: ManufacturingService;
-  let suppliesService: SuppliesCollection;
+  let suppliesCollection: SuppliesCollection;
+  let manufacturingProductionCollection: ManufacturingProductionCollection;
   let receipt: Receipt;
   let firestore: any;
   const positions = [
@@ -30,7 +32,8 @@ describe('ManufacturingService', () => {
     });
     service = TestBed.inject(ManufacturingService);
     firestore = TestBed.inject(Firestore);
-    suppliesService = TestBed.inject(SuppliesCollection);
+    suppliesCollection = TestBed.inject(SuppliesCollection);
+    manufacturingProductionCollection = TestBed.inject(ManufacturingProductionCollection);
 
     receipt = {
       code: 'P001',
@@ -81,7 +84,7 @@ describe('ManufacturingService', () => {
     ];
 
     for (const supply of supplies) {
-      supply.id = await suppliesService.add(supply);
+      supply.id = await suppliesCollection.add(supply);
     }
 
     const result = await service.getAvailability(receipt);
@@ -157,7 +160,7 @@ describe('ManufacturingService', () => {
     ];
 
     for (const supply of supplies) {
-      supply.id = await suppliesService.add(supply);
+      supply.id = await suppliesCollection.add(supply);
     }
 
     const result = await service.getAvailability(receipt);
@@ -167,7 +170,7 @@ describe('ManufacturingService', () => {
     await service.create(receipt, {executorId: '1', quantity: 1});
 
     const suppliesState: Record<string, Supply> = {};
-    for (const supply of await suppliesService.getList()) {
+    for (const supply of await suppliesCollection.getList()) {
       suppliesState[supply.id] = supply;
     }
 
@@ -226,7 +229,7 @@ describe('ManufacturingService', () => {
     await service.create(receipt, {executorId: '2', quantity: 1});
 
     const suppliesState2: Record<string, Supply> = {};
-    const supplies2 = await suppliesService.getList('lot');
+    const supplies2 = await suppliesCollection.getList('lot');
     for (const supply of supplies2) {
       suppliesState2[supply.id] = supply;
     }
@@ -235,6 +238,10 @@ describe('ManufacturingService', () => {
       .toBeResolvedTo(true);
     await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_222111')).then(d => d.exists()))
       .toBeResolvedTo(true);
+
+    await expectAsync(
+      manufacturingProductionCollection.getList().then(list => list.reduce((a, i) => a + i.quantity, 0))
+    ).toBeResolvedTo(4);
 
     const newLots2 = supplies2.filter(i => i.positionId === positions[0].id);
     expect(newLots2.length).toEqual(3);
