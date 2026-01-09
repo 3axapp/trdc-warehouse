@@ -58,7 +58,6 @@ export class Manufacturing implements OnInit {
   protected columns = ['date', 'executorId', 'lot', 'quantity'];
 
   public async ngOnInit() {
-    console.log(this.recipe);
     this.cache.add('executors', this.executors.getList());
     if (!this.recipe.id) {
       this.recipe.id = await this.positions.getList('name', 'asc', where('code', '==', this.recipe.code))

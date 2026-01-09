@@ -14,7 +14,6 @@ import {
 } from '@angular/fire/firestore';
 import {DocumentData} from '@firebase/firestore';
 import {generateCombinations, UsedLot} from './manufacturing/combination';
-import {chipRecipe} from '../recipes';
 
 @Injectable({
   providedIn: 'root',
@@ -87,7 +86,13 @@ export class ManufacturingService {
       }
 
       const itemSupplies = supplies[item.id];
-      available = Math.min(available, Math.floor(itemSupplies.quantity / item.quantity));
+      const itemAvailable = Math.floor(itemSupplies.quantity / item.quantity);
+      if (!itemAvailable) {
+        available = 0;
+        message = `Недостаточно материала ${item.code} (${itemSupplies.quantity} из ${item.quantity})`;
+        break;
+      }
+      available = Math.min(available, itemAvailable);
     }
 
     const nextId = Math.max(...(supplies[receipt.id!].supplies.map(i => i.lot!)), 0);

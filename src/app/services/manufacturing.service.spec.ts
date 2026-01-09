@@ -119,6 +119,49 @@ describe('ManufacturingService', () => {
     });
   });
 
+  it('Товар поставлен, но в недостаточном количестве', async () => {
+    const supplies: Supply[] = [
+      {
+        id: '', positionId: positions[1].id, quantity: 1,
+        date: new Date('2025-01-03'),
+        supplierId: '',
+        brokenQuantity: 0,
+        usedQuantity: 0,
+        lot: 2,
+        qualityControlStatus: QualityControlStatus.Completed,
+      },
+    ];
+
+    for (const supply of supplies) {
+      supply.id = await suppliesCollection.add(supply);
+    }
+
+    const result = await service.getAvailability(receipt);
+
+    expect(result).toEqual({
+      nextId: 0,
+      available: 0, supplies: {
+        [positions[1].id]: {
+          quantity: 1,
+          type: PositionType.Checked,
+          supplies: [
+            supplies[0],
+          ],
+        },
+        [positions[2].id]: {
+          quantity: 0,
+          type: PositionType.Checked,
+          supplies: [],
+        },
+        [positions[3].id]: {
+          quantity: 0,
+          type: PositionType.Checked,
+          supplies: [],
+        },
+      }, message: 'Недостаточно материала P002 (1 из 3)',
+    });
+  });
+
   it('Товар поставлен, и проверен', async () => {
     const supplies: Supply[] = [
       {
