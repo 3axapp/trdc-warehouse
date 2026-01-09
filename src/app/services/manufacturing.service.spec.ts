@@ -1,5 +1,5 @@
 import {TestBed} from '@angular/core/testing';
-import {ManufacturingService, Receipt} from './manufacturing.service';
+import {ManufacturingService, Recipe} from './manufacturing.service';
 import {provideZonelessChangeDetection} from '@angular/core';
 import {PositionsCollection, PositionType} from './collections/positions.collection';
 import {QualityControlStatus, SuppliesCollection, Supply} from './collections/supplies.collection';
@@ -11,7 +11,7 @@ describe('ManufacturingService', () => {
   let service: ManufacturingService;
   let suppliesCollection: SuppliesCollection;
   let manufacturingProductionCollection: ManufacturingProductionCollection;
-  let receipt: Receipt;
+  let receipt: Recipe;
   let firestore: any;
   const positions = [
     {id: '', code: 'P001', name: 'Position 1', type: PositionType.Produced},

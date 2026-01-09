@@ -14,6 +14,7 @@ import {
 } from '@angular/fire/firestore';
 import {DocumentData} from '@firebase/firestore';
 import {generateCombinations, UsedLot} from './manufacturing/combination';
+import {chipRecipe} from '../recipes';
 
 @Injectable({
   providedIn: 'root',
@@ -27,7 +28,7 @@ export class ManufacturingService {
   private manufacturingLotsCollectionName = 'manufacturingLots';
   private manufacturingProductionCollectionName = 'manufacturingProduction';
 
-  public async getAvailability(receipt: Receipt): Promise<AvailabilityResult> {
+  public async getAvailability(receipt: Recipe): Promise<AvailabilityResult> {
     const [positions, supplies] = await Promise.all([this.positions.getList(), this.supplies.getList('lot', 'asc')]);
     this.findReceiptPositions(receipt, positions);
     const receiptSupplies = this.filterReceiptSupplies(receipt, supplies);
@@ -35,7 +36,7 @@ export class ManufacturingService {
     return this.calculateAvailability(receipt, receiptSupplies);
   }
 
-  private findReceiptPositions(receipt: Receipt, positions: Position[]) {
+  private findReceiptPositions(receipt: Recipe, positions: Position[]) {
     if (!receipt.id) {
       const position = positions.find(p => p.code === receipt.code);
       receipt.id = position?.id;
@@ -50,7 +51,7 @@ export class ManufacturingService {
     }
   }
 
-  private filterReceiptSupplies(receipt: Receipt, supplies: Supply[]) {
+  private filterReceiptSupplies(receipt: Recipe, supplies: Supply[]) {
     const map: ReceiptSupplies = {[receipt.id!]: {type: PositionType.Produced, quantity: 0, supplies: []}};
     for (const item of receipt.items) {
       if (!item.id) {
@@ -74,7 +75,7 @@ export class ManufacturingService {
     return map;
   }
 
-  private calculateAvailability(receipt: Receipt, supplies: ReceiptSupplies): AvailabilityResult {
+  private calculateAvailability(receipt: Recipe, supplies: ReceiptSupplies): AvailabilityResult {
     let available = Number.MAX_SAFE_INTEGER;
     let message;
 
@@ -101,7 +102,7 @@ export class ManufacturingService {
     };
   }
 
-  public async create(receipt: Receipt, data: Result) {
+  public async create(receipt: Recipe, data: Result) {
     await runTransaction(this.firestore, async (transaction) => {
       const availability = await this.getAvailability(receipt);
       if (availability.available < data.quantity || !(data.quantity > 0)) {
@@ -114,7 +115,7 @@ export class ManufacturingService {
     });
   }
 
-  private reserveComponents(receipt: Receipt, componentsData: ReceiptSupplies, quantityToProduce: number) {
+  private reserveComponents(receipt: Recipe, componentsData: ReceiptSupplies, quantityToProduce: number) {
     const usedLots: Record<string, UsedLot[]> = {};
 
     for (const item of receipt.items) {
@@ -152,7 +153,7 @@ export class ManufacturingService {
   }
 
   private async recordProduction(
-    receipt: Receipt, a: { nextId: number, usedLots: Record<string, UsedLot[]> }, executorId: string,
+    receipt: Recipe, a: { nextId: number, usedLots: Record<string, UsedLot[]> }, executorId: string,
     transaction: Transaction,
   ) {
     // Получаем все возможные комбинации лотов
@@ -207,7 +208,7 @@ export class ManufacturingService {
     this.recordProductionLog(productionRecords, executorId, transaction);
   }
 
-  private generateLotCombinations(receipt: Receipt, usedLots: Record<string, UsedLot[]>) {
+  private generateLotCombinations(receipt: Recipe, usedLots: Record<string, UsedLot[]>) {
     const cells: string[] = [];
     for (const item of receipt.items) {
       cells.push(...Array(item.quantity).fill(item.id!));
@@ -246,7 +247,7 @@ export class ManufacturingService {
   }
 }
 
-export interface Receipt {
+export interface Recipe {
   id?: string;
   code: string;
   items: ReceiptItem[];

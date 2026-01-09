@@ -1,8 +1,8 @@
 import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
 import {TuiAlertService, TuiButton, tuiDialog} from '@taiga-ui/core';
-import {PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
+import {PositionsCollection} from '../../../services/collections/positions.collection';
 import {Executor, ExecutorsCollection} from '../../../services/collections/executors.collection';
-import {AvailabilityResult, ManufacturingService, Receipt} from '../../../services/manufacturing.service';
+import {AvailabilityResult, ManufacturingService, Recipe} from '../../../services/manufacturing.service';
 import {Observable} from 'rxjs';
 import {Options, Result} from './manufacturing-form/manufacturing-form';
 import {where} from '@angular/fire/firestore';
@@ -22,17 +22,7 @@ import {
 } from '../../../services/collections/manufacturing-production.collection';
 import {CacheService} from '../../../services/cache.service';
 import {ExecutorPipe} from '../../../pipes/executor-pipe';
-
-const receipt: Receipt = {
-  code: 'chip',
-  items: [
-    {type: PositionType.Normal, code: 'body', quantity: 1},
-    {type: PositionType.Normal, code: 'membrane', quantity: 1},
-    {type: PositionType.Normal, code: 'bottom_lid', quantity: 1},
-    {type: PositionType.Normal, code: 'top_lid', quantity: 1},
-    {type: PositionType.Normal, code: 'tape_3M', quantity: 1},
-  ],
-};
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-manufacturing',
@@ -61,15 +51,19 @@ export class Manufacturing implements OnInit {
   private readonly positions = inject(PositionsCollection);
   private readonly cache = inject(CacheService);
   private readonly alerts = inject(TuiAlertService);
+  private readonly recipe = inject(ActivatedRoute).snapshot.data['recipe'] as Recipe;
 
   protected block = signal(false);
   protected data = signal<ProductionItem[]>([]);
   protected columns = ['date', 'executorId', 'lot', 'quantity'];
 
   public async ngOnInit() {
+    console.log(this.recipe);
     this.cache.add('executors', this.executors.getList());
-    receipt.id = await this.positions.getList('name', 'asc', where('code', '==', receipt.code))
-      .then(list => list[0]?.id);
+    if (!this.recipe.id) {
+      this.recipe.id = await this.positions.getList('name', 'asc', where('code', '==', this.recipe.code))
+        .then(list => list[0]?.id);
+    }
     await this.load();
   }
 
@@ -77,7 +71,7 @@ export class Manufacturing implements OnInit {
     this.block.set(true);
     const [executors, availability] = await Promise.all([
       this.cache.getList<Executor>('executors'),
-      this.manufacturing.getAvailability(receipt),
+      this.manufacturing.getAvailability(this.recipe),
     ]);
 
     if (availability.available === 0) {
@@ -94,7 +88,7 @@ export class Manufacturing implements OnInit {
 
     dialog({executors, availability}).subscribe({
       next: async (data) => {
-        await this.manufacturing.create(receipt, data);
+        await this.manufacturing.create(this.recipe, data);
         await this.load();
         console.info(`Dialog emitted data = `, data);
       },
@@ -116,9 +110,10 @@ export class Manufacturing implements OnInit {
   }
 
   private async load() {
-    if (!receipt.id) {
+    if (!this.recipe.id) {
       return;
     }
-    this.data.set(await this.manufacturingProduction.getList().then(list => list.filter(i => i.positionId == receipt.id)));
+    this.data.set(
+      await this.manufacturingProduction.getList().then(list => list.filter(i => i.positionId == this.recipe.id)));
   }
 }

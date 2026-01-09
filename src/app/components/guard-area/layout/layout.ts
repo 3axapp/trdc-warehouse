@@ -28,11 +28,11 @@ export class Layout {
   protected readonly urls = [
     {route: '', title: 'Склад'},
     {route: 'manufacturing', title: 'Производство'},
-    {route: '', title: 'Упаковка'},
-    {route: '', title: 'Отгрузка'},
-    {route: '/positions', title: 'Позиции'},
-    {route: '/suppliers', title: 'Поставщики'},
-    {route: '/executors', title: 'Исполнители'},
+    {route: 'packing', title: 'Упаковка'},
+    {route: 'shipments', title: 'Отгрузка'},
+    {route: 'positions', title: 'Позиции'},
+    {route: 'suppliers', title: 'Поставщики'},
+    {route: 'executors', title: 'Исполнители'},
   ];
 
   async logout() {
