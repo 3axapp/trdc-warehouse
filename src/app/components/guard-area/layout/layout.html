@@ -1,5 +1,9 @@
-<tui-tabs-with-more>
-  @for (url of urls; track $index) {
+<div
+  class="wrapper"
+>
+  <img src="logo.png" alt="logo" class="logo">
+  <tui-tabs-with-more class="tabs">
+    @for (url of urls; track $index) {
     <a
       *tuiItem
       routerLinkActive="active"
@@ -7,20 +11,20 @@
       [routerLink]="url.route"
       [routerLinkActiveOptions]="{exact: true}"
     >
-      {{ url.title }}
+    {{ url.title }}
     </a>
-  }
-  <button
-    iconStart="@tui.log-out"
-    *tuiItem
-    tuiTab
-    type="button"
-    tuiHint="Выход"
-    (click)="logout()"
-    class="logout-btn"
-  ></button>
-</tui-tabs-with-more>
-
+    }
+    <button
+      iconStart="@tui.log-out"
+      *tuiItem
+      tuiTab
+      type="button"
+      tuiHint="Выход"
+      (click)="logout()"
+      class="logout-btn"
+    ></button>
+  </tui-tabs-with-more>
+</div>
 <section class="content">
   <router-outlet/>
 </section>

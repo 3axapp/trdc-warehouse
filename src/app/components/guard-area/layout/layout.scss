@@ -12,3 +12,17 @@
   padding-top: 1rem;
   display: grid;
 }
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.tabs {
+  inline-size: calc(100% - 100px);
+  justify-content: flex-end;
+}
+
+.logo {
+  width: 100px;
+}
