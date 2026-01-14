@@ -1,7 +1,7 @@
 import {provideEventPlugins} from '@taiga-ui/event-plugins';
 import {provideAnimations} from '@angular/platform-browser/animations';
 import {
-  ApplicationConfig,
+  ApplicationConfig, LOCALE_ID,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
@@ -39,5 +39,6 @@ export const appConfig: ApplicationConfig = {
       return firestore;
     }),
     provideEventPlugins(),
+    {provide: LOCALE_ID, useValue: 'ru-RU' },
   ],
 };
