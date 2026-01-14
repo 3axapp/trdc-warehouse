@@ -36,7 +36,7 @@
   >
   <tr tuiTr *ngFor="let item of data()" [class.row_deleted]="item.deleted">
     @let position = item.positionId | position | async;
-    <td *tuiCell="'date'" tuiTd>{{ item.date | date : 'yyyy-MM-dd' }}</td>
+    <td *tuiCell="'date'" tuiTd>{{ item.date | date : 'shortDate' }}</td>
     <td *tuiCell="'positionId'" tuiTd>{{ position?.name }}</td>
     <td *tuiCell="'positionCode'" tuiTd>{{ position?.code }}</td>
     <td *tuiCell="'supplierId'" tuiTd>{{ (item.supplierId | supplier | async)?.name }}</td>
