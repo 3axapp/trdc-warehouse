@@ -28,7 +28,7 @@ export class ManufacturingService {
   private manufacturingProductionCollectionName = 'manufacturingProduction';
 
   public async getAvailability(receipt: Recipe): Promise<AvailabilityResult> {
-    const [positions, supplies] = await Promise.all([this.positions.getList(), this.supplies.getList('lot', 'asc')]);
+    const [positions, supplies] = await Promise.all([this.positions.getList(), this.supplies.getList()]);
     this.findReceiptPositions(receipt, positions);
     const receiptSupplies = this.filterReceiptSupplies(receipt, supplies);
 
@@ -58,6 +58,8 @@ export class ManufacturingService {
       }
       map[item.id] = {type: item.type!, quantity: 0, supplies: []};
     }
+
+    supplies = supplies.sort((a, b) => (a.lot || 0) - (b.lot || 0));
 
     for (const supply of supplies) {
       const item = map[supply.positionId];

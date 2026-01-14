@@ -18,6 +18,7 @@ describe('ManufacturingService', () => {
     {id: '', code: 'P002', name: 'Position 2', type: PositionType.Checked},
     {id: '', code: 'P003', name: 'Position 3', type: PositionType.Checked},
     {id: '', code: 'P004', name: 'Position 4', type: PositionType.Checked},
+    {id: '', code: 'P005', name: 'Position 5', type: PositionType.Normal},
   ];
 
   beforeEach(async () => {
@@ -41,6 +42,7 @@ describe('ManufacturingService', () => {
         {code: 'P002', quantity: 3},
         {code: 'P004', quantity: 1},
         {code: 'P003', quantity: 2},
+        {code: 'P005', quantity: 1},
       ],
     };
 
@@ -81,6 +83,13 @@ describe('ManufacturingService', () => {
         brokenQuantity: 0,
         usedQuantity: 0,
       },
+      {
+        id: '', positionId: positions[4].id, quantity: 70,
+        date: new Date('2024-01-01'),
+        supplierId: '',
+        brokenQuantity: 0,
+        usedQuantity: 0,
+      },
     ];
 
     for (const supply of supplies) {
@@ -93,6 +102,7 @@ describe('ManufacturingService', () => {
     expect(receipt.items[0].id).toEqual(positions[1].id);
     expect(receipt.items[1].id).toEqual(positions[3].id);
     expect(receipt.items[2].id).toEqual(positions[2].id);
+    expect(receipt.items[3].id).toEqual(positions[4].id);
 
     expect(result).toEqual({
       nextId: 0,
@@ -114,6 +124,13 @@ describe('ManufacturingService', () => {
           quantity: 0,
           type: PositionType.Checked,
           supplies: [],
+        },
+        [positions[4].id]: {
+          quantity: 70,
+          type: PositionType.Normal,
+          supplies: [
+            supplies[3],
+          ],
         },
       }, message: 'Материал P004 не поставлен',
     });
@@ -158,6 +175,11 @@ describe('ManufacturingService', () => {
           type: PositionType.Checked,
           supplies: [],
         },
+        [positions[4].id]: {
+          quantity: 0,
+          type: PositionType.Normal,
+          supplies: [],
+        },
       }, message: 'Недостаточно материала P002 (1 из 3)',
     });
   });
@@ -199,6 +221,13 @@ describe('ManufacturingService', () => {
         usedQuantity: 0,
         lot: 1,
         qualityControlStatus: QualityControlStatus.Completed,
+      },
+      {
+        id: '', positionId: positions[4].id, quantity: 70,
+        date: new Date('2024-01-01'),
+        supplierId: '',
+        brokenQuantity: 0,
+        usedQuantity: 0,
       },
     ];
 
@@ -251,6 +280,12 @@ describe('ManufacturingService', () => {
         brokenQuantity: supplies[3].brokenQuantity,
         usedQuantity: supplies[3].usedQuantity + 1,
       },
+      {
+        id: supplies[4].id,
+        quantity: supplies[4].quantity,
+        brokenQuantity: supplies[4].brokenQuantity,
+        usedQuantity: supplies[4].usedQuantity + 1,
+      },
     ];
 
     for (const expectedItem of expectedState) {
@@ -272,7 +307,8 @@ describe('ManufacturingService', () => {
     await service.create(receipt, {executorId: '2', quantity: 1});
 
     const suppliesState2: Record<string, Supply> = {};
-    const supplies2 = await suppliesCollection.getList('lot');
+    const supplies2 = await suppliesCollection.getList();
+    supplies2.sort((a, b) => (b.lot || 0) - (a.lot || 0));
     for (const supply of supplies2) {
       suppliesState2[supply.id] = supply;
     }
@@ -283,7 +319,7 @@ describe('ManufacturingService', () => {
       .toBeResolvedTo(true);
 
     await expectAsync(
-      manufacturingProductionCollection.getList().then(list => list.reduce((a, i) => a + i.quantity, 0))
+      manufacturingProductionCollection.getList().then(list => list.reduce((a, i) => a + i.quantity, 0)),
     ).toBeResolvedTo(4);
 
     const newLots2 = supplies2.filter(i => i.positionId === positions[0].id);
@@ -305,7 +341,7 @@ describe('ManufacturingService', () => {
         id: supplies[0].id,
         quantity: supplies[0].quantity,
         brokenQuantity: supplies[0].brokenQuantity,
-        usedQuantity: supplies[0].usedQuantity + 3 + 1 + 3,
+        usedQuantity: supplies[0].usedQuantity + 3 + 3 + 1,
       },
       {
         id: supplies[1].id,
@@ -324,6 +360,12 @@ describe('ManufacturingService', () => {
         quantity: supplies[3].quantity,
         brokenQuantity: supplies[3].brokenQuantity,
         usedQuantity: supplies[3].usedQuantity + 1 + 1 + 1 + 1,
+      },
+      {
+        id: supplies[4].id,
+        quantity: supplies[4].quantity,
+        brokenQuantity: supplies[4].brokenQuantity,
+        usedQuantity: supplies[4].usedQuantity + 1 + 1 + 1 + 1,
       },
     ];
 
