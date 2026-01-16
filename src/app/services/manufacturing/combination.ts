@@ -1,6 +1,6 @@
 export interface UsedLot {
   supplyId: string;
-  lot: number;
+  lot?: number;
   taken: number;
   originalTaken: number;
 }
@@ -12,7 +12,7 @@ interface Combination {
 
 interface SupplyInfo {
   supplyId: string;
-  lot: number;
+  lot: number|undefined;
 }
 
 export function generateCombinations(cells: string[], usedLots: Record<string, UsedLot[]>): Combination[] {
@@ -37,8 +37,6 @@ export function generateCombinations(cells: string[], usedLots: Record<string, U
 
   // Находим все уникальные способы собрать ОДИН набор
   const singleSetCombinations: Combination[] = [];
-  const indexCombinations: Record<string, Combination> = {};
-
   // Рекурсивно ищем все способы собрать один набор
   const findSingleSet = (
     index: number,

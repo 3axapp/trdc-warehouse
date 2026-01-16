@@ -4,7 +4,7 @@ import {QualityControlStatus, SuppliesCollection, Supply} from './collections/su
 import {Result} from '../components/guard-area/manufacturing/manufacturing-form/manufacturing-form';
 import {
   collection,
-  doc,
+  doc as fireDoc,
   DocumentReference,
   DocumentSnapshot,
   Firestore,
@@ -28,7 +28,7 @@ export class ManufacturingService {
   private manufacturingProductionCollectionName = 'manufacturingProduction';
 
   public async getAvailability(receipt: Recipe): Promise<AvailabilityResult> {
-    const [positions, supplies] = await Promise.all([this.positions.getList(), this.supplies.getList('lot', 'asc')]);
+    const [positions, supplies] = await Promise.all([this.positions.getList(), this.supplies.getList()]);
     this.findReceiptPositions(receipt, positions);
     const receiptSupplies = this.filterReceiptSupplies(receipt, supplies);
 
@@ -58,6 +58,8 @@ export class ManufacturingService {
       }
       map[item.id] = {type: item.type!, quantity: 0, supplies: []};
     }
+
+    supplies = supplies.sort((a, b) => (a.lot || 0) - (b.lot || 0));
 
     for (const supply of supplies) {
       const item = map[supply.positionId];
@@ -165,30 +167,29 @@ export class ManufacturingService {
     const lotCombinations = this.generateLotCombinations(receipt, a.usedLots);
     const productionRecords: ProductionRecord[] = [];
     let nextId = a.nextId;
-    const combinationDocs: { ref: DocumentReference, doc: DocumentSnapshot<DocumentData>, supply: Supply | null }[] = [];
+    const combinationDocs: { ref: DocumentReference, doc: DocumentSnapshot<DocumentData>, supply: Supply | null, parts: number[] }[] = [];
     for (const combination of lotCombinations) {
-      const combinationId = `${receipt.code}_${combination.items.map(i => i.lot).join('_')}`;
-      const combinationRef = doc(this.getLotCollection(), combinationId);
-      const combinationDoc = await transaction.get(combinationRef);
+      const parts = combination.items.map(i => i.lot).filter(v => !!v) as number[];
+      const id = `${receipt.code}_${parts.join('_')}`;
+      const ref = fireDoc(this.getLotCollection(), id);
+      const doc = await transaction.get(ref);
       combinationDocs.push({
-        ref: combinationRef,
-        doc: combinationDoc,
-        supply: combinationDoc.exists() ? await this.supplies.get(combinationDoc.data()['id'], transaction) : null,
+        ref,
+        doc,
+        parts,
+        supply: doc.exists() ? await this.supplies.get(doc.data()['id'], transaction) : null,
       });
     }
 
     for (const [i, combination] of lotCombinations.entries()) {
       let supplyId: string;
       const quantity = combination.quantity!;
-
-      const combinationRef = combinationDocs[i].ref;
-      const combinationDoc = combinationDocs[i].doc;
-      const supply = combinationDocs[i].supply;
+      const {ref, doc, supply, parts} = combinationDocs[i];
 
       const lot = supply ? supply.lot! : ++nextId;
 
-      if (combinationDoc.exists()) {
-        const combination = combinationDoc.data() as CombinationLot;
+      if (doc.exists()) {
+        const combination = doc.data() as CombinationLot;
         supplyId = combination.id;
         await this.supplies.update(supplyId, {
           quantity: increment(quantity),
@@ -197,17 +198,17 @@ export class ManufacturingService {
         supplyId = await this.supplies.add({
           positionId: receipt.id!,
           // supplierId: string,
-          manufacturingCode: combinationRef.id,
+          manufacturingCode: ref.id,
           date: new Date(),
           quantity,
           brokenQuantity: 0,
           usedQuantity: 0,
           lot,
         }, transaction);
-        await transaction.set(combinationRef, {id: supplyId});
+        await transaction.set(ref, {id: supplyId});
       }
 
-      productionRecords.push({lot, supplyId, quantity, positionId: receipt.id!});
+      productionRecords.push({lot, supplyId, quantity, positionId: receipt.id!, parts});
     }
 
     this.recordProductionLog(productionRecords, executorId, transaction);
@@ -232,7 +233,7 @@ export class ManufacturingService {
 
   private recordProductionLog(productionRecords: ProductionRecord[], executorId: string, transaction: Transaction) {
     for (const record of productionRecords) {
-      const docRef = doc(this.getProductionCollection());
+      const docRef = fireDoc(this.getProductionCollection());
       transaction.set(docRef, {
         ...record,
         executorId,
@@ -285,6 +286,7 @@ interface CombinationLot {
 interface ProductionRecord {
   lot: number;
   positionId: string;
+  parts: number[];
   supplyId: string;
   quantity: number;
 }
