@@ -192,7 +192,7 @@ describe('ManufacturingService', () => {
         supplierId: '',
         brokenQuantity: 0,
         usedQuantity: 1,
-        lot: 2,
+        lot: 21,
         qualityControlStatus: QualityControlStatus.Completed,
       },
       {
@@ -246,7 +246,7 @@ describe('ManufacturingService', () => {
       suppliesState[supply.id] = supply;
     }
 
-    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_111111')).then(d => d.exists()))
+    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_1_1_1_1_1_1')).then(d => d.exists()))
       .toBeResolvedTo(true);
     const newLots = Object.values(suppliesState).filter(i => i.positionId === positions[0].id);
     expect(newLots.length).toEqual(1);
@@ -313,9 +313,9 @@ describe('ManufacturingService', () => {
       suppliesState2[supply.id] = supply;
     }
 
-    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_112111')).then(d => d.exists()))
+    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_1_1_21_1_1_1')).then(d => d.exists()))
       .toBeResolvedTo(true);
-    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_222111')).then(d => d.exists()))
+    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_21_21_21_1_1_1')).then(d => d.exists()))
       .toBeResolvedTo(true);
 
     await expectAsync(
@@ -324,15 +324,15 @@ describe('ManufacturingService', () => {
 
     const newLots2 = supplies2.filter(i => i.positionId === positions[0].id);
     expect(newLots2.length).toEqual(3);
-    expect(newLots2[0].manufacturingCode).toEqual('P001_222111');
+    expect(newLots2[0].manufacturingCode).toEqual('P001_21_21_21_1_1_1');
     expect(newLots2[0].lot).toEqual(3);
     expect(newLots2[0].quantity).toEqual(2);
     expect(newLots2[0].brokenQuantity).toEqual(0);
     expect(newLots2[0].usedQuantity).toEqual(0);
-    expect(newLots2[1].manufacturingCode).toEqual('P001_112111');
+    expect(newLots2[1].manufacturingCode).toEqual('P001_1_1_21_1_1_1');
     expect(newLots2[1].lot).toEqual(2);
     expect(newLots2[1].quantity).toEqual(1);
-    expect(newLots2[2].manufacturingCode).toEqual('P001_111111');
+    expect(newLots2[2].manufacturingCode).toEqual('P001_1_1_1_1_1_1');
     expect(newLots2[2].lot).toEqual(1);
     expect(newLots2[2].quantity).toEqual(1);
 
