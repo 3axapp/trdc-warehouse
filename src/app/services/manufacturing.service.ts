@@ -169,7 +169,7 @@ export class ManufacturingService {
     let nextId = a.nextId;
     const combinationDocs: { ref: DocumentReference, doc: DocumentSnapshot<DocumentData>, supply: Supply | null }[] = [];
     for (const combination of lotCombinations) {
-      const combinationId = `${receipt.code}_${combination.items.map(i => i.lot).join('_')}`;
+      const combinationId = `${receipt.code}_${combination.items.map(i => i.lot).filter(v => !!v).join('_')}`;
       const combinationRef = doc(this.getLotCollection(), combinationId);
       const combinationDoc = await transaction.get(combinationRef);
       combinationDocs.push({
