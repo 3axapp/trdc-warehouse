@@ -92,11 +92,17 @@ describe('ManufacturingService', () => {
       },
     ];
 
+    let result = await service.getAvailability(
+      {code:'code', items:[{code:'notexists', type: PositionType.Normal, quantity:3}]}
+    );
+    expect(receipt.id).toBeFalsy();
+    expect(result.message).toEqual("Материал с кодом «notexists» не найден");
+
     for (const supply of supplies) {
       supply.id = await suppliesCollection.add(supply);
     }
 
-    const result = await service.getAvailability(receipt);
+    result = await service.getAvailability(receipt);
 
     expect(receipt.id).toEqual(positions[0].id);
     expect(receipt.items[0].id).toEqual(positions[1].id);
@@ -132,7 +138,7 @@ describe('ManufacturingService', () => {
             supplies[3],
           ],
         },
-      }, message: 'Материал P004 не поставлен',
+      }, message: 'Материал «Position 4» не поставлен',
     });
   });
 
@@ -180,7 +186,7 @@ describe('ManufacturingService', () => {
           type: PositionType.Normal,
           supplies: [],
         },
-      }, message: 'Недостаточно материала P002 (1 из 3)',
+      }, message: 'Недостаточно материала «Position 2» (1 из 3)',
     });
   });
 
