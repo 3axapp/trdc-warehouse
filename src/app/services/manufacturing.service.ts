@@ -47,6 +47,7 @@ export class ManufacturingService {
       const position = positions.find(p => p.code === item.code);
       item.id = position?.id;
       item.type = position?.type;
+      item.name = position?.name;
     }
   }
 
@@ -81,9 +82,15 @@ export class ManufacturingService {
     let message;
 
     for (const item of receipt.items) {
-      if (!item.id || !supplies[item.id]?.quantity) {
+      if (!item.id) {
         available = 0;
-        message = `Материал ${item.code} не поставлен`;
+        message = `Материал с кодом «${item.code}» не найден`;
+        break;
+      }
+
+      if (!supplies[item.id]?.quantity) {
+        available = 0;
+        message = `Материал «${item.name!}» не поставлен`;
         break;
       }
 
@@ -91,7 +98,7 @@ export class ManufacturingService {
       const itemAvailable = Math.floor(itemSupplies.quantity / item.quantity);
       if (!itemAvailable) {
         available = 0;
-        message = `Недостаточно материала ${item.code} (${itemSupplies.quantity} из ${item.quantity})`;
+        message = `Недостаточно материала «${item.name!}» (${itemSupplies.quantity} из ${item.quantity})`;
         break;
       }
       available = Math.min(available, itemAvailable);
@@ -262,6 +269,7 @@ export interface Recipe {
 export interface ReceiptItem {
   id?: string,
   type?: PositionType,
+  name?: string,
   code: string,
   quantity: number,
 }
