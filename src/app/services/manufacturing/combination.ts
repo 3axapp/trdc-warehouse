@@ -1,11 +1,12 @@
 export interface UsedLot {
   supplyId: string;
   lot?: number;
+  name?: string;
   taken: number;
   originalTaken: number;
 }
 
-interface Combination {
+export interface Combination {
   items: SupplyInfo[];
   quantity: number;
 }

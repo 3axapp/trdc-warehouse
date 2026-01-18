@@ -13,7 +13,7 @@ import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angula
 import {Deletable} from '../../../../services/collections/abstract.collection';
 import {TuiCardLarge} from '@taiga-ui/layout';
 import {TuiChevron, TuiDataListWrapperComponent, TuiInputNumberDirective, TuiSelectDirective} from '@taiga-ui/kit';
-import {AvailabilityResult} from '../../../../services/manufacturing.service';
+import {NextMaxQuantity} from '../../../../services/manufacturing.service';
 
 @Component({
   selector: 'app-manufacturing-form',
@@ -66,7 +66,7 @@ export class ManufacturingForm {
 }
 
 export interface Options {
-  availability: AvailabilityResult,
+  availability: NextMaxQuantity,
   executors: Executor[];
   result?: Result;
 }

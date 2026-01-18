@@ -92,7 +92,7 @@ describe('ManufacturingService', () => {
       },
     ];
 
-    let result = await service.getAvailability(
+    let result = await service.getNextMaxQuantity(
       {code:'code', items:[{code:'notexists', type: PositionType.Normal, quantity:3}]}
     );
     expect(receipt.id).toBeFalsy();
@@ -102,7 +102,7 @@ describe('ManufacturingService', () => {
       supply.id = await suppliesCollection.add(supply);
     }
 
-    result = await service.getAvailability(receipt);
+    result = await service.getNextMaxQuantity(receipt);
 
     expect(receipt.id).toEqual(positions[0].id);
     expect(receipt.items[0].id).toEqual(positions[1].id);
@@ -111,34 +111,8 @@ describe('ManufacturingService', () => {
     expect(receipt.items[3].id).toEqual(positions[4].id);
 
     expect(result).toEqual({
-      nextId: 0,
-      available: 0, supplies: {
-        [positions[1].id]: {
-          quantity: 15,
-          type: PositionType.Checked,
-          supplies: [
-            supplies[1],
-            supplies[0],
-          ],
-        },
-        [positions[2].id]: {
-          quantity: 0,
-          type: PositionType.Checked,
-          supplies: [],
-        },
-        [positions[3].id]: {
-          quantity: 0,
-          type: PositionType.Checked,
-          supplies: [],
-        },
-        [positions[4].id]: {
-          quantity: 70,
-          type: PositionType.Normal,
-          supplies: [
-            supplies[3],
-          ],
-        },
-      }, message: 'Материал «Position 4» не поставлен',
+      available: 0,
+      message: 'Материал «Position 4» не поставлен',
     });
   });
 
@@ -159,34 +133,11 @@ describe('ManufacturingService', () => {
       supply.id = await suppliesCollection.add(supply);
     }
 
-    const result = await service.getAvailability(receipt);
+    const result = await service.getNextMaxQuantity(receipt);
 
     expect(result).toEqual({
-      nextId: 0,
-      available: 0, supplies: {
-        [positions[1].id]: {
-          quantity: 1,
-          type: PositionType.Checked,
-          supplies: [
-            supplies[0],
-          ],
-        },
-        [positions[2].id]: {
-          quantity: 0,
-          type: PositionType.Checked,
-          supplies: [],
-        },
-        [positions[3].id]: {
-          quantity: 0,
-          type: PositionType.Checked,
-          supplies: [],
-        },
-        [positions[4].id]: {
-          quantity: 0,
-          type: PositionType.Normal,
-          supplies: [],
-        },
-      }, message: 'Недостаточно материала «Position 2» (1 из 3)',
+      available: 0,
+      message: 'Недостаточно материала «Position 2» (1 из 3)',
     });
   });
 
@@ -241,9 +192,9 @@ describe('ManufacturingService', () => {
       supply.id = await suppliesCollection.add(supply);
     }
 
-    const result = await service.getAvailability(receipt);
+    const result = await service.getNextMaxQuantity(receipt);
 
-    expect(result.available).toEqual(4);
+    expect(result.available).toEqual(1);
 
     await service.create(receipt, {executorId: '1', quantity: 1});
 
@@ -304,13 +255,15 @@ describe('ManufacturingService', () => {
       }).toEqual(expectedItem);
     }
 
-    const result2 = await service.getAvailability(receipt);
-    expect(result2.available).toEqual(3);
+    const result2 = await service.getNextMaxQuantity(receipt);
+    expect(result2.available).toEqual(1);
     await expectAsync(service.create(receipt, {executorId: '2', quantity: 4}))
       .toBeRejectedWithError('Неправильное количество. Максимум 3');
+    await expectAsync(service.create(receipt, {executorId: '2', quantity: 2}))
+      .toBeRejectedWithError('Ошибка: создается несколько лотов, а разрешено создавать только по одному');
 
-    await service.create(receipt, {executorId: '2', quantity: 2});
     await service.create(receipt, {executorId: '2', quantity: 1});
+    await service.create(receipt, {executorId: '2', quantity: 2});
 
     const suppliesState2: Record<string, Supply> = {};
     const supplies2 = await suppliesCollection.getList();

@@ -1,8 +1,8 @@
 import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {TuiAlertService, TuiButton, tuiDialog} from '@taiga-ui/core';
+import {TuiAlertService, TuiButton, tuiDialog, TuiDialogService} from '@taiga-ui/core';
 import {PositionsCollection} from '../../../services/collections/positions.collection';
 import {Executor, ExecutorsCollection} from '../../../services/collections/executors.collection';
-import {AvailabilityResult, ManufacturingService, Recipe} from '../../../services/manufacturing.service';
+import {ManufacturingService, NextMaxQuantity, Recipe} from '../../../services/manufacturing.service';
 import {Observable} from 'rxjs';
 import {Options, Result} from './manufacturing-form/manufacturing-form';
 import {where} from '@angular/fire/firestore';
@@ -23,6 +23,8 @@ import {
 import {CacheService} from '../../../services/cache.service';
 import {ExecutorPipe} from '../../../pipes/executor-pipe';
 import {ActivatedRoute} from '@angular/router';
+import {UsedLot} from '../../../services/manufacturing/combination';
+import {ManufacturingSuccess} from './manufacturing-success/manufacturing-success';
 
 @Component({
   selector: 'app-manufacturing',
@@ -52,6 +54,7 @@ export class Manufacturing implements OnInit {
   private readonly cache = inject(CacheService);
   private readonly alerts = inject(TuiAlertService);
   private readonly recipe = inject(ActivatedRoute).snapshot.data['recipe'] as Recipe;
+  private readonly dialogs = inject(TuiDialogService);
 
   protected block = signal(false);
   protected data = signal<ProductionItem[]>([]);
@@ -70,7 +73,7 @@ export class Manufacturing implements OnInit {
     this.block.set(true);
     const [executors, availability] = await Promise.all([
       this.cache.getList<Executor>('executors'),
-      this.manufacturing.getAvailability(this.recipe),
+      this.manufacturing.getNextMaxQuantity(this.recipe),
     ]);
 
     if (availability.available === 0) {
@@ -82,17 +85,20 @@ export class Manufacturing implements OnInit {
     await this.showDialog(availability, executors);
   }
 
-  private async showDialog(availability: AvailabilityResult, executors: Executor[]) {
+  private async showDialog(availability: NextMaxQuantity, executors: Executor[]) {
     const dialog = await this.lazyLoad();
 
     dialog({executors, availability}).subscribe({
       next: async (data) => {
-        await this.manufacturing.create(this.recipe, data);
-        await this.load();
-        console.info(`Dialog emitted data = `, data);
+        try {
+          const usedLots = await this.manufacturing.create(this.recipe, data);
+          this.showSuccess(usedLots);
+          await this.load();
+        } catch (e: any) {
+          this.alerts.open(e.message || e, {appearance: 'negative'}).subscribe();
+        }
       },
       complete: () => {
-        console.info('Dialog closed');
         this.block.set(false);
       },
     });
@@ -114,5 +120,14 @@ export class Manufacturing implements OnInit {
     }
     this.data.set(
       await this.manufacturingProduction.getList().then(list => list.filter(i => i.positionId == this.recipe.id)));
+  }
+
+  private showSuccess(usedLots: UsedLot[]) {
+    const dialog = tuiDialog(ManufacturingSuccess, {
+      injector: this.injector,
+      dismissible: true,
+      label: 'Снова успех! Материалы',
+    });
+    dialog(usedLots).subscribe();
   }
 }

@@ -13,7 +13,7 @@ import {
   Transaction,
 } from '@angular/fire/firestore';
 import {DocumentData} from '@firebase/firestore';
-import {generateCombinations, UsedLot} from './manufacturing/combination';
+import {Combination, generateCombinations, UsedLot} from './manufacturing/combination';
 
 @Injectable({
   providedIn: 'root',
@@ -27,12 +27,58 @@ export class ManufacturingService {
   private manufacturingLotsCollectionName = 'manufacturingLots';
   private manufacturingProductionCollectionName = 'manufacturingProduction';
 
-  public async getAvailability(receipt: Recipe): Promise<AvailabilityResult> {
+  public async getNextMaxQuantity(receipt: Recipe): Promise<NextMaxQuantity> {
+    const availability = await this.getAvailability(receipt);
+    if (!availability.available) {
+      return {
+        available: availability.available,
+        message: availability.message,
+      };
+    }
+    const usedLots = this.reserveComponents(receipt, availability.supplies, availability.available);
+    const lotCombinations = this.generateLotCombinations(receipt, usedLots);
+console.log(lotCombinations)
+    return {available: lotCombinations[0].quantity};
+  }
+
+  private async getAvailability(receipt: Recipe): Promise<AvailabilityResult> {
     const [positions, supplies] = await Promise.all([this.positions.getList(), this.supplies.getList()]);
     this.findReceiptPositions(receipt, positions);
     const receiptSupplies = this.filterReceiptSupplies(receipt, supplies);
 
     return this.calculateAvailability(receipt, receiptSupplies);
+  }
+
+  public async create(receipt: Recipe, data: Result) {
+    let result: UsedLot[] = [];
+    await runTransaction(this.firestore, async (transaction) => {
+      const availability = await this.getAvailability(receipt);
+      if (!availability.available) {
+        throw new Error(`Неправильное количество. Максимум 0`);
+      }
+      if (!(data.quantity > 0)) {
+        throw new Error(`Неправильный формат: ${data.quantity}`);
+      }
+      if (availability.available < data.quantity) {
+        throw new Error(`Неправильное количество. Максимум ${availability.available}`);
+      }
+
+      const usedLots = this.reserveComponents(receipt, availability.supplies, data.quantity);
+      const lotCombinations = this.generateLotCombinations(receipt, usedLots);
+      if (lotCombinations.length !== 1) {
+        throw new Error(`Ошибка: создается несколько лотов, а разрешено создавать только по одному`);
+      }
+      if (lotCombinations[0].quantity != data.quantity) {
+        throw new Error(`Неправильное количество. Максимум ${lotCombinations[0].quantity}`);
+      }
+
+      await this.recordProduction(receipt, [lotCombinations[0]], availability.nextId, data.executorId, transaction);
+      await this.updateComponents(usedLots, transaction);
+
+      result = Object.values(usedLots).flat();
+    });
+
+    return result;
   }
 
   private findReceiptPositions(receipt: Recipe, positions: Position[]) {
@@ -116,19 +162,6 @@ export class ManufacturingService {
     };
   }
 
-  public async create(receipt: Recipe, data: Result) {
-    await runTransaction(this.firestore, async (transaction) => {
-      const availability = await this.getAvailability(receipt);
-      if (availability.available < data.quantity || !(data.quantity > 0)) {
-        throw new Error(`Неправильное количество. Максимум ${availability.available}`);
-      }
-
-      const usedLots = this.reserveComponents(receipt, availability.supplies, data.quantity);
-      await this.recordProduction(receipt, {usedLots, nextId: availability.nextId}, data.executorId, transaction);
-      await this.updateComponents(usedLots, transaction);
-    });
-  }
-
   private reserveComponents(receipt: Recipe, componentsData: ReceiptSupplies, quantityToProduce: number) {
     const usedLots: Record<string, UsedLot[]> = {};
 
@@ -153,6 +186,7 @@ export class ManufacturingService {
             supplyId: component.id,
             lot: component.lot!,
             taken: takeAmount,
+            name: item.name,
             originalTaken: takeAmount, // Сохраняем для возможного использования
           });
 
@@ -167,13 +201,11 @@ export class ManufacturingService {
   }
 
   private async recordProduction(
-    receipt: Recipe, a: { nextId: number, usedLots: Record<string, UsedLot[]> }, executorId: string,
+    receipt: Recipe, lotCombinations: Combination[], nextId: number, executorId: string,
     transaction: Transaction,
   ) {
     // Получаем все возможные комбинации лотов
-    const lotCombinations = this.generateLotCombinations(receipt, a.usedLots);
     const productionRecords: ProductionRecord[] = [];
-    let nextId = a.nextId;
     const combinationDocs: { ref: DocumentReference, doc: DocumentSnapshot<DocumentData>, supply: Supply | null, parts: number[] }[] = [];
     for (const combination of lotCombinations) {
       const parts = combination.items.map(i => i.lot).filter(v => !!v) as number[];
@@ -297,4 +329,9 @@ interface ProductionRecord {
   parts: number[];
   supplyId: string;
   quantity: number;
+}
+
+export interface NextMaxQuantity {
+  message?: string;
+  available: number;
 }
