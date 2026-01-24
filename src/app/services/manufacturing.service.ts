@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {Position, PositionsCollection, PositionType} from './collections/positions.collection';
+import {Position, PositionType} from './collections/positions.collection';
 import {QualityControlStatus, SuppliesCollection, Supply} from './collections/supplies.collection';
 import {Result} from '../components/guard-area/manufacturing/manufacturing-form/manufacturing-form';
 import {
@@ -20,7 +20,6 @@ import {Combination, generateCombinations, UsedLot} from './manufacturing/combin
 })
 export class ManufacturingService {
 
-  private positions = inject(PositionsCollection);
   private supplies = inject(SuppliesCollection);
   private firestore = inject(Firestore);
 
@@ -37,22 +36,21 @@ export class ManufacturingService {
     }
     const usedLots = this.reserveComponents(receipt, availability.supplies, availability.available);
     const lotCombinations = this.generateLotCombinations(receipt, usedLots);
-console.log(lotCombinations)
+
     return {available: lotCombinations[0].quantity};
   }
 
-  private async getAvailability(receipt: Recipe): Promise<AvailabilityResult> {
-    const [positions, supplies] = await Promise.all([this.positions.getList(), this.supplies.getList()]);
-    this.findReceiptPositions(receipt, positions);
-    const receiptSupplies = this.filterReceiptSupplies(receipt, supplies);
+  private async getAvailability(recipe: Recipe): Promise<AvailabilityResult> {
+    const supplies = await this.supplies.getList();
+    const receiptSupplies = this.filterReceiptSupplies(recipe, supplies);
 
-    return this.calculateAvailability(receipt, receiptSupplies);
+    return this.calculateAvailability(recipe, receiptSupplies);
   }
 
-  public async create(receipt: Recipe, data: Result) {
+  public async create(recipe: Recipe, data: Result) {
     let result: UsedLot[] = [];
     await runTransaction(this.firestore, async (transaction) => {
-      const availability = await this.getAvailability(receipt);
+      const availability = await this.getAvailability(recipe);
       if (!availability.available) {
         throw new Error(`Неправильное количество. Максимум 0`);
       }
@@ -63,8 +61,8 @@ console.log(lotCombinations)
         throw new Error(`Неправильное количество. Максимум ${availability.available}`);
       }
 
-      const usedLots = this.reserveComponents(receipt, availability.supplies, data.quantity);
-      const lotCombinations = this.generateLotCombinations(receipt, usedLots);
+      const usedLots = this.reserveComponents(recipe, availability.supplies, data.quantity);
+      const lotCombinations = this.generateLotCombinations(recipe, usedLots);
       if (lotCombinations.length !== 1) {
         throw new Error(`Ошибка: создается несколько лотов, а разрешено создавать только по одному`);
       }
@@ -72,29 +70,14 @@ console.log(lotCombinations)
         throw new Error(`Неправильное количество. Максимум ${lotCombinations[0].quantity}`);
       }
 
-      await this.recordProduction(receipt, [lotCombinations[0]], availability.nextId, data.executorId, transaction);
+      await this.recordProduction(recipe, [lotCombinations[0]], availability.nextId, data.executorId, data.date,
+        transaction);
       await this.updateComponents(usedLots, transaction);
 
       result = Object.values(usedLots).flat();
     });
 
     return result;
-  }
-
-  private findReceiptPositions(receipt: Recipe, positions: Position[]) {
-    if (!receipt.id) {
-      const position = positions.find(p => p.code === receipt.code);
-      receipt.id = position?.id;
-    }
-    for (const item of receipt.items) {
-      if (item.id) {
-        continue;
-      }
-      const position = positions.find(p => p.code === item.code);
-      item.id = position?.id;
-      item.type = position?.type;
-      item.name = position?.name;
-    }
   }
 
   private filterReceiptSupplies(receipt: Recipe, supplies: Supply[]) {
@@ -201,15 +184,16 @@ console.log(lotCombinations)
   }
 
   private async recordProduction(
-    receipt: Recipe, lotCombinations: Combination[], nextId: number, executorId: string,
+    receipt: Recipe, lotCombinations: Combination[], nextId: number, executorId: string, date: Date,
     transaction: Transaction,
   ) {
-    // Получаем все возможные комбинации лотов
     const productionRecords: ProductionRecord[] = [];
     const combinationDocs: { ref: DocumentReference, doc: DocumentSnapshot<DocumentData>, supply: Supply | null, parts: number[] }[] = [];
+    const idDate = date.toISOString().substring(0, 10).replaceAll('-', '');
+
     for (const combination of lotCombinations) {
       const parts = combination.items.map(i => i.lot).filter(v => !!v) as number[];
-      const id = `${receipt.code}_${parts.join('_')}`;
+      const id = `${receipt.code}_${idDate}_${executorId}_${parts.join('_')}`;
       const ref = fireDoc(this.getLotCollection(), id);
       const doc = await transaction.get(ref);
       combinationDocs.push({
@@ -238,7 +222,7 @@ console.log(lotCombinations)
           positionId: receipt.id!,
           // supplierId: string,
           manufacturingCode: ref.id,
-          date: new Date(),
+          date: date,
           quantity,
           brokenQuantity: 0,
           usedQuantity: 0,
@@ -250,7 +234,7 @@ console.log(lotCombinations)
       productionRecords.push({lot, supplyId, quantity, positionId: receipt.id!, parts});
     }
 
-    this.recordProductionLog(productionRecords, executorId, transaction);
+    this.recordProductionLog(productionRecords, executorId, date, transaction);
   }
 
   private generateLotCombinations(receipt: Recipe, usedLots: Record<string, UsedLot[]>) {
@@ -270,13 +254,14 @@ console.log(lotCombinations)
     return collection(this.firestore, this.manufacturingProductionCollectionName);
   }
 
-  private recordProductionLog(productionRecords: ProductionRecord[], executorId: string, transaction: Transaction) {
+  private recordProductionLog(
+    productionRecords: ProductionRecord[], executorId: string, date: Date, transaction: Transaction) {
     for (const record of productionRecords) {
       const docRef = fireDoc(this.getProductionCollection());
       transaction.set(docRef, {
         ...record,
         executorId,
-        date: new Date(),
+        date,
       });
     }
   }
@@ -292,13 +277,27 @@ console.log(lotCombinations)
   }
 }
 
+export function findReceiptPositions(receipt: Recipe, positions: Position[]) {
+  const position = positions.find(p => p.code === receipt.code);
+  receipt.id = position?.id;
+  for (const item of receipt.items) {
+    if (item.id) {
+      continue;
+    }
+    const position = positions.find(p => p.code === item.code);
+    item.id = position?.id;
+    item.type = position?.type;
+    item.name = position?.name;
+  }
+}
+
 export interface Recipe {
   id?: string;
   code: string;
-  items: ReceiptItem[];
+  items: RecipeItem[];
 }
 
-export interface ReceiptItem {
+export interface RecipeItem {
   id?: string,
   type?: PositionType,
   name?: string,
