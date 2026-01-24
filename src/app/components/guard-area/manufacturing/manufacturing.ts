@@ -1,11 +1,16 @@
 import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {TuiAlertService, TuiButton, tuiDialog, TuiDialogService} from '@taiga-ui/core';
-import {PositionsCollection} from '../../../services/collections/positions.collection';
+import {TuiAlertService, TuiButton, tuiDialog, TuiDialogService, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
+import {Position, PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
 import {Executor, ExecutorsCollection} from '../../../services/collections/executors.collection';
-import {ManufacturingService, NextMaxQuantity, Recipe} from '../../../services/manufacturing.service';
+import {
+  findReceiptPositions,
+  ManufacturingService,
+  NextMaxQuantity,
+  Recipe,
+  RecipeItem,
+} from '../../../services/manufacturing.service';
 import {Observable} from 'rxjs';
 import {Options, Result} from './manufacturing-form/manufacturing-form';
-import {where} from '@angular/fire/firestore';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -23,8 +28,8 @@ import {
 import {CacheService} from '../../../services/cache.service';
 import {ExecutorPipe} from '../../../pipes/executor-pipe';
 import {ActivatedRoute} from '@angular/router';
-import {UsedLot} from '../../../services/manufacturing/combination';
 import {ManufacturingSuccess} from './manufacturing-success/manufacturing-success';
+import {UsedLot} from '../../../services/manufacturing/combination';
 
 @Component({
   selector: 'app-manufacturing',
@@ -33,6 +38,8 @@ import {ManufacturingSuccess} from './manufacturing-success/manufacturing-succes
     ExecutorPipe,
     AsyncPipe,
     TuiButton,
+    TuiIcon,
+    TuiHintDirective,
     TuiTableCell,
     TuiTableDirective,
     TuiTableTbody,
@@ -58,13 +65,13 @@ export class Manufacturing implements OnInit {
 
   protected block = signal(false);
   protected data = signal<ProductionItem[]>([]);
-  protected columns = ['date', 'executorId', 'lot', 'quantity'];
+  protected columns = ['date', 'executorId', 'lot', 'quantity', 'controls'];
 
   public async ngOnInit() {
     this.cache.add('executors', this.executors.getList());
     if (!this.recipe.id) {
-      this.recipe.id = await this.positions.getList('name', 'asc', where('code', '==', this.recipe.code))
-        .then(list => list[0]?.id);
+      const list = await this.positions.getList();
+      findReceiptPositions(this.recipe, list);
     }
     await this.load();
   }
@@ -83,6 +90,42 @@ export class Manufacturing implements OnInit {
     }
 
     await this.showDialog(availability, executors);
+  }
+
+  protected showParts(item: ProductionItem) {
+    const usedLots: UsedLot[] = [];
+    const add = (part: RecipeItem, quantity: number, lot?: number) => {
+      usedLots.push({
+        supplyId: '',
+        taken: quantity,
+        lot,
+        originalTaken: quantity,
+        name: part.name,
+      });
+    };
+    let itemPartPosition = 0;
+
+    for (const part of this.recipe.items) {
+      if (part.type == PositionType.Normal) {
+        add(part, item.quantity * part.quantity);
+        continue;
+      }
+
+      let quantity = 0;
+      let currentLot: number | undefined;
+      for (let j = 0; j < part.quantity; j++) {
+        const lot = item.parts[itemPartPosition];
+        if (currentLot && currentLot != lot) {
+          add(part, item.quantity * quantity, currentLot);
+          quantity = 0;
+        }
+        currentLot = lot;
+        itemPartPosition++;
+        quantity++;
+      }
+      add(part, item.quantity * quantity, currentLot);
+    }
+    this.showSuccess(usedLots);
   }
 
   private async showDialog(availability: NextMaxQuantity, executors: Executor[]) {

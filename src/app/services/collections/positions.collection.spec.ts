@@ -2,7 +2,14 @@ import {TestBed} from '@angular/core/testing';
 import {PositionsCollection, PositionType} from './positions.collection';
 import {provideZonelessChangeDetection} from '@angular/core';
 import {doc, Firestore, getDoc} from '@angular/fire/firestore';
-import {clearFirestoreEmulator, provideFirebaseAppTest, provideFirestoreTest} from '../../../tests/utils';
+import {
+  clearFirestoreEmulator,
+  provideAuthTest,
+  provideFirebaseAppTest,
+  provideFirestoreTest,
+  signOut,
+  signupAndSignin,
+} from '../../../tests/utils';
 
 describe('PositionsCollection', () => {
   let service: PositionsCollection;
@@ -17,10 +24,16 @@ describe('PositionsCollection', () => {
         provideZonelessChangeDetection(),
         provideFirebaseAppTest(),
         provideFirestoreTest(),
+        provideAuthTest(),
       ],
     });
+
+    await signupAndSignin(TestBed);
+
     service = TestBed.inject(PositionsCollection);
   });
+
+  afterEach(async () => await signOut(TestBed), 10000);
 
   it('Создание сервиса', () => {
     expect(service).toBeTruthy();

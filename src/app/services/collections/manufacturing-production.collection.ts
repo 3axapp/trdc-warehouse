@@ -41,4 +41,5 @@ export interface ProductionItem extends Deletable {
   supplyId: string;
   positionId: string;
   lot: number;
+  parts: number[];
 }

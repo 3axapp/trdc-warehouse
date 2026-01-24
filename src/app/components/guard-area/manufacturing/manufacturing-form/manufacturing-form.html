@@ -1,6 +1,16 @@
 <form [formGroup]="form"
       tuiCardLarge
       (ngSubmit)="submit()">
+
+  <tui-textfield>
+    <label tuiLabel>Дата</label>
+    <input
+      tuiInputDateTime
+      formControlName="date"
+    />
+    <tui-calendar *tuiTextfieldDropdown />
+  </tui-textfield>
+
   <tui-textfield tuiChevron>
     <label tuiLabel>Исполнитель</label>
     <input
@@ -11,7 +21,7 @@
     <tui-data-list-wrapper
       *tuiTextfieldDropdown
       new
-      [items]="data!.executors"
+      [items]="data.executors"
     />
   </tui-textfield>
 
@@ -21,7 +31,7 @@
     <input
       tuiInputNumber
       formControlName="quantity"
-      placeholder="Максимум: {{data?.availability!.available}}"
+      placeholder="Максимум: {{data.availability.available}}"
     />
   </tui-textfield>
 

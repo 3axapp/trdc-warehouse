@@ -1,23 +1,26 @@
 import {TestBed} from '@angular/core/testing';
 
 import {ApproveData, QualityControlService} from './quality-control.service';
-import {clearFirestoreEmulator, provideAuthTest, provideFirebaseAppTest, provideFirestoreTest} from '../../tests/utils';
+import {
+  clearFirestoreEmulator,
+  provideAuthTest,
+  provideFirebaseAppTest,
+  provideFirestoreTest,
+  signOut,
+  signupAndSignin,
+  testUser,
+} from '../../tests/utils';
 import {provideZonelessChangeDetection} from '@angular/core';
 import {Firestore} from '@angular/fire/firestore';
-import {AuthService} from './auth.service';
-import {Auth} from '@angular/fire/auth';
 import {PositionsCollection, PositionType} from './collections/positions.collection';
 import {QualityControlStatus, SuppliesCollection, Supply} from './collections/supplies.collection';
 
 describe('QualityControlService', () => {
   let service: QualityControlService;
   let firestore: Firestore;
-  let userId: string;
   let position1Id: string;
   let position2Id: string;
   let supplies: SuppliesCollection;
-
-  const TEST_USER = 'test@unit.email';
 
   beforeAll(async () => {
     await clearFirestoreEmulator();
@@ -32,23 +35,13 @@ describe('QualityControlService', () => {
         provideAuthTest(),
       ],
     });
+
+    await signupAndSignin(TestBed);
+
     firestore = TestBed.inject(Firestore);
     supplies = TestBed.inject(SuppliesCollection);
     service = TestBed.inject(QualityControlService);
 
-    if (!userId) {
-      const auth = TestBed.inject(Auth);
-      const authService = TestBed.inject(AuthService);
-      try {
-        await authService.register(TEST_USER, TEST_USER);
-      } catch (error) {
-        if ((error as any)?.code !== 'auth/email-already-in-use') {
-          throw error;
-        }
-      }
-      await authService.login(TEST_USER, TEST_USER);
-      userId = auth.currentUser!.uid;
-    }
     if (!position1Id) {
       const positions = TestBed.inject(PositionsCollection);
       position1Id = await positions.add(
@@ -59,6 +52,8 @@ describe('QualityControlService', () => {
       );
     }
   });
+
+  afterEach(async () => await signOut(TestBed));
 
   it('Создание сервиса', () => {
     expect(service).toBeTruthy();
@@ -94,7 +89,7 @@ describe('QualityControlService', () => {
       brokenQuantity: 1,
       lot: 1,
       qualityControlStatus: QualityControlStatus.Completed,
-      qualityControlUserId: userId,
+      qualityControlUserId: testUser.id,
     });
   });
 
@@ -148,7 +143,7 @@ describe('QualityControlService', () => {
     expect(firstSupplySecondPosition.qualityControlDate).toEqual(new Date('2025-01-01 00:20:00'));
     expect(firstSupplySecondPosition.brokenQuantity).toEqual(1);
     expect(firstSupplySecondPosition.lot).toEqual(2);
-    expect(firstSupplySecondPosition.qualityControlUserId).toEqual(userId);
+    expect(firstSupplySecondPosition.qualityControlUserId).toEqual(testUser.id);
   });
 
   it('Количестыо брака', async () => {

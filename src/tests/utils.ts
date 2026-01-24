@@ -1,7 +1,15 @@
 import {environment} from '../environments/environment.development';
 import {initializeApp, provideFirebaseApp} from '@angular/fire/app';
 import {connectFirestoreEmulator, getFirestore, provideFirestore} from '@angular/fire/firestore';
-import {connectAuthEmulator, getAuth, provideAuth} from '@angular/fire/auth';
+import {Auth, connectAuthEmulator, getAuth, provideAuth} from '@angular/fire/auth';
+import {TestBedStatic} from '@angular/core/testing';
+import {AuthService} from '../app/services/auth.service';
+
+export const testUser = {
+  id: '',
+  email: 'test@unit.email',
+  password: 'test@unit.email',
+};
 
 export async function clearFirestoreEmulator(): Promise<void> {
   try {
@@ -36,3 +44,37 @@ export const provideAuthTest = () => provideAuth(() => {
   connectAuthEmulator(auth, 'http://localhost:9099');
   return auth;
 });
+export const signupAndSignin = async (TestBed: TestBedStatic) => {
+  const auth = TestBed.inject(Auth);
+  if (!auth.currentUser) {
+    const authService = TestBed.inject(AuthService);
+
+    try {
+      await authService.login(testUser.email, testUser.password);
+      testUser.id = auth.currentUser!.uid;
+      return;
+    } catch (error) {
+      console.log('login 1', error);
+    }
+    try {
+      await authService.register(testUser.email, testUser.password);
+      await authService.login(testUser.email, testUser.password);
+      testUser.id = auth.currentUser!.uid;
+    } catch (error) {
+      console.error('register', error);
+    }
+  }
+};
+
+export const signOut = async (TestBed: TestBedStatic) => {
+  const auth = TestBed.inject(Auth);
+  if (auth.currentUser) {
+    try {
+      const authService = TestBed.inject(AuthService);
+      await authService.logout();
+    } catch (e) {
+      console.log('signOut', e);
+    }
+  }
+  testUser.id = '';
+};

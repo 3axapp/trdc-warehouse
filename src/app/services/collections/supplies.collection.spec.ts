@@ -1,21 +1,33 @@
 import {TestBed} from '@angular/core/testing';
 import {SuppliesCollection} from './supplies.collection';
 import {provideZonelessChangeDetection} from '@angular/core';
-import {provideFirebaseAppTest, provideFirestoreTest} from '../../../tests/utils';
+import {
+  signOut,
+  provideAuthTest,
+  provideFirebaseAppTest,
+  provideFirestoreTest,
+  signupAndSignin,
+} from '../../../tests/utils';
 
 describe('SuppliesCollection', () => {
   let service: SuppliesCollection;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         provideFirebaseAppTest(),
         provideFirestoreTest(),
+        provideAuthTest(),
       ],
     });
+
+    await signupAndSignin(TestBed);
+
     service = TestBed.inject(SuppliesCollection);
   });
+
+  afterEach(async () => await signOut(TestBed));
 
   it('Создание сервиса', () => {
     expect(service).toBeTruthy();

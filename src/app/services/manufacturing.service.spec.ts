@@ -1,9 +1,15 @@
 import {TestBed} from '@angular/core/testing';
-import {ManufacturingService, Recipe} from './manufacturing.service';
+import {findReceiptPositions, ManufacturingService, Recipe} from './manufacturing.service';
 import {provideZonelessChangeDetection} from '@angular/core';
 import {PositionsCollection, PositionType} from './collections/positions.collection';
 import {QualityControlStatus, SuppliesCollection, Supply} from './collections/supplies.collection';
-import {clearFirestoreEmulator, provideFirebaseAppTest, provideFirestoreTest} from '../../tests/utils';
+import {
+  clearFirestoreEmulator, signOut,
+  provideAuthTest,
+  provideFirebaseAppTest,
+  provideFirestoreTest,
+  signupAndSignin,
+} from '../../tests/utils';
 import {doc, Firestore, getDoc} from '@angular/fire/firestore';
 import {ManufacturingProductionCollection} from './collections/manufacturing-production.collection';
 
@@ -29,8 +35,12 @@ describe('ManufacturingService', () => {
         provideZonelessChangeDetection(),
         provideFirebaseAppTest(),
         provideFirestoreTest(),
+        provideAuthTest(),
       ],
     });
+
+    await signupAndSignin(TestBed);
+
     service = TestBed.inject(ManufacturingService);
     firestore = TestBed.inject(Firestore);
     suppliesCollection = TestBed.inject(SuppliesCollection);
@@ -51,6 +61,8 @@ describe('ManufacturingService', () => {
       position.id = await positionService.add(position);
     }
   });
+
+  afterEach(async () => await signOut(TestBed));
 
   it('should be created', () => {
     expect(service).toBeTruthy();
@@ -92,24 +104,23 @@ describe('ManufacturingService', () => {
       },
     ];
 
-    let result = await service.getNextMaxQuantity(
-      {code:'code', items:[{code:'notexists', type: PositionType.Normal, quantity:3}]}
-    );
-    expect(receipt.id).toBeFalsy();
+    const recipe1: Recipe = {code:'code', items:[{code:'notexists', type: PositionType.Normal, quantity:3}]};
+    let result = await service.getNextMaxQuantity(recipe1);
+    expect(recipe1.id).toBeFalsy();
     expect(result.message).toEqual("Материал с кодом «notexists» не найден");
 
     for (const supply of supplies) {
       supply.id = await suppliesCollection.add(supply);
     }
 
-    result = await service.getNextMaxQuantity(receipt);
-
+    findReceiptPositions(receipt, positions);
     expect(receipt.id).toEqual(positions[0].id);
     expect(receipt.items[0].id).toEqual(positions[1].id);
     expect(receipt.items[1].id).toEqual(positions[3].id);
     expect(receipt.items[2].id).toEqual(positions[2].id);
     expect(receipt.items[3].id).toEqual(positions[4].id);
 
+    result = await service.getNextMaxQuantity(receipt);
     expect(result).toEqual({
       available: 0,
       message: 'Материал «Position 4» не поставлен',
@@ -133,6 +144,7 @@ describe('ManufacturingService', () => {
       supply.id = await suppliesCollection.add(supply);
     }
 
+    findReceiptPositions(receipt, positions);
     const result = await service.getNextMaxQuantity(receipt);
 
     expect(result).toEqual({
@@ -192,18 +204,19 @@ describe('ManufacturingService', () => {
       supply.id = await suppliesCollection.add(supply);
     }
 
+    findReceiptPositions(receipt, positions);
     const result = await service.getNextMaxQuantity(receipt);
 
     expect(result.available).toEqual(1);
 
-    await service.create(receipt, {executorId: '1', quantity: 1});
+    await service.create(receipt, {executorId: '1', quantity: 1, date: new Date('2025-01-01 10:10:11')});
 
     const suppliesState: Record<string, Supply> = {};
     for (const supply of await suppliesCollection.getList()) {
       suppliesState[supply.id] = supply;
     }
 
-    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_1_1_1_1_1_1')).then(d => d.exists()))
+    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_20250101_1_1_1_1_1_1_1')).then(d => d.exists()))
       .toBeResolvedTo(true);
     const newLots = Object.values(suppliesState).filter(i => i.positionId === positions[0].id);
     expect(newLots.length).toEqual(1);
@@ -257,13 +270,13 @@ describe('ManufacturingService', () => {
 
     const result2 = await service.getNextMaxQuantity(receipt);
     expect(result2.available).toEqual(1);
-    await expectAsync(service.create(receipt, {executorId: '2', quantity: 4}))
+    await expectAsync(service.create(receipt, {executorId: '2', quantity: 4, date: new Date('2025-01-01 10:10:11')}))
       .toBeRejectedWithError('Неправильное количество. Максимум 3');
-    await expectAsync(service.create(receipt, {executorId: '2', quantity: 2}))
+    await expectAsync(service.create(receipt, {executorId: '2', quantity: 2, date: new Date('2025-01-01 10:10:11')}))
       .toBeRejectedWithError('Ошибка: создается несколько лотов, а разрешено создавать только по одному');
 
-    await service.create(receipt, {executorId: '2', quantity: 1});
-    await service.create(receipt, {executorId: '2', quantity: 2});
+    await service.create(receipt, {executorId: '2', quantity: 1, date: new Date('2025-01-01 10:10:11')});
+    await service.create(receipt, {executorId: '2', quantity: 2, date: new Date('2025-01-01 10:10:11')});
 
     const suppliesState2: Record<string, Supply> = {};
     const supplies2 = await suppliesCollection.getList();
@@ -272,9 +285,9 @@ describe('ManufacturingService', () => {
       suppliesState2[supply.id] = supply;
     }
 
-    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_1_1_21_1_1_1')).then(d => d.exists()))
+    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_20250101_2_1_1_21_1_1_1')).then(d => d.exists()))
       .toBeResolvedTo(true);
-    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_21_21_21_1_1_1')).then(d => d.exists()))
+    await expectAsync(getDoc(doc(firestore, 'manufacturingLots', 'P001_20250101_2_21_21_21_1_1_1')).then(d => d.exists()))
       .toBeResolvedTo(true);
 
     await expectAsync(
@@ -283,15 +296,15 @@ describe('ManufacturingService', () => {
 
     const newLots2 = supplies2.filter(i => i.positionId === positions[0].id);
     expect(newLots2.length).toEqual(3);
-    expect(newLots2[0].manufacturingCode).toEqual('P001_21_21_21_1_1_1');
+    expect(newLots2[0].manufacturingCode).toEqual('P001_20250101_2_21_21_21_1_1_1');
     expect(newLots2[0].lot).toEqual(3);
     expect(newLots2[0].quantity).toEqual(2);
     expect(newLots2[0].brokenQuantity).toEqual(0);
     expect(newLots2[0].usedQuantity).toEqual(0);
-    expect(newLots2[1].manufacturingCode).toEqual('P001_1_1_21_1_1_1');
+    expect(newLots2[1].manufacturingCode).toEqual('P001_20250101_2_1_1_21_1_1_1');
     expect(newLots2[1].lot).toEqual(2);
     expect(newLots2[1].quantity).toEqual(1);
-    expect(newLots2[2].manufacturingCode).toEqual('P001_1_1_1_1_1_1');
+    expect(newLots2[2].manufacturingCode).toEqual('P001_20250101_1_1_1_1_1_1_1');
     expect(newLots2[2].lot).toEqual(1);
     expect(newLots2[2].quantity).toEqual(1);
 
