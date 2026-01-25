@@ -31,5 +31,6 @@ export const shipRecipe: Recipe = {
   ],
   extraFields: {
     recipient: true,
+    docNumber: true,
   },
 };

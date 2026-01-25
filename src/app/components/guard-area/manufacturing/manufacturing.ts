@@ -3,7 +3,7 @@ import {TuiAlertService, TuiButton, tuiDialog, TuiDialogService, TuiHintDirectiv
 import {PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
 import {Executor, ExecutorsCollection} from '../../../services/collections/executors.collection';
 import {
-  ExtraFields,
+  ExtraFieldKeys,
   findReceiptPositions,
   ManufacturingService,
   NextMaxQuantity,
@@ -61,15 +61,21 @@ export class Manufacturing implements OnInit {
   private readonly positions = inject(PositionsCollection);
   private readonly cache = inject(CacheService);
   private readonly alerts = inject(TuiAlertService);
-  private readonly recipe = inject(ActivatedRoute).snapshot.data['recipe'] as Recipe;
+  protected readonly recipe = inject(ActivatedRoute).snapshot.data['recipe'] as Recipe;
   private readonly dialogs = inject(TuiDialogService);
 
   protected block = signal(false);
   protected data = signal<ProductionItem[]>([]);
-  protected columns = ['date', 'executorId', 'lot', 'quantity', 'controls'];
+  protected columns = ['date', 'executorId', 'recipient', 'docNumber', 'lot', 'quantity', 'controls'];
 
   public async ngOnInit() {
     this.cache.add('executors', this.executors.getList());
+    if (!this.recipe.extraFields?.recipient) {
+      this.columns = this.columns.filter(v => v != 'recipient');
+    }
+    if (!this.recipe.extraFields?.docNumber) {
+      this.columns = this.columns.filter(v => v != 'docNumber');
+    }
     if (!this.recipe.id) {
       const list = await this.positions.getList();
       findReceiptPositions(this.recipe, list);
@@ -126,12 +132,12 @@ export class Manufacturing implements OnInit {
       }
       add(part, item.quantity * quantity, currentLot);
     }
-    const extraFields: Partial<Record<ExtraFields, { value: any }>> = {};
+    const extraFields: Partial<Record<ExtraFieldKeys, { value: any }>> = {};
     for (const [name, enable] of Object.entries(this.recipe.extraFields || {})) {
       if (!enable) {
         continue;
       }
-      extraFields[name as ExtraFields] = {value: (item as any)[name]};
+      extraFields[name as ExtraFieldKeys] = {value: (item as any)[name]};
     }
     this.showSuccess({usedLots, date: item.date, executorId: item.executorId, extraFields});
   }
@@ -143,12 +149,12 @@ export class Manufacturing implements OnInit {
       next: async (data) => {
         try {
           const usedLots = await this.manufacturing.create(this.recipe, data);
-          const extraFields: Partial<Record<ExtraFields, { value: any }>> = {};
+          const extraFields: Partial<Record<ExtraFieldKeys, { value: any }>> = {};
           for (const [name, enable] of Object.entries(this.recipe.extraFields || {})) {
             if (!enable) {
               continue;
             }
-            extraFields[name as ExtraFields] = {value: (data as any)[name]};
+            extraFields[name as ExtraFieldKeys] = {value: (data as any)[name]};
           }
           this.showSuccess({usedLots, date: data.date, executorId: data.executorId, extraFields});
           await this.load();

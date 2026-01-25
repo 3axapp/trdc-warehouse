@@ -21,7 +21,7 @@ import {
   TuiInputNumberDirective,
   TuiSelectDirective,
 } from '@taiga-ui/kit';
-import {ExtraFields, NextMaxQuantity} from '../../../../services/manufacturing.service';
+import {ExtraFieldKeys, ExtraFields, NextMaxQuantity} from '../../../../services/manufacturing.service';
 import {TuiDay, TuiTime} from '@taiga-ui/cdk';
 
 @Component({
@@ -81,6 +81,7 @@ export class ManufacturingForm {
       [Validators.required, Validators.min(1), Validators.max(this.data.availability.available)],
     ],
     recipient: [''],
+    docNumber: [''],
   });
 
   protected get data(): Options {
@@ -95,10 +96,12 @@ export class ManufacturingForm {
       date: this.form.value.date!,
       executorId: this.form.value.executor!.id,
       quantity: this.form.value.quantity!,
-      recipient: this.form.value.recipient,
     };
     if (this.data.extraFields?.recipient) {
       data.recipient = this.form.value.recipient;
+    }
+    if (this.data.extraFields?.docNumber) {
+      data.docNumber = this.form.value.docNumber;
     }
     this.context.completeWith(data);
   }
@@ -108,12 +111,11 @@ export interface Options {
   availability: NextMaxQuantity,
   executors: Executor[];
   result?: Result;
-  extraFields?: Record<ExtraFields, boolean>
+  extraFields?: Partial<Record<ExtraFieldKeys, boolean>>;
 }
 
-export interface Result {
+export interface Result extends ExtraFields{
   date: Date;
   executorId: string;
   quantity: number;
-  recipient?: string | null;
 }

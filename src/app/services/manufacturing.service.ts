@@ -73,8 +73,7 @@ export class ManufacturingService {
         throw new Error(`Неправильное количество. Максимум ${lotCombinations[0].quantity}`);
       }
 
-      await this.recordProduction(recipe, [lotCombinations[0]], availability.nextId,
-        data.executorId, data.date, data.recipient,
+      await this.recordProduction(recipe, [lotCombinations[0]], availability.nextId, data,
         transaction);
       await this.updateComponents(usedLots, transaction);
 
@@ -188,17 +187,16 @@ export class ManufacturingService {
   }
 
   private async recordProduction(
-    receipt: Recipe, lotCombinations: Combination[], nextId: number,
-    executorId: string, date: Date, recipient: string | null | undefined,
+    receipt: Recipe, lotCombinations: Combination[], nextId: number, data: Result,
     transaction: Transaction,
   ) {
     const productionRecords: ProductionRecord[] = [];
     const combinationDocs: { ref: DocumentReference, doc: DocumentSnapshot<DocumentData>, supply: Supply | null, parts: number[] }[] = [];
-    const idDate = date.toISOString().substring(0, 10).replaceAll('-', '');
+    const idDate = data.date.toISOString().substring(0, 10).replaceAll('-', '');
 
     for (const combination of lotCombinations) {
       const parts = combination.items.map(i => i.lot).filter(v => !!v) as number[];
-      const id = `${receipt.code}_${idDate}_${executorId}_${parts.join('_')}`;
+      const id = `${receipt.code}_${idDate}_${data.executorId}_${parts.join('_')}`;
       const ref = fireDoc(this.getLotCollection(), id);
       const doc = await transaction.get(ref);
       combinationDocs.push({
@@ -227,7 +225,7 @@ export class ManufacturingService {
           positionId: receipt.id!,
           // supplierId: string,
           manufacturingCode: ref.id,
-          date: date,
+          date: data.date,
           quantity,
           brokenQuantity: 0,
           usedQuantity: 0,
@@ -236,10 +234,10 @@ export class ManufacturingService {
         await transaction.set(ref, {id: supplyId});
       }
 
-      productionRecords.push({lot, supplyId, quantity, positionId: receipt.id!, parts, recipient});
+      productionRecords.push({lot, supplyId, quantity, positionId: receipt.id!, parts});
     }
 
-    this.recordProductionLog(productionRecords, executorId, date, transaction);
+    this.recordProductionLog(productionRecords, data, transaction);
   }
 
   private generateLotCombinations(receipt: Recipe, usedLots: Record<string, UsedLot[]>) {
@@ -260,14 +258,21 @@ export class ManufacturingService {
   }
 
   private recordProductionLog(
-    productionRecords: ProductionRecord[], executorId: string, date: Date, transaction: Transaction) {
+    productionRecords: ProductionRecord[], data: Result, transaction: Transaction) {
     for (const record of productionRecords) {
       const docRef = fireDoc(this.getProductionCollection());
-      transaction.set(docRef, {
+      const recordData = {
         ...record,
-        executorId,
-        date,
-      });
+        executorId: data.executorId,
+        date: data.date,
+      };
+      if (data.recipient) {
+        recordData.recipient = data.recipient;
+      }
+      if (data.docNumber) {
+        recordData.docNumber = data.docNumber;
+      }
+      transaction.set(docRef, recordData);
     }
   }
 
@@ -300,10 +305,8 @@ export interface Recipe {
   id?: string;
   code: string;
   items: RecipeItem[];
-  extraFields?: Record<ExtraFields, boolean>;
+  extraFields?: Partial<Record<ExtraFieldKeys, boolean>>;
 }
-
-export type ExtraFields = 'recipient';
 
 export interface RecipeItem {
   id?: string,
@@ -330,14 +333,20 @@ interface CombinationLot {
   id: string;
 }
 
-interface ProductionRecord {
+interface ProductionRecord extends ExtraFields {
   lot: number;
   positionId: string;
   parts: number[];
   supplyId: string;
   quantity: number;
-  recipient?: string | null;
 }
+
+export interface ExtraFields {
+  recipient?: string | null;
+  docNumber?: string | null;
+}
+
+export type ExtraFieldKeys = keyof ExtraFields;
 
 export interface NextMaxQuantity {
   message?: string;

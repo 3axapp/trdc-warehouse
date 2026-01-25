@@ -46,6 +46,17 @@
     </tui-textfield>
   }
 
+  @if (data.extraFields?.docNumber) {
+    <tui-textfield>
+      <label tuiLabel>Номер документа</label>
+
+      <input
+        tuiTextfield
+        formControlName="docNumber"
+      />
+    </tui-textfield>
+  }
+
   <footer>
     <button
       tuiButton
