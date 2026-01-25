@@ -4,6 +4,7 @@ import {TuiButton, TuiDialogContext, TuiTextfield} from '@taiga-ui/core';
 import {Supplier} from '../../../../services/collections/suppliers.collection';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {TuiCard} from '@taiga-ui/layout';
+import {Executor} from '../../../../services/collections/executors.collection';
 
 @Component({
   selector: 'app-executor-form',
@@ -18,12 +19,13 @@ import {TuiCard} from '@taiga-ui/layout';
 })
 export class ExecutorForm implements OnInit {
 
-  public readonly context = injectContext<TuiDialogContext<Partial<Supplier>, Supplier | undefined>>();
+  public readonly context = injectContext<TuiDialogContext<Partial<Executor>, Executor | undefined>>();
 
   private fb = inject(FormBuilder);
 
   public positionForm = this.fb.group({
     name: ['', [Validators.required]],
+    post: ['', [Validators.required]],
   });
 
   public ngOnInit(): void {
@@ -32,6 +34,7 @@ export class ExecutorForm implements OnInit {
     }
     this.positionForm.setValue({
       name: this.context.data.name,
+      post: this.context.data.post || '',
     });
   }
 
@@ -45,6 +48,7 @@ export class ExecutorForm implements OnInit {
     }
     this.context.completeWith({
       name: this.positionForm.value.name!,
+      post: this.positionForm.value.post!,
     });
   }
 }
