@@ -10,4 +10,5 @@ export class ExecutorsCollection extends AbstractCollection<Executor> {
 
 export interface Executor extends Deletable {
   name: string;
+  post: string;
 }

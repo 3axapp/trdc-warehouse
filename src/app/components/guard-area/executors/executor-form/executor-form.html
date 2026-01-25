@@ -4,9 +4,16 @@
   (ngSubmit)="submit()"
 >
   <tui-textfield>
-    <label tuiLabel>Название</label>
+    <label tuiLabel>ФИО</label>
     <input
       formControlName="name"
+      tuiTextfield
+    />
+  </tui-textfield>
+  <tui-textfield>
+    <label tuiLabel>Должность</label>
+    <input
+      formControlName="post"
       tuiTextfield
     />
   </tui-textfield>

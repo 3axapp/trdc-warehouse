@@ -41,6 +41,7 @@ export class Executors implements OnInit {
 
   protected columns = [
     'name',
+    'post',
     'actions',
   ];
 
@@ -117,7 +118,6 @@ export class Executors implements OnInit {
           await this.executors.add(data);
         }
         await this.load();
-        console.info(`Dialog emitted data = `, data);
       },
       complete: () => {
         console.info('Dialog closed');
