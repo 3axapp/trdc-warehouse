@@ -28,7 +28,6 @@ export class Positions implements OnInit {
   private readonly alerts = inject(TuiAlertService);
 
   protected columns = [
-    'id',
     'code',
     'name',
     'type',

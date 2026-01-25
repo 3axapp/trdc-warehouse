@@ -40,7 +40,6 @@ export class Suppliers implements OnInit {
   private readonly alerts = inject(TuiAlertService);
 
   protected columns = [
-    'id',
     'name',
     'actions',
   ];
