@@ -16,6 +16,7 @@
     <input
       tuiSelect
       formControlName="position"
+      [readOnly]="!!data?.usedQuantity || data?.qualityControlStatus == QualityControlStatus.Completed"
     />
 
     <tui-data-list-wrapper

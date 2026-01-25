@@ -60,12 +60,14 @@
             <tui-icon icon="@tui.archive-restore"></tui-icon>
           </button>
         } @else {
-          <button tuiButton type="button" tuiHint="Изменить" (click)="edit(item)">
-            <tui-icon icon="@tui.edit"></tui-icon>
-          </button>
-          <button tuiButton type="button" appearance="accent" tuiHint="Удалить" (click)="remove(item)">
-            <tui-icon icon="@tui.archive-x"></tui-icon>
-          </button>
+          @if (position?.type != PositionType.Produced) {
+            <button tuiButton type="button" tuiHint="Изменить" (click)="edit(item)">
+              <tui-icon icon="@tui.edit"></tui-icon>
+            </button>
+            <button tuiButton type="button" appearance="accent" tuiHint="Удалить" (click)="remove(item)">
+              <tui-icon icon="@tui.archive-x"></tui-icon>
+            </button>
+          }
         }
       </div>
     </td>

@@ -3,7 +3,7 @@ import {injectContext} from '@taiga-ui/polymorpheus';
 import {TuiButton, TuiCalendar, TuiDialogContext, tuiItemsHandlersProvider, TuiTextfield} from '@taiga-ui/core';
 import {Position, PositionsCollection, PositionType} from '../../../../services/collections/positions.collection';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Supply} from '../../../../services/collections/supplies.collection';
+import {QualityControlStatus, Supply} from '../../../../services/collections/supplies.collection';
 import {TuiChevron, TuiDataListWrapperComponent, TuiInputDate, TuiInputNumber, TuiSelectDirective} from '@taiga-ui/kit';
 import {TuiCardLarge} from '@taiga-ui/layout';
 import {Supplier, SuppliersCollection} from '../../../../services/collections/suppliers.collection';
@@ -56,6 +56,7 @@ export class SupplyForm implements OnInit {
     PositionType.Checked,
     PositionType.Produced,
   ];
+  protected QualityControlStatus = QualityControlStatus;
   protected min = 1;
 
   public ngOnInit(): void {
