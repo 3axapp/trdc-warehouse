@@ -49,6 +49,9 @@ export class ManufacturingService {
 
   public async create(recipe: Recipe, data: Result) {
     let result: UsedLot[] = [];
+    if (!recipe.id) {
+      throw new Error(`Неизвестный производимая позиция с кодом «${recipe.code}»`);
+    }
     await runTransaction(this.firestore, async (transaction) => {
       const availability = await this.getAvailability(recipe);
       if (!availability.available) {
@@ -70,7 +73,8 @@ export class ManufacturingService {
         throw new Error(`Неправильное количество. Максимум ${lotCombinations[0].quantity}`);
       }
 
-      await this.recordProduction(recipe, [lotCombinations[0]], availability.nextId, data.executorId, data.date,
+      await this.recordProduction(recipe, [lotCombinations[0]], availability.nextId,
+        data.executorId, data.date, data.recipient,
         transaction);
       await this.updateComponents(usedLots, transaction);
 
@@ -93,7 +97,7 @@ export class ManufacturingService {
 
     for (const supply of supplies) {
       const item = map[supply.positionId];
-      if (!item) {
+      if (!item || supply.deleted) {
         continue;
       }
       if (item.type === PositionType.Checked && supply.qualityControlStatus !== QualityControlStatus.Completed) {
@@ -184,7 +188,8 @@ export class ManufacturingService {
   }
 
   private async recordProduction(
-    receipt: Recipe, lotCombinations: Combination[], nextId: number, executorId: string, date: Date,
+    receipt: Recipe, lotCombinations: Combination[], nextId: number,
+    executorId: string, date: Date, recipient: string | null | undefined,
     transaction: Transaction,
   ) {
     const productionRecords: ProductionRecord[] = [];
@@ -231,7 +236,7 @@ export class ManufacturingService {
         await transaction.set(ref, {id: supplyId});
       }
 
-      productionRecords.push({lot, supplyId, quantity, positionId: receipt.id!, parts});
+      productionRecords.push({lot, supplyId, quantity, positionId: receipt.id!, parts, recipient});
     }
 
     this.recordProductionLog(productionRecords, executorId, date, transaction);
@@ -295,7 +300,10 @@ export interface Recipe {
   id?: string;
   code: string;
   items: RecipeItem[];
+  extraFields?: Record<ExtraFields, boolean>;
 }
+
+export type ExtraFields = 'recipient';
 
 export interface RecipeItem {
   id?: string,
@@ -328,6 +336,7 @@ interface ProductionRecord {
   parts: number[];
   supplyId: string;
   quantity: number;
+  recipient?: string | null;
 }
 
 export interface NextMaxQuantity {

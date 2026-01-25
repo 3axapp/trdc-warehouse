@@ -1,8 +1,9 @@
 import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
 import {TuiAlertService, TuiButton, tuiDialog, TuiDialogService, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
-import {Position, PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
+import {PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
 import {Executor, ExecutorsCollection} from '../../../services/collections/executors.collection';
 import {
+  ExtraFields,
   findReceiptPositions,
   ManufacturingService,
   NextMaxQuantity,
@@ -125,17 +126,31 @@ export class Manufacturing implements OnInit {
       }
       add(part, item.quantity * quantity, currentLot);
     }
-    this.showSuccess({usedLots, date: item.date, executorId: item.executorId});
+    const extraFields: Partial<Record<ExtraFields, { value: any }>> = {};
+    for (const [name, enable] of Object.entries(this.recipe.extraFields || {})) {
+      if (!enable) {
+        continue;
+      }
+      extraFields[name as ExtraFields] = {value: (item as any)[name]};
+    }
+    this.showSuccess({usedLots, date: item.date, executorId: item.executorId, extraFields});
   }
 
   private async showDialog(availability: NextMaxQuantity, executors: Executor[]) {
     const dialog = await this.lazyLoad();
 
-    dialog({executors, availability}).subscribe({
+    dialog({executors, availability, extraFields: this.recipe.extraFields}).subscribe({
       next: async (data) => {
         try {
           const usedLots = await this.manufacturing.create(this.recipe, data);
-          this.showSuccess({usedLots, date: data.date, executorId: data.executorId});
+          const extraFields: Partial<Record<ExtraFields, { value: any }>> = {};
+          for (const [name, enable] of Object.entries(this.recipe.extraFields || {})) {
+            if (!enable) {
+              continue;
+            }
+            extraFields[name as ExtraFields] = {value: (data as any)[name]};
+          }
+          this.showSuccess({usedLots, date: data.date, executorId: data.executorId, extraFields});
           await this.load();
         } catch (e: any) {
           this.alerts.open(e.message || e, {appearance: 'negative'}).subscribe();

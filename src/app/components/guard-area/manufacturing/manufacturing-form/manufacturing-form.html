@@ -8,7 +8,7 @@
       tuiInputDateTime
       formControlName="date"
     />
-    <tui-calendar *tuiTextfieldDropdown />
+    <tui-calendar *tuiTextfieldDropdown/>
   </tui-textfield>
 
   <tui-textfield tuiChevron>
@@ -34,6 +34,17 @@
       placeholder="Максимум: {{data.availability.available}}"
     />
   </tui-textfield>
+
+  @if (data.extraFields?.recipient) {
+    <tui-textfield>
+      <label tuiLabel>Получатель</label>
+
+      <input
+        tuiTextfield
+        formControlName="recipient"
+      />
+    </tui-textfield>
+  }
 
   <footer>
     <button

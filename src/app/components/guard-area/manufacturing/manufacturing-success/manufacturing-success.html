@@ -1,5 +1,8 @@
 <div>Дата: {{(data.executorId|executor|async)?.name}}</div>
 <div>Исполнитель: {{data.date|date}}</div>
+@if (data.extraFields?.recipient) {
+  <div>Получатель: {{data.extraFields!.recipient!.value}}</div>
+}
 <table
   tuiTable
   class="table table-striped table-hover"
