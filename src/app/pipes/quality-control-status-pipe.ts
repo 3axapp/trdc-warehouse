@@ -6,8 +6,8 @@ import {QualityControlStatus} from '../services/collections/supplies.collection'
 })
 export class QualityControlStatusPipe implements PipeTransform {
   private names = {
-    [QualityControlStatus.Pending]: 'Ожидает',
-    [QualityControlStatus.Completed]: 'Обработан',
+    [QualityControlStatus.Pending]: 'Ожидает контроля',
+    [QualityControlStatus.Completed]: 'Прошел контроль',
   };
 
   transform(value: QualityControlStatus): string {
