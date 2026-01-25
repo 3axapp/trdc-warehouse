@@ -1,3 +1,5 @@
+<div>Дата: {{(data.executorId|executor|async)?.name}}</div>
+<div>Исполнитель: {{data.date|date}}</div>
 <table
   tuiTable
   class="table table-striped table-hover"
@@ -13,8 +15,8 @@
   </thead>
   <tbody
     tuiTbody
-    [data]="data"
+    [data]="data.usedLots"
   >
-  <tr tuiTr *ngFor="let item of data"></tr>
+  <tr tuiTr *ngFor="let item of data.usedLots"></tr>
   </tbody>
 </table>
