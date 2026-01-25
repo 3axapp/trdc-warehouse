@@ -18,6 +18,12 @@
   <tr tuiThGroup>
     <th tuiTh>Дата производства</th>
     <th tuiTh>Исполнитель</th>
+    @if (recipe.extraFields?.recipient) {
+      <th tuiTh>Получатель</th>
+    }
+    @if (recipe.extraFields?.docNumber) {
+      <th tuiTh>Номер документа</th>
+    }
     <th tuiTh>Лот</th>
     <th tuiTh>Количество</th>
     <th tuiTh [maxWidth]="100">&nbsp;</th>

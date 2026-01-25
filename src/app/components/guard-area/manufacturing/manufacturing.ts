@@ -1,8 +1,9 @@
 import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
 import {TuiAlertService, TuiButton, tuiDialog, TuiDialogService, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
-import {Position, PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
+import {PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
 import {Executor, ExecutorsCollection} from '../../../services/collections/executors.collection';
 import {
+  ExtraFieldKeys,
   findReceiptPositions,
   ManufacturingService,
   NextMaxQuantity,
@@ -60,15 +61,21 @@ export class Manufacturing implements OnInit {
   private readonly positions = inject(PositionsCollection);
   private readonly cache = inject(CacheService);
   private readonly alerts = inject(TuiAlertService);
-  private readonly recipe = inject(ActivatedRoute).snapshot.data['recipe'] as Recipe;
+  protected readonly recipe = inject(ActivatedRoute).snapshot.data['recipe'] as Recipe;
   private readonly dialogs = inject(TuiDialogService);
 
   protected block = signal(false);
   protected data = signal<ProductionItem[]>([]);
-  protected columns = ['date', 'executorId', 'lot', 'quantity', 'controls'];
+  protected columns = ['date', 'executorId', 'recipient', 'docNumber', 'lot', 'quantity', 'controls'];
 
   public async ngOnInit() {
     this.cache.add('executors', this.executors.getList());
+    if (!this.recipe.extraFields?.recipient) {
+      this.columns = this.columns.filter(v => v != 'recipient');
+    }
+    if (!this.recipe.extraFields?.docNumber) {
+      this.columns = this.columns.filter(v => v != 'docNumber');
+    }
     if (!this.recipe.id) {
       const list = await this.positions.getList();
       findReceiptPositions(this.recipe, list);
@@ -125,17 +132,31 @@ export class Manufacturing implements OnInit {
       }
       add(part, item.quantity * quantity, currentLot);
     }
-    this.showSuccess({usedLots, date: item.date, executorId: item.executorId});
+    const extraFields: Partial<Record<ExtraFieldKeys, { value: any }>> = {};
+    for (const [name, enable] of Object.entries(this.recipe.extraFields || {})) {
+      if (!enable) {
+        continue;
+      }
+      extraFields[name as ExtraFieldKeys] = {value: (item as any)[name]};
+    }
+    this.showSuccess({usedLots, date: item.date, executorId: item.executorId, extraFields});
   }
 
   private async showDialog(availability: NextMaxQuantity, executors: Executor[]) {
     const dialog = await this.lazyLoad();
 
-    dialog({executors, availability}).subscribe({
+    dialog({executors, availability, extraFields: this.recipe.extraFields}).subscribe({
       next: async (data) => {
         try {
           const usedLots = await this.manufacturing.create(this.recipe, data);
-          this.showSuccess({usedLots, date: data.date, executorId: data.executorId});
+          const extraFields: Partial<Record<ExtraFieldKeys, { value: any }>> = {};
+          for (const [name, enable] of Object.entries(this.recipe.extraFields || {})) {
+            if (!enable) {
+              continue;
+            }
+            extraFields[name as ExtraFieldKeys] = {value: (data as any)[name]};
+          }
+          this.showSuccess({usedLots, date: data.date, executorId: data.executorId, extraFields});
           await this.load();
         } catch (e: any) {
           this.alerts.open(e.message || e, {appearance: 'negative'}).subscribe();

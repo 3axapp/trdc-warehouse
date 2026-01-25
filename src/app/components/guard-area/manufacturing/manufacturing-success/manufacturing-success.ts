@@ -5,6 +5,7 @@ import {UsedLot} from '../../../../services/manufacturing/combination';
 import {TuiTableDirective, TuiTableTbody, TuiTableTh, TuiTableThGroup, TuiTableTr} from '@taiga-ui/addon-table';
 import {AsyncPipe, DatePipe, NgFor} from '@angular/common';
 import {ExecutorPipe} from '../../../../pipes/executor-pipe';
+import {ExtraFieldKeys} from '../../../../services/manufacturing.service';
 
 @Component({
   selector: 'app-manufacturing-success',
@@ -37,4 +38,5 @@ export interface ManufacturingSuccessOptions {
   usedLots: UsedLot[];
   executorId: string;
   date: Date;
+  extraFields?: Partial<Record<ExtraFieldKeys, { value: any }>>;
 }

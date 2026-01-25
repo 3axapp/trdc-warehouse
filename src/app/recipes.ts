@@ -29,4 +29,8 @@ export const shipRecipe: Recipe = {
     {type: PositionType.Normal, code: 'label_ship', quantity: 1},
     {type: PositionType.Normal, code: 'box_ship', quantity: 1},
   ],
+  extraFields: {
+    recipient: true,
+    docNumber: true,
+  },
 };

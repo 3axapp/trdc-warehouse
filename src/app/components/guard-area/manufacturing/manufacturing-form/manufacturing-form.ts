@@ -16,11 +16,12 @@ import {TuiCardLarge} from '@taiga-ui/layout';
 import {
   TuiChevron,
   TuiDataListWrapperComponent,
-  TuiInputDateTime, tuiInputDateTimeOptionsProvider,
+  TuiInputDateTime,
+  tuiInputDateTimeOptionsProvider,
   TuiInputNumberDirective,
   TuiSelectDirective,
 } from '@taiga-ui/kit';
-import {NextMaxQuantity} from '../../../../services/manufacturing.service';
+import {ExtraFieldKeys, ExtraFields, NextMaxQuantity} from '../../../../services/manufacturing.service';
 import {TuiDay, TuiTime} from '@taiga-ui/cdk';
 
 @Component({
@@ -77,7 +78,10 @@ export class ManufacturingForm {
     executor: [null as unknown as Executor, [Validators.required]],
     quantity: [
       null as unknown as number,
-      [Validators.required, Validators.min(1), Validators.max(this.data.availability.available)]],
+      [Validators.required, Validators.min(1), Validators.max(this.data.availability.available)],
+    ],
+    recipient: [''],
+    docNumber: [''],
   });
 
   protected get data(): Options {
@@ -88,11 +92,18 @@ export class ManufacturingForm {
     if (this.form.invalid) {
       return;
     }
-    this.context.completeWith({
+    const data: Result = {
       date: this.form.value.date!,
       executorId: this.form.value.executor!.id,
       quantity: this.form.value.quantity!,
-    });
+    };
+    if (this.data.extraFields?.recipient) {
+      data.recipient = this.form.value.recipient;
+    }
+    if (this.data.extraFields?.docNumber) {
+      data.docNumber = this.form.value.docNumber;
+    }
+    this.context.completeWith(data);
   }
 }
 
@@ -100,9 +111,10 @@ export interface Options {
   availability: NextMaxQuantity,
   executors: Executor[];
   result?: Result;
+  extraFields?: Partial<Record<ExtraFieldKeys, boolean>>;
 }
 
-export interface Result {
+export interface Result extends ExtraFields{
   date: Date;
   executorId: string;
   quantity: number;
