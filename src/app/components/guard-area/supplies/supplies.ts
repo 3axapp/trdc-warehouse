@@ -61,7 +61,6 @@ export class Supplies implements OnInit {
   protected readonly QualityControlStatus = QualityControlStatus;
 
   protected columns = [
-    'id',
     'positionId',
     'positionCode',
     'supplierId',
