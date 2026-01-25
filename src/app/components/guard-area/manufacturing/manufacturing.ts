@@ -28,7 +28,7 @@ import {
 import {CacheService} from '../../../services/cache.service';
 import {ExecutorPipe} from '../../../pipes/executor-pipe';
 import {ActivatedRoute} from '@angular/router';
-import {ManufacturingSuccess} from './manufacturing-success/manufacturing-success';
+import {ManufacturingSuccess, ManufacturingSuccessOptions} from './manufacturing-success/manufacturing-success';
 import {UsedLot} from '../../../services/manufacturing/combination';
 
 @Component({
@@ -125,7 +125,7 @@ export class Manufacturing implements OnInit {
       }
       add(part, item.quantity * quantity, currentLot);
     }
-    this.showSuccess(usedLots);
+    this.showSuccess({usedLots, date: item.date, executorId: item.executorId});
   }
 
   private async showDialog(availability: NextMaxQuantity, executors: Executor[]) {
@@ -135,7 +135,7 @@ export class Manufacturing implements OnInit {
       next: async (data) => {
         try {
           const usedLots = await this.manufacturing.create(this.recipe, data);
-          this.showSuccess(usedLots);
+          this.showSuccess({usedLots, date: data.date, executorId: data.executorId});
           await this.load();
         } catch (e: any) {
           this.alerts.open(e.message || e, {appearance: 'negative'}).subscribe();
@@ -165,12 +165,12 @@ export class Manufacturing implements OnInit {
       await this.manufacturingProduction.getList().then(list => list.filter(i => i.positionId == this.recipe.id)));
   }
 
-  private showSuccess(usedLots: UsedLot[]) {
+  private showSuccess(options: ManufacturingSuccessOptions) {
     const dialog = tuiDialog(ManufacturingSuccess, {
       injector: this.injector,
       dismissible: true,
       label: 'Снова успех! Материалы',
     });
-    dialog(usedLots).subscribe();
+    dialog(options).subscribe();
   }
 }
