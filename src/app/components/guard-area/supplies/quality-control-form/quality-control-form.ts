@@ -45,7 +45,6 @@ export class QualityControlForm {
   protected form = this.fb.group({
     qualityControlDate: [null as unknown as TuiDay, [Validators.required]],
     brokenQuantity: [null as unknown as number, [Validators.required]],
-    lot: [null as unknown as number, [Validators.required]],
   });
 
   protected async submit() {
@@ -55,7 +54,6 @@ export class QualityControlForm {
     }
 
     const approveData = {
-      lot: this.form.value.lot!,
       brokenQuantity: this.form.value.brokenQuantity!,
       qualityControlDate: this.form.value.qualityControlDate!.toUtcNativeDate(),
     };

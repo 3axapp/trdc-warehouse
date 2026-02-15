@@ -101,7 +101,7 @@ export class Manufacturing implements OnInit {
 
   protected showParts(item: ProductionItem) {
     const usedLots: UsedLot[] = [];
-    const add = (part: RecipeItem, quantity: number, lot?: number) => {
+    const add = (part: RecipeItem, quantity: number, lot?: string | number) => {
       usedLots.push({
         supplyId: '',
         taken: quantity,
@@ -119,7 +119,7 @@ export class Manufacturing implements OnInit {
       }
 
       let quantity = 0;
-      let currentLot: number | undefined;
+      let currentLot: string | number | undefined;
       for (let j = 0; j < part.quantity; j++) {
         const lot = item.parts[itemPartPosition];
         if (currentLot && currentLot != lot) {

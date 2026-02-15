@@ -42,7 +42,7 @@ export interface Supply extends Deletable {
   qualityControlDate?: Date;
   qualityControlUserId?: string;
   qualityControlStatus?: QualityControlStatus;
-  lot?: number;
+  lot?: string | number;
   manufacturingCode?: string;
 }
 

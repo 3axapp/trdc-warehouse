@@ -92,11 +92,17 @@ export class SupplyForm implements OnInit {
     if (this.form.invalid) {
       return;
     }
+    const date = this.form.value.date!;
+    const mm = String(date.month + 1).padStart(2, '0');
+    const yy = String(date.year).slice(-2);
+    const lot = `${this.form.value.position!.code}-${mm}${yy}`;
+
     this.context.completeWith({
       positionId: this.form.value.position!.id,
       supplierId: this.form.value.supplier!.id,
       quantity: this.form.value.quantity!,
-      date: this.form.value.date!.toUtcNativeDate(),
+      date: date.toUtcNativeDate(),
+      lot,
     });
   }
 }

@@ -1,6 +1,6 @@
 export interface UsedLot {
   supplyId: string;
-  lot?: number;
+  lot?: string | number;
   name?: string;
   taken: number;
   originalTaken: number;
@@ -13,7 +13,7 @@ export interface Combination {
 
 interface SupplyInfo {
   supplyId: string;
-  lot: number|undefined;
+  lot: string | number | undefined;
 }
 
 export function generateCombinations(cells: string[], usedLots: Record<string, UsedLot[]>): Combination[] {

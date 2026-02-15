@@ -19,7 +19,6 @@ describe('QualityControlService', () => {
   let service: QualityControlService;
   let firestore: Firestore;
   let position1Id: string;
-  let position2Id: string;
   let supplies: SuppliesCollection;
 
   beforeAll(async () => {
@@ -47,9 +46,6 @@ describe('QualityControlService', () => {
       position1Id = await positions.add(
         {code: 'quality_control_position', name: 'quality_control_position', type: PositionType.Checked},
       );
-      position2Id = await positions.add(
-        {code: 'quality_control_position2', name: 'quality_control_position2', type: PositionType.Checked},
-      );
     }
   });
 
@@ -76,7 +72,6 @@ describe('QualityControlService', () => {
     await service.approve(supply, {
       qualityControlDate: new Date('2025-01-01 00:10:00'),
       brokenQuantity: 1,
-      lot: 1,
     });
     await expectAsync(supplies.get(id)).toBeResolvedTo({
       id,
@@ -87,66 +82,12 @@ describe('QualityControlService', () => {
       date: new Date('2025-01-01 00:00:10'),
       qualityControlDate: new Date('2025-01-01 00:10:00'),
       brokenQuantity: 1,
-      lot: 1,
       qualityControlStatus: QualityControlStatus.Completed,
       qualityControlUserId: testUser.id,
     });
   });
 
-  it('Уникальность лота', async () => {
-    const firstSupplyId = await supplies.add({
-      positionId: position1Id,
-      supplierId: 'supplierId',
-      quantity: 20,
-      brokenQuantity: 0,
-      usedQuantity: 0,
-      date: new Date('2025-01-01 00:00:20'),
-    });
-    const firstSupply = await supplies.get(firstSupplyId);
-    await service.approve(firstSupply, {
-      qualityControlDate: new Date('2025-01-01 00:20:00'),
-      brokenQuantity: 1,
-      lot: 2,
-    });
-
-    const secondSupplyId = await supplies.add({
-      positionId: position1Id,
-      supplierId: 'supplierId',
-      quantity: 20,
-      brokenQuantity: 0,
-      usedQuantity: 0,
-      date: new Date('2025-01-01 00:00:20'),
-    });
-    const secondSupply = await supplies.get(secondSupplyId);
-    await expectAsync(service.approve(secondSupply, {
-      qualityControlDate: new Date('2025-01-01 00:20:00'),
-      brokenQuantity: 0,
-      lot: 2,
-    })).toBeRejectedWithError('Лот поставки позиции не уникален');
-
-    const firstSupplySecondPositionId = await supplies.add({
-      positionId: position2Id,
-      supplierId: 'supplierId',
-      quantity: 20,
-      brokenQuantity: 0,
-      usedQuantity: 0,
-      date: new Date('2025-01-01 00:00:20'),
-    });
-    let firstSupplySecondPosition = await supplies.get(firstSupplySecondPositionId);
-    await service.approve(firstSupplySecondPosition, {
-      qualityControlDate: new Date('2025-01-01 00:20:00'),
-      brokenQuantity: 1,
-      lot: 2,
-    });
-    firstSupplySecondPosition = await supplies.get(firstSupplySecondPositionId);
-    expect(firstSupplySecondPosition.qualityControlStatus).toEqual(QualityControlStatus.Completed);
-    expect(firstSupplySecondPosition.qualityControlDate).toEqual(new Date('2025-01-01 00:20:00'));
-    expect(firstSupplySecondPosition.brokenQuantity).toEqual(1);
-    expect(firstSupplySecondPosition.lot).toEqual(2);
-    expect(firstSupplySecondPosition.qualityControlUserId).toEqual(testUser.id);
-  });
-
-  it('Количестыо брака', async () => {
+  it('Количество брака', async () => {
     const supply = {quantity: 10} as Supply;
     const error = 'Неправильно количество брака';
     await expectAsync(service.approve(supply, {brokenQuantity: 20} as ApproveData)).toBeRejectedWithError(error);

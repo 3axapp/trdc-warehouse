@@ -68,6 +68,10 @@ Packing and shipment routes reuse the same manufacturing component, differing on
 - Supply position cannot be changed after QC approval or partial use
 - Quantity validation: available = total − broken − used
 
+## Quality Gates
+- **All tests must pass** before considering any task complete. Run `ng test --no-watch` after making changes and fix any failures.
+- **Build must succeed** — run `ng build` to verify there are no compilation errors.
+
 ## Code Style
 - 2-space indentation, single quotes for TypeScript, UTF-8
 - Angular schematics generate SCSS for component styles

@@ -92,7 +92,7 @@ export class ManufacturingService {
       map[item.id] = {type: item.type!, quantity: 0, supplies: []};
     }
 
-    supplies = supplies.sort((a, b) => (a.lot || 0) - (b.lot || 0));
+    supplies = supplies.sort((a, b) => String(a.lot || '').localeCompare(String(b.lot || '')));
 
     for (const supply of supplies) {
       const item = map[supply.positionId];
@@ -136,7 +136,7 @@ export class ManufacturingService {
       available = Math.min(available, itemAvailable);
     }
 
-    const nextId = Math.max(...(supplies[receipt.id!].supplies.map(i => i.lot!)), 0);
+    const nextId = Math.max(...(supplies[receipt.id!].supplies.map(i => i.lot as number || 0)), 0);
 
     delete supplies[receipt.id!];
 
@@ -191,11 +191,11 @@ export class ManufacturingService {
     transaction: Transaction,
   ) {
     const productionRecords: ProductionRecord[] = [];
-    const combinationDocs: { ref: DocumentReference, doc: DocumentSnapshot<DocumentData>, supply: Supply | null, parts: number[] }[] = [];
+    const combinationDocs: { ref: DocumentReference, doc: DocumentSnapshot<DocumentData>, supply: Supply | null, parts: (string | number)[] }[] = [];
     const idDate = data.date.toISOString().substring(0, 10).replaceAll('-', '');
 
     for (const combination of lotCombinations) {
-      const parts = combination.items.map(i => i.lot).filter(v => !!v) as number[];
+      const parts = combination.items.map(i => i.lot).filter(v => !!v) as (string | number)[];
       const id = `${receipt.code}_${idDate}_${data.executorId}_${parts.join('_')}`;
       const ref = fireDoc(this.getLotCollection(), id);
       const doc = await transaction.get(ref);
@@ -212,7 +212,7 @@ export class ManufacturingService {
       const quantity = combination.quantity!;
       const {ref, doc, supply, parts} = combinationDocs[i];
 
-      const lot = supply ? supply.lot! : ++nextId;
+      const lot = (supply ? supply.lot! : ++nextId) as number;
 
       if (doc.exists()) {
         const combination = doc.data() as CombinationLot;
@@ -336,7 +336,7 @@ interface CombinationLot {
 interface ProductionRecord extends ExtraFields {
   lot: number;
   positionId: string;
-  parts: number[];
+  parts: (string | number)[];
   supplyId: string;
   quantity: number;
 }

@@ -280,7 +280,7 @@ describe('ManufacturingService', () => {
 
     const suppliesState2: Record<string, Supply> = {};
     const supplies2 = await suppliesCollection.getList();
-    supplies2.sort((a, b) => (b.lot || 0) - (a.lot || 0));
+    supplies2.sort((a, b) => String(b.lot || '').localeCompare(String(a.lot || '')));
     for (const supply of supplies2) {
       suppliesState2[supply.id] = supply;
     }
