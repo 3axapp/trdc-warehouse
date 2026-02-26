@@ -26,6 +26,7 @@ export class Layout {
   private readonly router = inject(Router);
 
   protected readonly urls = [
+    {route: 'quarantine', title: 'Карантин'},
     {route: '', title: 'Склад'},
     {route: 'manufacturing', title: 'Производство'},
     {route: 'packing', title: 'Упаковка'},

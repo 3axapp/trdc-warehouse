@@ -1,0 +1,105 @@
+<form [formGroup]="form"
+      tuiCardLarge
+      (ngSubmit)="submit()">
+
+  <tui-textfield>
+    <label tuiLabel>Дата счёта</label>
+    <input
+      tuiInputDate
+      formControlName="date"
+    />
+    <tui-calendar *tuiTextfieldDropdown/>
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Номер счёта</label>
+    <input
+      tuiTextfield
+      formControlName="number"
+    />
+  </tui-textfield>
+
+  <tui-textfield tuiChevron>
+    <label tuiLabel>Поставщик</label>
+    <input
+      tuiSelect
+      formControlName="supplier"
+    />
+    <tui-data-list-wrapper
+      *tuiTextfieldDropdown
+      new
+      [items]="suppliers()"
+    />
+  </tui-textfield>
+
+  <table
+    tuiTable
+    class="items-table"
+    [columns]="tableColumns"
+  >
+    <thead>
+    <tr tuiThGroup>
+      <th tuiTh>Комплектующее</th>
+      <th tuiTh [style.width.px]="160">Количество</th>
+      <th tuiTh [style.width.px]="48"></th>
+    </tr>
+    </thead>
+    <tbody tuiTbody [data]="items.controls">
+    <tr tuiTr *ngFor="let row of items.controls; let i = index" [formGroup]="row">
+      <td *tuiCell="'position'" tuiTd>
+        <tui-textfield tuiChevron>
+          <input
+            tuiSelect
+            formControlName="position"
+          />
+          <tui-data-list-wrapper
+            *tuiTextfieldDropdown
+            new
+            [items]="positions()"
+          />
+        </tui-textfield>
+      </td>
+      <td *tuiCell="'quantity'" tuiTd>
+        <tui-textfield>
+          <input
+            tuiInputNumber
+            formControlName="quantity"
+            [min]="1"
+          />
+        </tui-textfield>
+      </td>
+      <td *tuiCell="'remove'" tuiTd>
+        <button
+          tuiIconButton
+          type="button"
+          iconStart="@tui.trash-2"
+          appearance="secondary-destructive"
+          size="xs"
+          (click)="removeItem(i)"
+        ></button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <button
+    tuiButton
+    type="button"
+    size="s"
+    appearance="secondary"
+    iconStart="@tui.plus"
+    (click)="addItem()"
+  >
+    Добавить
+  </button>
+
+  <footer>
+    <button
+      tuiButton
+      type="submit"
+      [disabled]="!isFormValid()"
+    >
+      Сохранить
+    </button>
+  </footer>
+</form>

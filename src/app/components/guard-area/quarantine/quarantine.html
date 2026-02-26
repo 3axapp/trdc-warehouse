@@ -1,0 +1,69 @@
+<button
+  tuiButton
+  iconEnd="@tui.plus"
+  type="button"
+  size="m"
+  (click)="add()"
+>
+  Новый счёт
+</button>
+
+<table
+  tuiTable
+  class="table"
+  [style.width.%]="100"
+  [columns]="columns"
+>
+  <thead>
+  <tr tuiThGroup>
+    <th tuiTh [style.width.px]="40"></th>
+    <th tuiTh>Номер счёта</th>
+    <th tuiTh>Лот</th>
+    <th tuiTh>Дата</th>
+    <th tuiTh>Поставщик</th>
+    <th tuiTh [maxWidth]="80" [minWidth]="80">&nbsp;</th>
+  </tr>
+  </thead>
+  <tbody tuiTbody [data]="data()">
+  <ng-container *ngFor="let invoice of data()">
+    <tr tuiTr>
+      <td *tuiCell="'expand'" tuiTd class="expand-cell">
+        <tui-icon
+          icon="@tui.chevron-right"
+          class="expand-icon"
+          [class.expand-icon_open]="isExpanded(invoice.id)"
+          (click)="toggleExpand(invoice.id)"
+        />
+      </td>
+      <td *tuiCell="'number'" tuiTd>{{ invoice.number }}</td>
+      <td *tuiCell="'lot'" tuiTd>{{ invoice.lot }}</td>
+      <td *tuiCell="'date'" tuiTd>{{ invoice.date | date : 'shortDate' }}</td>
+      <td *tuiCell="'supplier'" tuiTd>{{ (invoice.supplierId | supplier | async)?.name }}</td>
+      <td *tuiCell="'actions'" tuiTd>
+        <button tuiButton type="button" appearance="accent" tuiHint="Удалить" (click)="remove(invoice)">
+          <tui-icon icon="@tui.archive-x"></tui-icon>
+        </button>
+      </td>
+    </tr>
+    <tui-table-expand [expanded]="isExpanded(invoice.id)">
+      @for (item of invoice.items; track $index) {
+        <tr tuiTr class="detail-row">
+          <td tuiTd [attr.colspan]="columns.length-1" class="detail-cell">
+            <div class="detail-items">
+                <div class="detail-item">
+                  <span class="detail-item__name">{{ (item.positionId | position | async)?.name }}</span>
+                  <span class="detail-item__qty">{{ item.quantity }} шт.</span>
+                </div>
+            </div>
+          </td>
+          <td tuiTd class="detail-cell">
+            <button tuiButton type="button" tuiHint="Обработать" (click)="qualityControl(item)">
+              <tui-icon icon="@tui.notebook-pen"></tui-icon>
+            </button>
+          </td>
+        </tr>
+      }
+    </tui-table-expand>
+  </ng-container>
+  </tbody>
+</table>
