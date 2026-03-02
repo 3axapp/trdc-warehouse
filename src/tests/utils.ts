@@ -11,6 +11,12 @@ export const testUser = {
   password: 'test@unit.email',
 };
 
+export const testUser2 = {
+  id: '',
+  email: 'test2@unit.email',
+  password: 'test2@unit.email',
+};
+
 export async function clearFirestoreEmulator(): Promise<void> {
   try {
     const response = await fetch(
@@ -44,22 +50,22 @@ export const provideAuthTest = () => provideAuth(() => {
   connectAuthEmulator(auth, 'http://localhost:9099');
   return auth;
 });
-export const signupAndSignin = async (TestBed: TestBedStatic) => {
+export const signupAndSignin = async (TestBed: TestBedStatic, user = testUser) => {
   const auth = TestBed.inject(Auth);
   if (!auth.currentUser) {
     const authService = TestBed.inject(AuthService);
 
     try {
-      await authService.login(testUser.email, testUser.password);
-      testUser.id = auth.currentUser!.uid;
+      await authService.login(user.email, user.password);
+      user.id = auth.currentUser!.uid;
       return;
     } catch (error) {
       console.log('login 1', error);
     }
     try {
-      await authService.register(testUser.email, testUser.password);
-      await authService.login(testUser.email, testUser.password);
-      testUser.id = auth.currentUser!.uid;
+      await authService.register(user.email, user.password);
+      await authService.login(user.email, user.password);
+      user.id = auth.currentUser!.uid;
     } catch (error) {
       console.error('register', error);
     }
@@ -77,4 +83,5 @@ export const signOut = async (TestBed: TestBedStatic) => {
     }
   }
   testUser.id = '';
+  testUser2.id = '';
 };

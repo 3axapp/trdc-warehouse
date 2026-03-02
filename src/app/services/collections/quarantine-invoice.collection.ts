@@ -49,6 +49,8 @@ export class QuarantineInvoiceCollection extends AbstractCollection<QuarantineIn
 export interface QuarantineInvoiceItem {
   positionId: string;
   quantity: number;
+  usedQuantity?: number;
+  brokenQuantity?: number;
 }
 
 export interface QuarantineInvoice extends Deletable {

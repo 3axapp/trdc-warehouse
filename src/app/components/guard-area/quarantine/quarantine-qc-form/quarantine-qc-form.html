@@ -2,28 +2,39 @@
       tuiCardLarge
       (ngSubmit)="submit()">
 
+  <p class="position-name">{{ context.data.positionName }}</p>
+
   <tui-textfield>
     <label tuiLabel>Дата</label>
     <input
       tuiInputDate
-      formControlName="qualityControlDate"
+      formControlName="date"
     />
     <tui-calendar *tuiTextfieldDropdown/>
   </tui-textfield>
 
   <tui-textfield>
-    <label tuiLabel>Брак</label>
-
+    <label tuiLabel>Принято (макс. {{ context.data.maxQuantity }})</label>
     <input
       tuiInputNumber
-      [max]="context.data!.quantity"
-      [min]="0"
-      [step]="1"
-      formControlName="brokenQuantity"
+      formControlName="quantity"
+      [min]="1"
     />
   </tui-textfield>
 
-  <tui-error [error]="error()"></tui-error>
+  <tui-textfield>
+    <label tuiLabel>Брак</label>
+    <input
+      tuiInputNumber
+      formControlName="brokenQuantity"
+      [min]="0"
+    />
+  </tui-textfield>
+
+  <tui-error
+    *ngIf="totalError"
+    [error]="'Принято + брак не может превышать ' + context.data.maxQuantity"
+  />
 
   <footer>
     <button

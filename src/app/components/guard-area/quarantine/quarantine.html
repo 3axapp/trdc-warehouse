@@ -48,18 +48,20 @@
     <tui-table-expand [expanded]="isExpanded(invoice.id)">
       @for (item of invoice.items; track $index) {
         <tr tuiTr class="detail-row">
-          <td tuiTd [attr.colspan]="columns.length-1" class="detail-cell">
-            <div class="detail-items">
-                <div class="detail-item">
-                  <span class="detail-item__name">{{ (item.positionId | position | async)?.name }}</span>
-                  <span class="detail-item__qty">{{ item.quantity }} шт.</span>
-                </div>
+          <td tuiTd [attr.colspan]="columns.length - 1" class="detail-cell">
+            <div class="detail-item">
+              <span class="detail-item__name">{{ (item.positionId | position | async)?.name }}</span>
+              <span class="detail-item__qty">
+                осталось {{ remaining(item) }} / {{ item.quantity }} шт.
+              </span>
             </div>
           </td>
           <td tuiTd class="detail-cell">
-            <button tuiButton type="button" tuiHint="Обработать" (click)="qualityControl(item)">
-              <tui-icon icon="@tui.notebook-pen"></tui-icon>
-            </button>
+            @if (remaining(item) > 0) {
+              <button tuiButton type="button" tuiHint="Контроль качества" (click)="qualityControl(invoice, item)">
+                <tui-icon icon="@tui.notebook-pen"></tui-icon>
+              </button>
+            }
           </td>
         </tr>
       }
