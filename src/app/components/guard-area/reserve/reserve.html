@@ -1,0 +1,53 @@
+<button
+  tuiButton
+  iconEnd="@tui.plus"
+  type="button"
+  size="m"
+  (click)="add()"
+>
+  Добавить
+</button>
+
+<table
+  tuiTable
+  class="table"
+  [style.width.%]="100"
+  [columns]="columns"
+>
+  <thead>
+  <tr tuiThGroup>
+    <th tuiTh [style.width.px]="40"></th>
+    <th tuiTh>Дата и время резерва</th>
+    <th tuiTh>Количество</th>
+  </tr>
+  </thead>
+  <tbody tuiTbody [data]="data()">
+  <ng-container *ngFor="let reserve of data()">
+    <tr tuiTr>
+      <td *tuiCell="'expand'" tuiTd class="expand-cell">
+        <tui-icon
+          icon="@tui.chevron-right"
+          class="expand-icon"
+          [class.expand-icon_open]="isExpanded(reserve.id)"
+          (click)="toggleExpand(reserve.id)"
+        />
+      </td>
+      <td *tuiCell="'date'" tuiTd>{{ reserve.date | date : 'short' }}</td>
+      <td *tuiCell="'quantity'" tuiTd>{{ reserve.quantity }}</td>
+    </tr>
+    <tui-table-expand [expanded]="isExpanded(reserve.id)">
+      @for (item of reserve.items; track $index) {
+        <tr tuiTr class="detail-row">
+          <td tuiTd [attr.colspan]="columns.length" class="detail-cell">
+            <div class="detail-item">
+              <span class="detail-item__name">{{ item.name ?? item.positionId }}</span>
+              <span class="detail-item__lot" tuiHint="Лот">{{ item.lot }}</span>
+              <span class="detail-item__qty">{{ item.quantity }} шт.</span>
+            </div>
+          </td>
+        </tr>
+      }
+    </tui-table-expand>
+  </ng-container>
+  </tbody>
+</table>

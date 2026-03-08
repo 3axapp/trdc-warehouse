@@ -74,7 +74,6 @@ describe('ManufacturingService', () => {
         id: '', positionId: positions[1].id, quantity: 10,
         date: new Date('2025-01-03'),
         supplierId: '',
-        brokenQuantity: 0,
         usedQuantity: 0,
         lot: 2,
         qualityControlStatus: QualityControlStatus.Completed,
@@ -83,7 +82,6 @@ describe('ManufacturingService', () => {
         id: '', positionId: positions[1].id, quantity: 10,
         date: new Date('2025-01-02'),
         supplierId: '',
-        brokenQuantity: 3,
         usedQuantity: 2,
         lot: 1,
         qualityControlStatus: QualityControlStatus.Completed,
@@ -92,14 +90,12 @@ describe('ManufacturingService', () => {
         id: '', positionId: positions[2].id, quantity: 7,
         date: new Date('2025-01-01'),
         supplierId: '',
-        brokenQuantity: 0,
         usedQuantity: 0,
       },
       {
         id: '', positionId: positions[4].id, quantity: 70,
         date: new Date('2024-01-01'),
         supplierId: '',
-        brokenQuantity: 0,
         usedQuantity: 0,
       },
     ];
@@ -133,7 +129,6 @@ describe('ManufacturingService', () => {
         id: '', positionId: positions[1].id, quantity: 1,
         date: new Date('2025-01-03'),
         supplierId: '',
-        brokenQuantity: 0,
         usedQuantity: 0,
         lot: 2,
         qualityControlStatus: QualityControlStatus.Completed,
@@ -159,7 +154,6 @@ describe('ManufacturingService', () => {
         id: '', positionId: positions[1].id, quantity: 10,
         date: new Date('2025-01-03'),
         supplierId: '',
-        brokenQuantity: 0,
         usedQuantity: 1,
         lot: 21,
         qualityControlStatus: QualityControlStatus.Completed,
@@ -168,7 +162,6 @@ describe('ManufacturingService', () => {
         id: '', positionId: positions[1].id, quantity: 10,
         date: new Date('2025-01-02'),
         supplierId: '',
-        brokenQuantity: 3,
         usedQuantity: 2,
         lot: 1,
         qualityControlStatus: QualityControlStatus.Completed,
@@ -177,7 +170,6 @@ describe('ManufacturingService', () => {
         id: '', positionId: positions[2].id, quantity: 9,
         date: new Date('2025-01-01'),
         supplierId: '',
-        brokenQuantity: 0,
         usedQuantity: 0,
         lot: 1,
         qualityControlStatus: QualityControlStatus.Completed,
@@ -186,7 +178,6 @@ describe('ManufacturingService', () => {
         id: '', positionId: positions[3].id, quantity: 9,
         date: new Date('2024-12-31'),
         supplierId: '',
-        brokenQuantity: 0,
         usedQuantity: 0,
         lot: 1,
         qualityControlStatus: QualityControlStatus.Completed,
@@ -195,7 +186,6 @@ describe('ManufacturingService', () => {
         id: '', positionId: positions[4].id, quantity: 70,
         date: new Date('2024-01-01'),
         supplierId: '',
-        brokenQuantity: 0,
         usedQuantity: 0,
       },
     ];
@@ -222,38 +212,32 @@ describe('ManufacturingService', () => {
     expect(newLots.length).toEqual(1);
     expect(newLots[0].lot).toEqual(1);
     expect(newLots[0].quantity).toEqual(1);
-    expect(newLots[0].brokenQuantity).toEqual(0);
     expect(newLots[0].usedQuantity).toEqual(0);
 
     const expectedState = [
       {
         id: supplies[0].id,
         quantity: supplies[0].quantity,
-        brokenQuantity: supplies[0].brokenQuantity,
         usedQuantity: supplies[0].usedQuantity,
       },
       {
         id: supplies[1].id,
         quantity: supplies[1].quantity,
-        brokenQuantity: supplies[1].brokenQuantity,
         usedQuantity: supplies[1].usedQuantity + 3,
       },
       {
         id: supplies[2].id,
         quantity: supplies[2].quantity,
-        brokenQuantity: supplies[2].brokenQuantity,
         usedQuantity: supplies[2].usedQuantity + 2,
       },
       {
         id: supplies[3].id,
         quantity: supplies[3].quantity,
-        brokenQuantity: supplies[3].brokenQuantity,
         usedQuantity: supplies[3].usedQuantity + 1,
       },
       {
         id: supplies[4].id,
         quantity: supplies[4].quantity,
-        brokenQuantity: supplies[4].brokenQuantity,
         usedQuantity: supplies[4].usedQuantity + 1,
       },
     ];
@@ -263,7 +247,6 @@ describe('ManufacturingService', () => {
       expect({
         id: state.id,
         quantity: state.quantity,
-        brokenQuantity: state.brokenQuantity,
         usedQuantity: state.usedQuantity,
       }).toEqual(expectedItem);
     }
@@ -299,7 +282,6 @@ describe('ManufacturingService', () => {
     expect(newLots2[0].manufacturingCode).toEqual('P001_20250101_2_21_21_21_1_1_1');
     expect(newLots2[0].lot).toEqual(3);
     expect(newLots2[0].quantity).toEqual(2);
-    expect(newLots2[0].brokenQuantity).toEqual(0);
     expect(newLots2[0].usedQuantity).toEqual(0);
     expect(newLots2[1].manufacturingCode).toEqual('P001_20250101_2_1_1_21_1_1_1');
     expect(newLots2[1].lot).toEqual(2);
@@ -312,31 +294,26 @@ describe('ManufacturingService', () => {
       {
         id: supplies[0].id,
         quantity: supplies[0].quantity,
-        brokenQuantity: supplies[0].brokenQuantity,
         usedQuantity: supplies[0].usedQuantity + 3 + 3 + 1,
       },
       {
         id: supplies[1].id,
         quantity: supplies[1].quantity,
-        brokenQuantity: supplies[1].brokenQuantity,
         usedQuantity: supplies[1].usedQuantity + 3 + 2,
       },
       {
         id: supplies[2].id,
         quantity: supplies[2].quantity,
-        brokenQuantity: supplies[2].brokenQuantity,
         usedQuantity: supplies[2].usedQuantity + 2 + 2 + 2 + 2,
       },
       {
         id: supplies[3].id,
         quantity: supplies[3].quantity,
-        brokenQuantity: supplies[3].brokenQuantity,
         usedQuantity: supplies[3].usedQuantity + 1 + 1 + 1 + 1,
       },
       {
         id: supplies[4].id,
         quantity: supplies[4].quantity,
-        brokenQuantity: supplies[4].brokenQuantity,
         usedQuantity: supplies[4].usedQuantity + 1 + 1 + 1 + 1,
       },
     ];
@@ -346,7 +323,6 @@ describe('ManufacturingService', () => {
       expect({
         id: state.id,
         quantity: state.quantity,
-        brokenQuantity: state.brokenQuantity,
         usedQuantity: state.usedQuantity,
       }).toEqual(expectedItem);
     }

@@ -10,6 +10,7 @@ export class SuppliesCollection extends AbstractCollection<Supply> {
 
   public override async getList(
     orderField: string = 'date', orderDirection: OrderByDirection = 'desc'): Promise<Supply[]> {
+    console.log(orderDirection)
     return super.getList(orderField, orderDirection);
   }
 
@@ -37,7 +38,6 @@ export interface Supply extends Deletable {
   supplierId?: string;
   date: Date;
   quantity: number;
-  brokenQuantity: number;
   usedQuantity: number;
   qualityControlDate?: Date;
   qualityControlUserId?: string;

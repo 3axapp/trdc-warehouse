@@ -60,7 +60,6 @@ describe('QualityControlService', () => {
       positionId: position1Id,
       supplierId: 'supplierId',
       quantity: 10,
-      brokenQuantity: 0,
       usedQuantity: 0,
       date: new Date('2025-01-01 00:00:10'),
     });
@@ -81,7 +80,6 @@ describe('QualityControlService', () => {
       usedQuantity: 0,
       date: new Date('2025-01-01 00:00:10'),
       qualityControlDate: new Date('2025-01-01 00:10:00'),
-      brokenQuantity: 1,
       qualityControlStatus: QualityControlStatus.Completed,
       qualityControlUserId: testUser.id,
     });

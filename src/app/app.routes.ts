@@ -9,6 +9,7 @@ import {Executors} from './components/guard-area/executors/executors';
 import {Manufacturing} from './components/guard-area/manufacturing/manufacturing';
 import {chipRecipe, packRecipe, shipRecipe} from './recipes';
 import {Quarantine} from './components/guard-area/quarantine/quarantine';
+import {ReserveComponent} from './components/guard-area/reserve/reserve';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['login']);
 const redirectLoggedInToItems = () => redirectLoggedInTo(['']);
@@ -22,6 +23,7 @@ export const routes: Routes = [
     children: [
       {path: 'quarantine', component: Quarantine},
       {path: '', component: Supplies},
+      {path: 'reserve', component: ReserveComponent},
       {path: 'shipments', component: Manufacturing, data: {recipe: shipRecipe}},
       {path: 'packing', component: Manufacturing, data: {recipe: packRecipe}},
       {path: 'manufacturing', component: Manufacturing, data: {recipe: chipRecipe}},

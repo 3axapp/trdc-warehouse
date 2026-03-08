@@ -50,7 +50,7 @@ export class ManufacturingService {
   public async create(recipe: Recipe, data: Result) {
     let result: UsedLot[] = [];
     if (!recipe.id) {
-      throw new Error(`Неизвестный производимая позиция с кодом «${recipe.code}»`);
+      throw new Error(`Неизвестная производимая позиция с кодом «${recipe.code}»`);
     }
     await runTransaction(this.firestore, async (transaction) => {
       const availability = await this.getAvailability(recipe);
@@ -92,7 +92,7 @@ export class ManufacturingService {
       map[item.id] = {type: item.type!, quantity: 0, supplies: []};
     }
 
-    supplies = supplies.sort((a, b) => String(a.lot || '').localeCompare(String(b.lot || '')));
+    supplies = supplies.sort((a, b) => +a.date - +b. date);
 
     for (const supply of supplies) {
       const item = map[supply.positionId];
@@ -103,7 +103,7 @@ export class ManufacturingService {
         continue;
       }
 
-      item.quantity += supply.quantity - supply.usedQuantity - supply.brokenQuantity;
+      item.quantity += supply.quantity - supply.usedQuantity;
       item.supplies.push(supply);
     }
     return map;
@@ -112,6 +112,7 @@ export class ManufacturingService {
   private calculateAvailability(receipt: Recipe, supplies: ReceiptSupplies): AvailabilityResult {
     let available = Number.MAX_SAFE_INTEGER;
     let message;
+    console.log(supplies)
 
     for (const item of receipt.items) {
       if (!item.id) {
@@ -163,7 +164,7 @@ export class ManufacturingService {
           break;
         }
 
-        const takeAmount = Math.min(component.quantity - component.brokenQuantity - component.usedQuantity,
+        const takeAmount = Math.min(component.quantity - component.usedQuantity,
           remainingToTake);
 
         if (takeAmount > 0) {
@@ -227,7 +228,6 @@ export class ManufacturingService {
           manufacturingCode: ref.id,
           date: data.date,
           quantity,
-          brokenQuantity: 0,
           usedQuantity: 0,
           lot,
         }, transaction);

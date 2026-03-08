@@ -1,0 +1,24 @@
+<form [formGroup]="form"
+      tuiCardLarge
+      (ngSubmit)="submit()">
+
+  <tui-textfield>
+    <label tuiLabel>Количество (макс. {{ context.data.available }})</label>
+    <input
+      tuiInputNumber
+      formControlName="quantity"
+      [min]="1"
+      [max]="context.data.available"
+    />
+  </tui-textfield>
+
+  <footer>
+    <button
+      tuiButton
+      type="submit"
+      [disabled]="form.invalid"
+    >
+      Зарезервировать
+    </button>
+  </footer>
+</form>

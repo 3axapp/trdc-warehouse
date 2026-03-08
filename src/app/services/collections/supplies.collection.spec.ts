@@ -38,7 +38,6 @@ describe('SuppliesCollection', () => {
       positionId: 'positionId',
       date: new Date('2025-01-01 00:00:00'),
       quantity: 12,
-      brokenQuantity: 0,
       usedQuantity: 0,
       qualityControlDate: new Date('2025-01-01 00:01:00'),
     });
@@ -47,7 +46,6 @@ describe('SuppliesCollection', () => {
       positionId: 'positionId',
       date: new Date('2025-01-01 00:00:00'),
       quantity: 12,
-      brokenQuantity: 0,
       usedQuantity: 0,
       qualityControlDate: new Date('2025-01-01 00:01:00'),
     });

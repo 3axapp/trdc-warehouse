@@ -28,6 +28,7 @@ export class Layout {
   protected readonly urls = [
     {route: 'quarantine', title: 'Карантин'},
     {route: '', title: 'Склад'},
+    {route: 'reserve', title: 'Резерв'},
     {route: 'manufacturing', title: 'Производство'},
     {route: 'packing', title: 'Упаковка'},
     {route: 'shipments', title: 'Отгрузка'},
