@@ -162,7 +162,7 @@ describe('ManufacturingService', () => {
         id: '', positionId: positions[1].id, quantity: 10,
         date: new Date('2025-01-02'),
         supplierId: '',
-        usedQuantity: 2,
+        usedQuantity: 5,
         lot: 1,
         qualityControlStatus: QualityControlStatus.Completed,
       },
