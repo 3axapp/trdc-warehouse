@@ -2,11 +2,12 @@ import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
 import {TuiTable} from '@taiga-ui/addon-table';
 import {Position, PositionsCollection} from '../../../services/collections/positions.collection';
 import {TuiAlertService, TuiButton, tuiDialog, TuiHint, TuiIcon} from '@taiga-ui/core';
-import {Observable, switchMap} from 'rxjs';
+import {switchMap} from 'rxjs';
 import {NgForOf} from '@angular/common';
 import {PositionTypePipe} from '../../../pipes/position-type-pipe';
 import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
 import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
+import {PositionForm} from './position-form/position-form';
 
 @Component({
   selector: 'app-positions',
@@ -97,7 +98,11 @@ export class Positions implements OnInit {
   }
 
   protected async showDialog(position?: Position): Promise<void> {
-    const dialog = await this.lazyLoad(position);
+    const dialog = tuiDialog(PositionForm, {
+      injector: this.injector,
+      dismissible: true,
+      label: position ? 'Изменить' : 'Добавить',
+    });
 
     dialog(position).subscribe({
       next: async (data) => {
@@ -107,16 +112,6 @@ export class Positions implements OnInit {
       complete: () => {
         console.info('Dialog closed');
       },
-    });
-  }
-
-  private async lazyLoad(position?: Position): Promise<(position?: Position) => Observable<Position>> {
-    const {PositionForm} = await import('./position-form/position-form');
-
-    return tuiDialog(PositionForm, {
-      injector: this.injector,
-      dismissible: true,
-      label: position ? 'Изменить' : 'Добавить',
     });
   }
 

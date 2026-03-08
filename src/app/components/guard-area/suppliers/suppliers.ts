@@ -1,6 +1,6 @@
 import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {NgForOf} from "@angular/common";
-import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from "@taiga-ui/core";
+import {NgForOf} from '@angular/common';
+import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -9,11 +9,12 @@ import {
   TuiTableTh,
   TuiTableThGroup,
   TuiTableTr,
-} from "@taiga-ui/addon-table";
+} from '@taiga-ui/addon-table';
 import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
 import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
-import {Observable, switchMap} from 'rxjs';
+import {switchMap} from 'rxjs';
 import {Supplier, SuppliersCollection} from '../../../services/collections/suppliers.collection';
+import {SupplierForm} from './supplier-form/supplier-form';
 
 @Component({
   selector: 'app-suppliers',
@@ -107,7 +108,11 @@ export class Suppliers implements OnInit {
   }
 
   protected async showDialog(supplier?: Supplier): Promise<void> {
-    const dialog = await this.lazyLoad(supplier);
+    const dialog = tuiDialog(SupplierForm, {
+      injector: this.injector,
+      dismissible: true,
+      label: supplier ? 'Изменить' : 'Добавить',
+    });
 
     dialog(supplier).subscribe({
       next: async (data) => {
@@ -122,16 +127,6 @@ export class Suppliers implements OnInit {
       complete: () => {
         console.info('Dialog closed');
       },
-    });
-  }
-
-  private async lazyLoad(supplier?: Supplier): Promise<(supplier?: Supplier) => Observable<Supplier>> {
-    const {SupplierForm} = await import('./supplier-form/supplier-form');
-
-    return tuiDialog(SupplierForm, {
-      injector: this.injector,
-      dismissible: true,
-      label: supplier ? 'Изменить' : 'Добавить',
     });
   }
 

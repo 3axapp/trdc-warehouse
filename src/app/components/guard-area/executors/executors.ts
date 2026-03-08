@@ -2,7 +2,7 @@ import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
 import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
 import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
 import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
-import {Observable, switchMap} from 'rxjs';
+import {switchMap} from 'rxjs';
 import {Executor, ExecutorsCollection} from '../../../services/collections/executors.collection';
 import {NgForOf} from '@angular/common';
 import {
@@ -14,6 +14,7 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
+import {ExecutorForm} from './executor-form/executor-form';
 
 @Component({
   selector: 'app-executors',
@@ -108,7 +109,11 @@ export class Executors implements OnInit {
   }
 
   protected async showDialog(executor?: Executor): Promise<void> {
-    const dialog = await this.lazyLoad(executor);
+    const dialog = tuiDialog(ExecutorForm, {
+      injector: this.injector,
+      dismissible: true,
+      label: executor ? 'Изменить' : 'Добавить',
+    });
 
     dialog(executor).subscribe({
       next: async (data) => {
@@ -122,16 +127,6 @@ export class Executors implements OnInit {
       complete: () => {
         console.info('Dialog closed');
       },
-    });
-  }
-
-  private async lazyLoad(executor?: Executor): Promise<(supplier?: Executor) => Observable<Executor>> {
-    const {ExecutorForm} = await import('./executor-form/executor-form');
-
-    return tuiDialog(ExecutorForm, {
-      injector: this.injector,
-      dismissible: true,
-      label: executor ? 'Изменить' : 'Добавить',
     });
   }
 

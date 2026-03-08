@@ -18,7 +18,7 @@ import {Supplier} from '../../../../services/collections/suppliers.collection';
 })
 export class SupplierForm implements OnInit {
 
-  public readonly context = injectContext<TuiDialogContext<Partial<Supplier>, Supplier | undefined>>();
+  public readonly context = injectContext<TuiDialogContext<Omit<Supplier, 'id'>, Supplier | undefined>>();
 
   private fb = inject(FormBuilder);
 

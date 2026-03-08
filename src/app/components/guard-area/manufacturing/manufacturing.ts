@@ -10,8 +10,7 @@ import {
   Recipe,
   RecipeItem,
 } from '../../../services/manufacturing.service';
-import {Observable} from 'rxjs';
-import {Options, Result} from './manufacturing-form/manufacturing-form';
+import {ManufacturingForm} from './manufacturing-form/manufacturing-form';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -143,7 +142,11 @@ export class Manufacturing implements OnInit {
   }
 
   private async showDialog(availability: NextMaxQuantity, executors: Executor[]) {
-    const dialog = await this.lazyLoad();
+    const dialog = tuiDialog(ManufacturingForm, {
+      injector: this.injector,
+      dismissible: true,
+      label: 'Создать',
+    });
 
     dialog({executors, availability, extraFields: this.recipe.extraFields}).subscribe({
       next: async (data) => {
@@ -165,16 +168,6 @@ export class Manufacturing implements OnInit {
       complete: () => {
         this.block.set(false);
       },
-    });
-  }
-
-  private async lazyLoad(): Promise<(options: Options) => Observable<Result>> {
-    const {ManufacturingForm} = await import('./manufacturing-form/manufacturing-form');
-
-    return tuiDialog(ManufacturingForm, {
-      injector: this.injector,
-      dismissible: true,
-      label: 'Создать',
     });
   }
 

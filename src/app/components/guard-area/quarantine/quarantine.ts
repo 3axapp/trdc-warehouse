@@ -1,7 +1,7 @@
 import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
 import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
 import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
-import {Observable, switchMap} from 'rxjs';
+import {switchMap} from 'rxjs';
 import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
 import {
   QuarantineInvoice,
@@ -25,6 +25,7 @@ import {CacheService} from '../../../services/cache.service';
 import {Position, PositionsCollection} from '../../../services/collections/positions.collection';
 import {SuppliersCollection} from '../../../services/collections/suppliers.collection';
 import {QuarantineQcService} from '../../../services/quarantine-qc.service';
+import {QuarantineInvoiceForm} from './quarantine-invoice-form/quarantine-invoice-form';
 
 @Component({
   selector: 'app-quarantine',
@@ -89,7 +90,11 @@ export class Quarantine implements OnInit {
   }
 
   protected async add(): Promise<void> {
-    const dialog = await this.lazyLoadInvoiceForm();
+    const dialog = tuiDialog(QuarantineInvoiceForm, {
+      injector: this.injector,
+      dismissible: true,
+      label: 'Новый счёт',
+    });
     dialog(undefined).subscribe({
       next: async (data) => {
         try {
@@ -154,16 +159,6 @@ export class Quarantine implements OnInit {
         return this.alerts.open('Счёт удалён');
       }))
       .subscribe();
-  }
-
-  private async lazyLoadInvoiceForm(): Promise<(data: undefined) => Observable<Omit<QuarantineInvoice, 'id'>>> {
-    const {QuarantineInvoiceForm} = await import('./quarantine-invoice-form/quarantine-invoice-form');
-
-    return tuiDialog(QuarantineInvoiceForm, {
-      injector: this.injector,
-      dismissible: true,
-      label: 'Новый счёт',
-    });
   }
 
   private async load(): Promise<void> {

@@ -19,7 +19,7 @@ import {Executor} from '../../../../services/collections/executors.collection';
 })
 export class ExecutorForm implements OnInit {
 
-  public readonly context = injectContext<TuiDialogContext<Partial<Executor>, Executor | undefined>>();
+  public readonly context = injectContext<TuiDialogContext<Omit<Executor, 'id'>, Executor | undefined>>();
 
   private fb = inject(FormBuilder);
 
