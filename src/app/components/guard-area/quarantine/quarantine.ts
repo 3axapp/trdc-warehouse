@@ -1,5 +1,5 @@
 import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
+import {TuiAlertService, TuiButton, tuiDialog, TuiHint, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
 import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
 import {switchMap} from 'rxjs';
 import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
@@ -34,6 +34,7 @@ import {QuarantineInvoiceForm} from './quarantine-invoice-form/quarantine-invoic
     NgForOf,
     TuiHintDirective,
     TuiIcon,
+    TuiHint,
     TuiTableCell,
     TuiTableDirective,
     TuiTableExpand,
@@ -87,6 +88,10 @@ export class Quarantine implements OnInit {
 
   protected remaining(item: QuarantineInvoiceItem): number {
     return item.quantity - (item.usedQuantity ?? 0);
+  }
+
+  protected broken(item: QuarantineInvoiceItem): number {
+    return (item.brokenQuantity ?? 0);
   }
 
   protected async add(): Promise<void> {

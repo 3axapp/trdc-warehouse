@@ -51,9 +51,9 @@
           <td tuiTd [attr.colspan]="columns.length - 1" class="detail-cell">
             <div class="detail-item">
               <span class="detail-item__name">{{ (item.positionId | position | async)?.name }}</span>
-              <span class="detail-item__qty">
-                осталось {{ remaining(item) }} / {{ item.quantity }} шт.
-              </span>
+              <span class="detail-item__remaining" tuiHint="Осталось">{{ remaining(item) }}</span> /
+              <span class="detail-item__broken" tuiHint="Брак">{{ broken(item) }}</span> /
+              <span class="detail-item__total" tuiHint="Всего">{{ item.quantity }}</span> шт.
             </div>
           </td>
           <td tuiTd class="detail-cell">

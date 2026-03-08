@@ -29,10 +29,25 @@
   gap: 1rem;
   align-items: center;
   padding: 0.125rem 0;
-}
 
-.detail-item__name {
-  flex: 1;
+  &__name {
+    flex: 1;
+  }
+
+  &__remaining {
+    color: var(--tui-text-secondary);
+    white-space: nowrap;
+  }
+
+  &__broken {
+    color: var(--tui-text-negative);
+    white-space: nowrap;
+  }
+
+  &__total {
+    color: var(--tui-text-secondary);
+    white-space: nowrap;
+  }
 }
 
 .detail-item__qty {
