@@ -28,7 +28,9 @@ export class ReserveForm {
   });
 
   protected submit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      return;
+    }
     this.context.completeWith(this.form.value.quantity!);
   }
 }

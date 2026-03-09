@@ -74,10 +74,13 @@ Packing and shipment routes reuse the same manufacturing component, differing on
 
 ## Code Style
 - 2-space indentation, single quotes for TypeScript, UTF-8
+- Always use curly braces for `if`, `for`, `while` etc. — even single-line bodies (`curly: all`)
+- All class members must have explicit access modifiers (`public`/`protected`/`private`)
 - Angular schematics generate SCSS for component styles
 - Icons from [Lucide](https://lucide.dev/icons/)
 - Domain terms (UI labels, docs, comments) in Russian; code identifiers in English
 - Component prefix: `app`
+- Full style reference: `docs/code_style.md`
 
 ## Firebase
 - Project: `trdc-warehouse-0x3`
