@@ -80,7 +80,7 @@ export class QuarantineQcService {
         transaction.set(supplyRef, {
           positionId: position.id,
           supplierId: invoice.supplierId,
-          date,
+          date: invoice.date,
           quantity,
           usedQuantity: 0,
           qualityControlStatus: QualityControlStatus.Completed,
