@@ -1,10 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Position, PositionType } from './collections/positions.collection';
-import {
-  QualityControlStatus,
-  SuppliesCollection,
-  Supply,
-} from './collections/supplies.collection';
+import { SuppliesCollection, Supply } from './collections/supplies.collection';
 import { Result } from '../components/guard-area/manufacturing/manufacturing-form/manufacturing-form';
 import {
   collection,
@@ -17,7 +13,13 @@ import {
   Transaction,
 } from '@angular/fire/firestore';
 import { DocumentData } from '@firebase/firestore';
-import { Combination, generateCombinations, UsedLot } from './manufacturing/combination';
+import { Combination, UsedLot } from './manufacturing/combination';
+import {
+  generateLotCombinations,
+  getAvailability,
+  getNextMaxQuantity,
+  reserveComponents,
+} from './manufacturing/supply-planning';
 
 @Injectable({
   providedIn: 'root',
@@ -30,24 +32,8 @@ export class ManufacturingService {
   private manufacturingProductionCollectionName = 'manufacturingProduction';
 
   public async getNextMaxQuantity(receipt: Recipe): Promise<NextMaxQuantity> {
-    const availability = await this.getAvailability(receipt);
-    if (!availability.available) {
-      return {
-        available: availability.available,
-        message: availability.message,
-      };
-    }
-    const usedLots = this.reserveComponents(receipt, availability.supplies, availability.available);
-    const lotCombinations = this.generateLotCombinations(receipt, usedLots);
-
-    return { available: lotCombinations[0].quantity };
-  }
-
-  private async getAvailability(recipe: Recipe): Promise<AvailabilityResult> {
     const supplies = await this.supplies.getList();
-    const receiptSupplies = this.filterReceiptSupplies(recipe, supplies);
-
-    return this.calculateAvailability(recipe, receiptSupplies);
+    return getNextMaxQuantity(receipt, supplies);
   }
 
   public async create(recipe: Recipe, data: Result) {
@@ -56,7 +42,8 @@ export class ManufacturingService {
       throw new Error(`Неизвестная производимая позиция с кодом «${recipe.code}»`);
     }
     await runTransaction(this.firestore, async (transaction) => {
-      const availability = await this.getAvailability(recipe);
+      const supplies = await this.supplies.getList();
+      const availability = await getAvailability(recipe, supplies);
       if (!availability.available) {
         throw new Error(`Неправильное количество. Максимум 0`);
       }
@@ -67,8 +54,8 @@ export class ManufacturingService {
         throw new Error(`Неправильное количество. Максимум ${availability.available}`);
       }
 
-      const usedLots = this.reserveComponents(recipe, availability.supplies, data.quantity);
-      const lotCombinations = this.generateLotCombinations(recipe, usedLots);
+      const usedLots = reserveComponents(recipe, availability.supplies, data.quantity);
+      const lotCombinations = generateLotCombinations(recipe, usedLots);
       if (lotCombinations.length !== 1) {
         throw new Error(
           `Ошибка: создается несколько лотов, а разрешено создавать только по одному`,
@@ -91,121 +78,6 @@ export class ManufacturingService {
     });
 
     return result;
-  }
-
-  private filterReceiptSupplies(receipt: Recipe, supplies: Supply[]) {
-    const map: ReceiptSupplies = {
-      [receipt.id!]: { type: PositionType.Produced, quantity: 0, supplies: [] },
-    };
-    for (const item of receipt.items) {
-      if (!item.id) {
-        continue;
-      }
-      map[item.id] = { type: item.type!, quantity: 0, supplies: [] };
-    }
-
-    supplies = supplies.sort((a, b) => +a.date - +b.date);
-
-    for (const supply of supplies) {
-      const item = map[supply.positionId];
-      if (!item || supply.deleted) {
-        continue;
-      }
-      if (
-        item.type === PositionType.Checked &&
-        supply.qualityControlStatus !== QualityControlStatus.Completed
-      ) {
-        continue;
-      }
-
-      item.quantity += supply.quantity - supply.usedQuantity;
-      item.supplies.push(supply);
-    }
-    return map;
-  }
-
-  private calculateAvailability(receipt: Recipe, supplies: ReceiptSupplies): AvailabilityResult {
-    let available = Number.MAX_SAFE_INTEGER;
-    let message;
-    console.log(supplies);
-
-    for (const item of receipt.items) {
-      if (!item.id) {
-        available = 0;
-        message = `Материал с кодом «${item.code}» не найден`;
-        break;
-      }
-
-      if (!supplies[item.id]?.quantity) {
-        available = 0;
-        message = `Материал «${item.name!}» не поставлен`;
-        break;
-      }
-
-      const itemSupplies = supplies[item.id];
-      const itemAvailable = Math.floor(itemSupplies.quantity / item.quantity);
-      if (!itemAvailable) {
-        available = 0;
-        message = `Недостаточно материала «${item.name!}» (${itemSupplies.quantity} из ${item.quantity})`;
-        break;
-      }
-      available = Math.min(available, itemAvailable);
-    }
-
-    const nextId = Math.max(
-      ...supplies[receipt.id!].supplies.map((i) => (i.lot as number) || 0),
-      0,
-    );
-
-    delete supplies[receipt.id!];
-
-    return {
-      available,
-      supplies,
-      message,
-      nextId,
-    };
-  }
-
-  private reserveComponents(
-    receipt: Recipe,
-    componentsData: ReceiptSupplies,
-    quantityToProduce: number,
-  ) {
-    const usedLots: Record<string, UsedLot[]> = {};
-
-    for (const item of receipt.items) {
-      usedLots[item.id!] = [];
-      let remainingToTake = quantityToProduce * item.quantity;
-
-      // Проходим по всем доступным лотам компонента
-      const components = componentsData[item.id!].supplies;
-
-      for (const component of components) {
-        if (remainingToTake <= 0) {
-          break;
-        }
-
-        const takeAmount = Math.min(component.quantity - component.usedQuantity, remainingToTake);
-
-        if (takeAmount > 0) {
-          // Сохраняем информацию о взятом количестве из каждого лота
-          usedLots[item.id!].push({
-            supplyId: component.id,
-            lot: component.lot!,
-            taken: takeAmount,
-            name: item.name,
-            originalTaken: takeAmount, // Сохраняем для возможного использования
-          });
-
-          // Уменьшаем количество в данных компонентов
-          component.quantity -= takeAmount;
-          remainingToTake -= takeAmount;
-        }
-      }
-    }
-
-    return usedLots;
   }
 
   private async recordProduction(
@@ -274,15 +146,6 @@ export class ManufacturingService {
     }
 
     this.recordProductionLog(productionRecords, data, transaction);
-  }
-
-  private generateLotCombinations(receipt: Recipe, usedLots: Record<string, UsedLot[]>) {
-    const cells: string[] = [];
-    for (const item of receipt.items) {
-      cells.push(...Array(item.quantity).fill(item.id!));
-    }
-
-    return generateCombinations(cells, usedLots);
   }
 
   private getLotCollection() {
@@ -357,22 +220,6 @@ export interface RecipeItem {
   name?: string;
   code: string;
   quantity: number;
-}
-
-type ReceiptSupplies = Record<
-  string,
-  {
-    quantity: number;
-    type: PositionType;
-    supplies: Supply[];
-  }
->;
-
-export interface AvailabilityResult {
-  nextId: number;
-  available: number;
-  supplies: ReceiptSupplies;
-  message?: string;
 }
 
 interface CombinationLot {

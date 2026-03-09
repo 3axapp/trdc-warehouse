@@ -174,8 +174,9 @@ describe('ReserveService', () => {
       for (const code of chipCodes) {
         await addSupply(code, 20, 0, 2, new Date('2025-01-02'));
       }
+
       await expectAsync(service.createReserve(30)).toBeRejectedWithError(
-        'Неправильное количество. Максимум 20',
+        'Ошибка: резервируется для нескольких лотов, а разрешено резервировать только для одного за раз',
       );
     });
 

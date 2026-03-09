@@ -1,19 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import { Firestore, increment, runTransaction } from '@angular/fire/firestore';
-import {
-  QualityControlStatus,
-  SuppliesCollection,
-  Supply,
-} from './collections/supplies.collection';
+import { SuppliesCollection } from './collections/supplies.collection';
 import { Reserve, ReserveCollection, ReserveItem } from './collections/reserve.collection';
 import { PositionsCollection } from './collections/positions.collection';
-import {
-  findReceiptPositions,
-  ManufacturingService,
-  NextMaxQuantity,
-} from './manufacturing.service';
+import { findReceiptPositions, NextMaxQuantity } from './manufacturing.service';
 import { chipRecipe } from '../recipes';
-import { UsedLot } from './manufacturing/combination';
+import {
+  generateLotCombinations,
+  getAvailability,
+  getNextMaxQuantity,
+  reserveComponents,
+} from './manufacturing/supply-planning';
 
 @Injectable({
   providedIn: 'root',
@@ -23,24 +20,35 @@ export class ReserveService {
   private readonly supplies = inject(SuppliesCollection);
   private readonly reserves = inject(ReserveCollection);
   private readonly positions = inject(PositionsCollection);
-  private readonly manufacturing = inject(ManufacturingService);
 
   public async getMaxQuantity(): Promise<NextMaxQuantity> {
     await this.ensureRecipeLoaded();
-    return this.manufacturing.getNextMaxQuantity(chipRecipe);
+    const allSupplies = await this.supplies.getList();
+
+    return getNextMaxQuantity(chipRecipe, allSupplies);
   }
 
   public async createReserve(quantity: number): Promise<void> {
     await this.ensureRecipeLoaded();
     const allSupplies = await this.supplies.getList();
-    const recipeSupplies = this.filterSupplies(allSupplies);
-    const available = this.calcAvailable(recipeSupplies);
 
-    if (quantity <= 0 || quantity > available) {
-      throw new Error(`Неправильное количество. Максимум ${available}`);
+    const availability = await getAvailability(chipRecipe, allSupplies);
+
+    if (!availability.available) {
+      throw new Error(`Неправильное количество. Максимум 0`);
+    }
+    if (!(quantity > 0) || availability.available < quantity) {
+      throw new Error(`Неправильное количество. Максимум ${availability.available}`);
     }
 
-    const usedLots = this.pickLots(quantity, recipeSupplies);
+    const usedLots = reserveComponents(chipRecipe, availability.supplies, quantity);
+    const lotCombinations = generateLotCombinations(chipRecipe, usedLots);
+    if (lotCombinations.length !== 1) {
+      throw new Error(
+        `Ошибка: резервируется для нескольких лотов, а разрешено резервировать только для одного за раз`,
+      );
+    }
+
     const items: ReserveItem[] = [];
 
     for (const [positionId, lots] of Object.entries(usedLots)) {
@@ -76,72 +84,5 @@ export class ReserveService {
     if (!chipRecipe.items[0].id) {
       findReceiptPositions(chipRecipe, await this.positions.getList());
     }
-  }
-
-  private filterSupplies(supplies: Supply[]): Record<string, Supply[]> {
-    const result: Record<string, Supply[]> = {};
-    for (const item of chipRecipe.items) {
-      if (item.id) {
-        result[item.id] = [];
-      }
-    }
-    const sorted = supplies.slice().sort((a, b) => +a.date - +b.date);
-    for (const s of sorted) {
-      if (s.deleted || !result[s.positionId]) {
-        continue;
-      }
-      if (s.qualityControlStatus !== QualityControlStatus.Completed) {
-        continue;
-      }
-      result[s.positionId].push(s);
-    }
-    return result;
-  }
-
-  private calcAvailable(recipeSupplies: Record<string, Supply[]>): number {
-    let available = Number.MAX_SAFE_INTEGER;
-    for (const item of chipRecipe.items) {
-      if (!item.id) {
-        return 0;
-      }
-      const total = (recipeSupplies[item.id] ?? []).reduce(
-        (sum, s) => sum + s.quantity - s.usedQuantity,
-        0,
-      );
-      available = Math.min(available, Math.floor(total / item.quantity));
-    }
-    return available === Number.MAX_SAFE_INTEGER ? 0 : available;
-  }
-
-  private pickLots(
-    quantity: number,
-    recipeSupplies: Record<string, Supply[]>,
-  ): Record<string, UsedLot[]> {
-    const result: Record<string, UsedLot[]> = {};
-    for (const item of chipRecipe.items) {
-      if (!item.id) {
-        continue;
-      }
-      result[item.id] = [];
-      let remaining = quantity * item.quantity;
-      for (const s of recipeSupplies[item.id] ?? []) {
-        if (remaining <= 0) {
-          break;
-        }
-        const avail = s.quantity - s.usedQuantity;
-        const take = Math.min(avail, remaining);
-        if (take > 0) {
-          result[item.id].push({
-            supplyId: s.id,
-            lot: s.lot,
-            name: item.name,
-            taken: take,
-            originalTaken: take,
-          });
-          remaining -= take;
-        }
-      }
-    }
-    return result;
   }
 }
