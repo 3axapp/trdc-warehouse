@@ -1,10 +1,5 @@
-import {Component, inject, signal} from '@angular/core';
-import {
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   TuiAppearance,
   TuiButton,
@@ -13,11 +8,11 @@ import {
   TuiTextfield,
   TuiTitle,
 } from '@taiga-ui/core';
-import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
-import {AuthService} from '../../services/auth.service';
-import {passwordMatchValidator} from './password-match.validator';
-import {Router} from '@angular/router';
-import {TuiToastService} from '@taiga-ui/kit';
+import { TuiCardLarge, TuiForm, TuiHeader } from '@taiga-ui/layout';
+import { AuthService } from '../../services/auth.service';
+import { passwordMatchValidator } from './password-match.validator';
+import { Router } from '@angular/router';
+import { TuiToastService } from '@taiga-ui/kit';
 
 @Component({
   selector: 'app-login',
@@ -43,23 +38,24 @@ export class Login {
   private readonly router = inject(Router);
   protected readonly toast = inject(TuiToastService);
 
-  isLoginMode = true;
-  error = signal<string | null>(null);
+  protected isLoginMode = true;
+  protected error = signal<string | null>(null);
 
-  loginForm = this.fb.group(
+  protected loginForm = this.fb.group(
     {
       email: [null, [Validators.required, Validators.email]],
       password: [null, [Validators.required, Validators.minLength(8)]],
       confirmPassword: [
-        {value: null, disabled: true},
-        [Validators.required, Validators.minLength(8)]],
+        { value: null, disabled: true },
+        [Validators.required, Validators.minLength(8)],
+      ],
     },
     {
       validators: passwordMatchValidator(),
     },
   );
 
-  toggleMode() {
+  protected toggleMode() {
     this.isLoginMode = !this.isLoginMode;
     const confirmPassword = this.loginForm.get('confirmPassword')!;
     if (this.isLoginMode) {
@@ -71,7 +67,7 @@ export class Login {
     this.loginForm.reset();
   }
 
-  async onSubmit() {
+  protected async onSubmit() {
     if (this.loginForm.invalid) {
       return;
     }
@@ -82,8 +78,7 @@ export class Login {
         await this.authService.register(data.email!, data.password!);
         this.toggleMode(); // Переключаемся на форму входа
         this.toast
-          .open('Пользователь успешно зарегистрирован!',
-            {autoClose: 3000, data: '@tui.info'})
+          .open('Пользователь успешно зарегистрирован!', { autoClose: 3000, data: '@tui.info' })
           .subscribe();
       } else {
         // Вход в систему

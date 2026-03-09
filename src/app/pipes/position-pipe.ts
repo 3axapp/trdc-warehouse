@@ -1,6 +1,6 @@
-import {inject, Pipe, PipeTransform} from '@angular/core';
-import {Position} from '../services/collections/positions.collection';
-import {CacheService} from '../services/cache.service';
+import { inject, Pipe, PipeTransform } from '@angular/core';
+import { Position } from '../services/collections/positions.collection';
+import { CacheService } from '../services/cache.service';
 
 @Pipe({
   name: 'position',
@@ -8,7 +8,7 @@ import {CacheService} from '../services/cache.service';
 export class PositionPipe implements PipeTransform {
   private readonly cache = inject(CacheService);
 
-  transform(value: string): Promise<Position | null> {
+  public transform(value: string): Promise<Position | null> {
     return this.cache.get('positions', value);
   }
 }

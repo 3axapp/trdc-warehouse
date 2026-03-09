@@ -1,24 +1,19 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {injectContext} from '@taiga-ui/polymorpheus';
-import {TuiButton, TuiDialogContext, TuiTextfield} from '@taiga-ui/core';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {TuiCard} from '@taiga-ui/layout';
-import {Supplier} from '../../../../services/collections/suppliers.collection';
+import { Component, inject, OnInit } from '@angular/core';
+import { injectContext } from '@taiga-ui/polymorpheus';
+import { TuiButton, TuiDialogContext, TuiTextfield } from '@taiga-ui/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TuiCard } from '@taiga-ui/layout';
+import { Supplier } from '../../../../services/collections/suppliers.collection';
 
 @Component({
   selector: 'app-supplier-form',
-  imports: [
-    ReactiveFormsModule,
-    TuiCard,
-    TuiTextfield,
-    TuiButton,
-  ],
+  imports: [ReactiveFormsModule, TuiCard, TuiTextfield, TuiButton],
   templateUrl: './supplier-form.html',
   styleUrl: './supplier-form.scss',
 })
 export class SupplierForm implements OnInit {
-
-  public readonly context = injectContext<TuiDialogContext<Omit<Supplier, 'id'>, Supplier | undefined>>();
+  public readonly context =
+    injectContext<TuiDialogContext<Omit<Supplier, 'id'>, Supplier | undefined>>();
 
   private fb = inject(FormBuilder);
 

@@ -10,20 +10,25 @@
   </header>
   <tui-textfield>
     <label tuiLabel>Email</label>
-    <input tuiTextfield type="email" formControlName="email">
+    <input tuiTextfield type="email" formControlName="email" />
     <tui-icon icon="@tui.mail" />
   </tui-textfield>
 
   <tui-textfield>
     <label tuiLabel>Пароль</label>
-    <input tuiTextfield type="password" formControlName="password" placeholder="Минимум 8 символов">
+    <input
+      tuiTextfield
+      type="password"
+      formControlName="password"
+      placeholder="Минимум 8 символов"
+    />
     <tui-icon icon="@tui.key" />
   </tui-textfield>
 
   @if (!isLoginMode) {
     <tui-textfield>
       <label tuiLabel>Пароль</label>
-      <input tuiTextfield type="password" formControlName="confirmPassword">
+      <input tuiTextfield type="password" formControlName="confirmPassword" />
       <tui-icon icon="@tui.key" />
     </tui-textfield>
   }
@@ -31,19 +36,10 @@
   <tui-error [error]="error()"></tui-error>
 
   <footer>
-    <button
-      tuiButton
-      [disabled]="loginForm.invalid"
-      type="submit"
-    >
+    <button tuiButton [disabled]="loginForm.invalid" type="submit">
       {{ isLoginMode ? 'Войти' : 'Зарегистрироваться' }}
     </button>
-    <button
-      appearance="flat"
-      tuiButton
-      type="button"
-      (click)="toggleMode()"
-    >
+    <button appearance="flat" tuiButton type="button" (click)="toggleMode()">
       => {{ isLoginMode ? 'Зарегистрироваться' : 'Войти' }}
     </button>
   </footer>

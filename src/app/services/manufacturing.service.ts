@@ -1,7 +1,11 @@
-import {inject, Injectable} from '@angular/core';
-import {Position, PositionType} from './collections/positions.collection';
-import {QualityControlStatus, SuppliesCollection, Supply} from './collections/supplies.collection';
-import {Result} from '../components/guard-area/manufacturing/manufacturing-form/manufacturing-form';
+import { inject, Injectable } from '@angular/core';
+import { Position, PositionType } from './collections/positions.collection';
+import {
+  QualityControlStatus,
+  SuppliesCollection,
+  Supply,
+} from './collections/supplies.collection';
+import { Result } from '../components/guard-area/manufacturing/manufacturing-form/manufacturing-form';
 import {
   collection,
   doc as fireDoc,
@@ -12,14 +16,13 @@ import {
   runTransaction,
   Transaction,
 } from '@angular/fire/firestore';
-import {DocumentData} from '@firebase/firestore';
-import {Combination, generateCombinations, UsedLot} from './manufacturing/combination';
+import { DocumentData } from '@firebase/firestore';
+import { Combination, generateCombinations, UsedLot } from './manufacturing/combination';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ManufacturingService {
-
   private supplies = inject(SuppliesCollection);
   private firestore = inject(Firestore);
 
@@ -37,7 +40,7 @@ export class ManufacturingService {
     const usedLots = this.reserveComponents(receipt, availability.supplies, availability.available);
     const lotCombinations = this.generateLotCombinations(receipt, usedLots);
 
-    return {available: lotCombinations[0].quantity};
+    return { available: lotCombinations[0].quantity };
   }
 
   private async getAvailability(recipe: Recipe): Promise<AvailabilityResult> {
@@ -67,14 +70,21 @@ export class ManufacturingService {
       const usedLots = this.reserveComponents(recipe, availability.supplies, data.quantity);
       const lotCombinations = this.generateLotCombinations(recipe, usedLots);
       if (lotCombinations.length !== 1) {
-        throw new Error(`Ошибка: создается несколько лотов, а разрешено создавать только по одному`);
+        throw new Error(
+          `Ошибка: создается несколько лотов, а разрешено создавать только по одному`,
+        );
       }
       if (lotCombinations[0].quantity != data.quantity) {
         throw new Error(`Неправильное количество. Максимум ${lotCombinations[0].quantity}`);
       }
 
-      await this.recordProduction(recipe, [lotCombinations[0]], availability.nextId, data,
-        transaction);
+      await this.recordProduction(
+        recipe,
+        [lotCombinations[0]],
+        availability.nextId,
+        data,
+        transaction,
+      );
       await this.updateComponents(usedLots, transaction);
 
       result = Object.values(usedLots).flat();
@@ -84,22 +94,27 @@ export class ManufacturingService {
   }
 
   private filterReceiptSupplies(receipt: Recipe, supplies: Supply[]) {
-    const map: ReceiptSupplies = {[receipt.id!]: {type: PositionType.Produced, quantity: 0, supplies: []}};
+    const map: ReceiptSupplies = {
+      [receipt.id!]: { type: PositionType.Produced, quantity: 0, supplies: [] },
+    };
     for (const item of receipt.items) {
       if (!item.id) {
         continue;
       }
-      map[item.id] = {type: item.type!, quantity: 0, supplies: []};
+      map[item.id] = { type: item.type!, quantity: 0, supplies: [] };
     }
 
-    supplies = supplies.sort((a, b) => +a.date - +b. date);
+    supplies = supplies.sort((a, b) => +a.date - +b.date);
 
     for (const supply of supplies) {
       const item = map[supply.positionId];
       if (!item || supply.deleted) {
         continue;
       }
-      if (item.type === PositionType.Checked && supply.qualityControlStatus !== QualityControlStatus.Completed) {
+      if (
+        item.type === PositionType.Checked &&
+        supply.qualityControlStatus !== QualityControlStatus.Completed
+      ) {
         continue;
       }
 
@@ -112,7 +127,7 @@ export class ManufacturingService {
   private calculateAvailability(receipt: Recipe, supplies: ReceiptSupplies): AvailabilityResult {
     let available = Number.MAX_SAFE_INTEGER;
     let message;
-    console.log(supplies)
+    console.log(supplies);
 
     for (const item of receipt.items) {
       if (!item.id) {
@@ -137,7 +152,10 @@ export class ManufacturingService {
       available = Math.min(available, itemAvailable);
     }
 
-    const nextId = Math.max(...(supplies[receipt.id!].supplies.map(i => i.lot as number || 0)), 0);
+    const nextId = Math.max(
+      ...supplies[receipt.id!].supplies.map((i) => (i.lot as number) || 0),
+      0,
+    );
 
     delete supplies[receipt.id!];
 
@@ -149,7 +167,11 @@ export class ManufacturingService {
     };
   }
 
-  private reserveComponents(receipt: Recipe, componentsData: ReceiptSupplies, quantityToProduce: number) {
+  private reserveComponents(
+    receipt: Recipe,
+    componentsData: ReceiptSupplies,
+    quantityToProduce: number,
+  ) {
     const usedLots: Record<string, UsedLot[]> = {};
 
     for (const item of receipt.items) {
@@ -164,8 +186,7 @@ export class ManufacturingService {
           break;
         }
 
-        const takeAmount = Math.min(component.quantity - component.usedQuantity,
-          remainingToTake);
+        const takeAmount = Math.min(component.quantity - component.usedQuantity, remainingToTake);
 
         if (takeAmount > 0) {
           // Сохраняем информацию о взятом количестве из каждого лота
@@ -188,15 +209,23 @@ export class ManufacturingService {
   }
 
   private async recordProduction(
-    receipt: Recipe, lotCombinations: Combination[], nextId: number, data: Result,
+    receipt: Recipe,
+    lotCombinations: Combination[],
+    nextId: number,
+    data: Result,
     transaction: Transaction,
   ) {
     const productionRecords: ProductionRecord[] = [];
-    const combinationDocs: { ref: DocumentReference, doc: DocumentSnapshot<DocumentData>, supply: Supply | null, parts: (string | number)[] }[] = [];
+    const combinationDocs: {
+      ref: DocumentReference;
+      doc: DocumentSnapshot<DocumentData>;
+      supply: Supply | null;
+      parts: (string | number)[];
+    }[] = [];
     const idDate = data.date.toISOString().substring(0, 10).replaceAll('-', '');
 
     for (const combination of lotCombinations) {
-      const parts = combination.items.map(i => i.lot).filter(v => !!v) as (string | number)[];
+      const parts = combination.items.map((i) => i.lot).filter((v) => !!v) as (string | number)[];
       const id = `${receipt.code}_${idDate}_${data.executorId}_${parts.join('_')}`;
       const ref = fireDoc(this.getLotCollection(), id);
       const doc = await transaction.get(ref);
@@ -211,30 +240,37 @@ export class ManufacturingService {
     for (const [i, combination] of lotCombinations.entries()) {
       let supplyId: string;
       const quantity = combination.quantity!;
-      const {ref, doc, supply, parts} = combinationDocs[i];
+      const { ref, doc, supply, parts } = combinationDocs[i];
 
       const lot = (supply ? supply.lot! : ++nextId) as number;
 
       if (doc.exists()) {
         const combination = doc.data() as CombinationLot;
         supplyId = combination.id;
-        await this.supplies.update(supplyId, {
-          quantity: increment(quantity),
-        }, transaction);
+        await this.supplies.update(
+          supplyId,
+          {
+            quantity: increment(quantity),
+          },
+          transaction,
+        );
       } else {
-        supplyId = await this.supplies.add({
-          positionId: receipt.id!,
-          // supplierId: string,
-          manufacturingCode: ref.id,
-          date: data.date,
-          quantity,
-          usedQuantity: 0,
-          lot,
-        }, transaction);
-        await transaction.set(ref, {id: supplyId});
+        supplyId = await this.supplies.add(
+          {
+            positionId: receipt.id!,
+            // supplierId: string,
+            manufacturingCode: ref.id,
+            date: data.date,
+            quantity,
+            usedQuantity: 0,
+            lot,
+          },
+          transaction,
+        );
+        await transaction.set(ref, { id: supplyId });
       }
 
-      productionRecords.push({lot, supplyId, quantity, positionId: receipt.id!, parts});
+      productionRecords.push({ lot, supplyId, quantity, positionId: receipt.id!, parts });
     }
 
     this.recordProductionLog(productionRecords, data, transaction);
@@ -258,7 +294,10 @@ export class ManufacturingService {
   }
 
   private recordProductionLog(
-    productionRecords: ProductionRecord[], data: Result, transaction: Transaction) {
+    productionRecords: ProductionRecord[],
+    data: Result,
+    transaction: Transaction,
+  ) {
     for (const record of productionRecords) {
       const docRef = fireDoc(this.getProductionCollection());
       const recordData = {
@@ -279,22 +318,26 @@ export class ManufacturingService {
   private async updateComponents(usedLots: Record<string, UsedLot[]>, transaction: Transaction) {
     for (const lots of Object.values(usedLots)) {
       for (const lot of lots) {
-        await this.supplies.update(lot.supplyId, {
-          usedQuantity: increment(lot.originalTaken),
-        }, transaction);
+        await this.supplies.update(
+          lot.supplyId,
+          {
+            usedQuantity: increment(lot.originalTaken),
+          },
+          transaction,
+        );
       }
     }
   }
 }
 
 export function findReceiptPositions(receipt: Recipe, positions: Position[]) {
-  const position = positions.find(p => p.code === receipt.code);
+  const position = positions.find((p) => p.code === receipt.code);
   receipt.id = position?.id;
   for (const item of receipt.items) {
     if (item.id) {
       continue;
     }
-    const position = positions.find(p => p.code === item.code);
+    const position = positions.find((p) => p.code === item.code);
     item.id = position?.id;
     item.type = position?.type;
     item.name = position?.name;
@@ -309,18 +352,21 @@ export interface Recipe {
 }
 
 export interface RecipeItem {
-  id?: string,
-  type?: PositionType,
-  name?: string,
-  code: string,
-  quantity: number,
+  id?: string;
+  type?: PositionType;
+  name?: string;
+  code: string;
+  quantity: number;
 }
 
-type ReceiptSupplies = Record<string, {
-  quantity: number;
-  type: PositionType;
-  supplies: Supply[]
-}>;
+type ReceiptSupplies = Record<
+  string,
+  {
+    quantity: number;
+    type: PositionType;
+    supplies: Supply[];
+  }
+>;
 
 export interface AvailabilityResult {
   nextId: number;

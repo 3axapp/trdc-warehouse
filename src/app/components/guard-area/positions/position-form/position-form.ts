@@ -1,11 +1,21 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
-import {TuiAlertService, TuiButton, TuiDialogContext, tuiItemsHandlersProvider, TuiTextfield} from '@taiga-ui/core';
-import {injectContext} from '@taiga-ui/polymorpheus';
-import {Position, PositionsCollection, PositionType} from '../../../../services/collections/positions.collection';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {TuiCardLarge} from '@taiga-ui/layout';
-import {TuiChevron, TuiDataListWrapper, TuiSelect} from '@taiga-ui/kit';
-import {PositionTypePipe} from '../../../../pipes/position-type-pipe';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  TuiAlertService,
+  TuiButton,
+  TuiDialogContext,
+  tuiItemsHandlersProvider,
+  TuiTextfield,
+} from '@taiga-ui/core';
+import { injectContext } from '@taiga-ui/polymorpheus';
+import {
+  Position,
+  PositionsCollection,
+  PositionType,
+} from '../../../../services/collections/positions.collection';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TuiCardLarge } from '@taiga-ui/layout';
+import { TuiChevron, TuiDataListWrapper, TuiSelect } from '@taiga-ui/kit';
+import { PositionTypePipe } from '../../../../pipes/position-type-pipe';
 
 const names = new PositionTypePipe();
 
@@ -31,12 +41,12 @@ const names = new PositionTypePipe();
   styleUrl: './position-form.scss',
 })
 export class PositionForm implements OnInit {
-
   private positions = inject(PositionsCollection);
 
   private readonly alerts = inject(TuiAlertService);
 
-  public readonly context = injectContext<TuiDialogContext<Partial<Position>, Position | undefined>>();
+  public readonly context =
+    injectContext<TuiDialogContext<Partial<Position>, Position | undefined>>();
 
   private fb = inject(FormBuilder);
 
@@ -46,11 +56,7 @@ export class PositionForm implements OnInit {
     type: [PositionType.Normal, [Validators.required]],
   });
 
-  protected types = [
-    PositionType.Normal,
-    PositionType.Checked,
-    PositionType.Produced,
-  ];
+  protected types = [PositionType.Normal, PositionType.Checked, PositionType.Produced];
 
   public ngOnInit(): void {
     if (!this.context.data) {
@@ -86,7 +92,7 @@ export class PositionForm implements OnInit {
       }
       this.context.completeWith(data);
     } catch (e: any) {
-      this.alerts.open(e.message || 'Неизвестная ошибка',{appearance: 'negative'}).subscribe();
+      this.alerts.open(e.message || 'Неизвестная ошибка', { appearance: 'negative' }).subscribe();
     }
   }
 }

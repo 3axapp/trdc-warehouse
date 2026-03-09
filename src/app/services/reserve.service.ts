@@ -1,11 +1,19 @@
-import {inject, Injectable} from '@angular/core';
-import {Firestore, increment, runTransaction} from '@angular/fire/firestore';
-import {QualityControlStatus, SuppliesCollection, Supply} from './collections/supplies.collection';
-import {Reserve, ReserveCollection, ReserveItem} from './collections/reserve.collection';
-import {PositionsCollection} from './collections/positions.collection';
-import {findReceiptPositions, ManufacturingService, NextMaxQuantity} from './manufacturing.service';
-import {chipRecipe} from '../recipes';
-import {UsedLot} from './manufacturing/combination';
+import { inject, Injectable } from '@angular/core';
+import { Firestore, increment, runTransaction } from '@angular/fire/firestore';
+import {
+  QualityControlStatus,
+  SuppliesCollection,
+  Supply,
+} from './collections/supplies.collection';
+import { Reserve, ReserveCollection, ReserveItem } from './collections/reserve.collection';
+import { PositionsCollection } from './collections/positions.collection';
+import {
+  findReceiptPositions,
+  ManufacturingService,
+  NextMaxQuantity,
+} from './manufacturing.service';
+import { chipRecipe } from '../recipes';
+import { UsedLot } from './manufacturing/combination';
 
 @Injectable({
   providedIn: 'root',
@@ -17,12 +25,12 @@ export class ReserveService {
   private readonly positions = inject(PositionsCollection);
   private readonly manufacturing = inject(ManufacturingService);
 
-  async getMaxQuantity(): Promise<NextMaxQuantity> {
+  public async getMaxQuantity(): Promise<NextMaxQuantity> {
     await this.ensureRecipeLoaded();
     return this.manufacturing.getNextMaxQuantity(chipRecipe);
   }
 
-  async createReserve(quantity: number): Promise<void> {
+  public async createReserve(quantity: number): Promise<void> {
     await this.ensureRecipeLoaded();
     const allSupplies = await this.supplies.getList();
     const recipeSupplies = this.filterSupplies(allSupplies);
@@ -48,10 +56,17 @@ export class ReserveService {
     }
 
     await runTransaction(this.firestore, async (transaction) => {
-      await this.reserves.add({date: new Date(), quantity, items} as Omit<Reserve, 'id'>, transaction);
+      await this.reserves.add(
+        { date: new Date(), quantity, items } as Omit<Reserve, 'id'>,
+        transaction,
+      );
       for (const lots of Object.values(usedLots)) {
         for (const lot of lots) {
-          await this.supplies.update(lot.supplyId, {usedQuantity: increment(lot.originalTaken)}, transaction);
+          await this.supplies.update(
+            lot.supplyId,
+            { usedQuantity: increment(lot.originalTaken) },
+            transaction,
+          );
         }
       }
     });
@@ -89,14 +104,19 @@ export class ReserveService {
       if (!item.id) {
         return 0;
       }
-      const total = (recipeSupplies[item.id] ?? [])
-        .reduce((sum, s) => sum + s.quantity - s.usedQuantity, 0);
+      const total = (recipeSupplies[item.id] ?? []).reduce(
+        (sum, s) => sum + s.quantity - s.usedQuantity,
+        0,
+      );
       available = Math.min(available, Math.floor(total / item.quantity));
     }
     return available === Number.MAX_SAFE_INTEGER ? 0 : available;
   }
 
-  private pickLots(quantity: number, recipeSupplies: Record<string, Supply[]>): Record<string, UsedLot[]> {
+  private pickLots(
+    quantity: number,
+    recipeSupplies: Record<string, Supply[]>,
+  ): Record<string, UsedLot[]> {
     const result: Record<string, UsedLot[]> = {};
     for (const item of chipRecipe.items) {
       if (!item.id) {
@@ -111,7 +131,13 @@ export class ReserveService {
         const avail = s.quantity - s.usedQuantity;
         const take = Math.min(avail, remaining);
         if (take > 0) {
-          result[item.id].push({supplyId: s.id, lot: s.lot, name: item.name, taken: take, originalTaken: take});
+          result[item.id].push({
+            supplyId: s.id,
+            lot: s.lot,
+            name: item.name,
+            taken: take,
+            originalTaken: take,
+          });
           remaining -= take;
         }
       }

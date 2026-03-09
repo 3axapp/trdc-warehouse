@@ -16,7 +16,10 @@ interface SupplyInfo {
   lot: string | number | undefined;
 }
 
-export function generateCombinations(cells: string[], usedLots: Record<string, UsedLot[]>): Combination[] {
+export function generateCombinations(
+  cells: string[],
+  usedLots: Record<string, UsedLot[]>,
+): Combination[] {
   // Подсчитываем компоненты
   const componentCounts: Record<string, number> = {};
   for (const cell of cells) {
@@ -26,8 +29,7 @@ export function generateCombinations(cells: string[], usedLots: Record<string, U
   // Максимальное количество полных наборов
   let maxSets = Infinity;
   for (const [componentId, needed] of Object.entries(componentCounts)) {
-    const totalAvailable = (usedLots[componentId] || [])
-      .reduce((sum, lot) => sum + lot.taken, 0);
+    const totalAvailable = (usedLots[componentId] || []).reduce((sum, lot) => sum + lot.taken, 0);
     maxSets = Math.min(maxSets, Math.floor(totalAvailable / needed));
   }
 
@@ -46,28 +48,31 @@ export function generateCombinations(cells: string[], usedLots: Record<string, U
   ): boolean | void => {
     // Если прошли все cells
     if (index >= cells.length) {
-      const values: Record<string, { lotIndex: number, quantity: number, maxQuantity: number }> = {};
+      const values: Record<string, { lotIndex: number; quantity: number; maxQuantity: number }> =
+        {};
       for (const [partIndex, componentId] of cells.entries()) {
         const lotIndex = currentItems[partIndex];
         const supply = usedLots[componentId][lotIndex];
         if (!values[supply.supplyId]) {
-          values[supply.supplyId] = {lotIndex: lotIndex, quantity: 0, maxQuantity: supply.taken};
+          values[supply.supplyId] = { lotIndex: lotIndex, quantity: 0, maxQuantity: supply.taken };
         }
         values[supply.supplyId].quantity++;
       }
 
-      const maxProductCount = Math.min(...Object.values(values).map(i => Math.floor(i.maxQuantity / i.quantity)));
+      const maxProductCount = Math.min(
+        ...Object.values(values).map((i) => Math.floor(i.maxQuantity / i.quantity)),
+      );
       if (!maxProductCount) {
         return false;
       }
 
-      const combination: Combination = {quantity: maxProductCount, items: []};
+      const combination: Combination = { quantity: maxProductCount, items: [] };
 
       for (const [partIndex, componentId] of cells.entries()) {
         const lotIndex = currentItems[partIndex];
         const supply = usedLots[componentId][lotIndex];
 
-        combination.items.push({supplyId: supply.supplyId, lot: supply.lot});
+        combination.items.push({ supplyId: supply.supplyId, lot: supply.lot });
 
         if (!values[supply.supplyId]) {
           continue;
@@ -89,7 +94,7 @@ export function generateCombinations(cells: string[], usedLots: Record<string, U
       while (lot.taken > 0) {
         // Берем один компонент из этого лота
         const newItems = [...currentItems, lotIndex];
-        if (!findSingleSet(index + 1, newItems, {...remaining})) {
+        if (!findSingleSet(index + 1, newItems, { ...remaining })) {
           break;
         }
         found = true;

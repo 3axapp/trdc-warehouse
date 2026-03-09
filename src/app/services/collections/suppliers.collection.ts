@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {AbstractCollection, Deletable} from './abstract.collection';
+import { Injectable } from '@angular/core';
+import { AbstractCollection, Deletable } from './abstract.collection';
 
 @Injectable({
   providedIn: 'root',

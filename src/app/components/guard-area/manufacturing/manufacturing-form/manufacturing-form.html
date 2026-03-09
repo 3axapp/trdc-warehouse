@@ -1,28 +1,15 @@
-<form [formGroup]="form"
-      tuiCardLarge
-      (ngSubmit)="submit()">
-
+<form [formGroup]="form" tuiCardLarge (ngSubmit)="submit()">
   <tui-textfield>
     <label tuiLabel>Дата</label>
-    <input
-      tuiInputDateTime
-      formControlName="date"
-    />
-    <tui-calendar *tuiTextfieldDropdown/>
+    <input tuiInputDateTime formControlName="date" />
+    <tui-calendar *tuiTextfieldDropdown />
   </tui-textfield>
 
   <tui-textfield tuiChevron>
     <label tuiLabel>Исполнитель</label>
-    <input
-      tuiSelect
-      formControlName="executor"
-    />
+    <input tuiSelect formControlName="executor" />
 
-    <tui-data-list-wrapper
-      *tuiTextfieldDropdown
-      new
-      [items]="data.executors"
-    />
+    <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="data.executors" />
   </tui-textfield>
 
   <tui-textfield>
@@ -31,7 +18,7 @@
     <input
       tuiInputNumber
       formControlName="quantity"
-      placeholder="Максимум: {{data.availability.available}}"
+      placeholder="Максимум: {{ data.availability.available }}"
     />
   </tui-textfield>
 
@@ -39,10 +26,7 @@
     <tui-textfield>
       <label tuiLabel>Получатель</label>
 
-      <input
-        tuiTextfield
-        formControlName="recipient"
-      />
+      <input tuiTextfield formControlName="recipient" />
     </tui-textfield>
   }
 
@@ -50,20 +34,11 @@
     <tui-textfield>
       <label tuiLabel>Номер документа</label>
 
-      <input
-        tuiTextfield
-        formControlName="docNumber"
-      />
+      <input tuiTextfield formControlName="docNumber" />
     </tui-textfield>
   }
 
   <footer>
-    <button
-      tuiButton
-      type="submit"
-      [disabled]="form.invalid"
-    >
-      Сохранить
-    </button>
+    <button tuiButton type="submit" [disabled]="form.invalid">Сохранить</button>
   </footer>
 </form>

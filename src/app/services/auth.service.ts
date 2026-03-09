@@ -1,5 +1,11 @@
-import {inject, Injectable} from '@angular/core';
-import {Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from '@angular/fire/auth';
+import { inject, Injectable } from '@angular/core';
+import {
+  Auth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  UserCredential,
+} from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root',
@@ -7,15 +13,15 @@ import {Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOu
 export class AuthService {
   private auth = inject(Auth);
 
-  register(email: string, password: string): Promise<any> {
+  public register(email: string, password: string): Promise<UserCredential> {
     return createUserWithEmailAndPassword(this.auth, email, password);
   }
 
-  login(email: string, password: string): Promise<any> {
+  public login(email: string, password: string): Promise<UserCredential> {
     return signInWithEmailAndPassword(this.auth, email, password);
   }
 
-  logout(): Promise<void> {
+  public logout(): Promise<void> {
     return signOut(this.auth);
   }
 }

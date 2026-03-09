@@ -1,8 +1,8 @@
-import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {TuiAlertService} from '@taiga-ui/core';
-import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
-import {SuppliesCollection, Supply} from '../../../services/collections/supplies.collection';
-import {AsyncPipe, DatePipe, NgForOf} from '@angular/common';
+import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
+import { TuiAlertService } from '@taiga-ui/core';
+import { TuiResponsiveDialogService } from '@taiga-ui/addon-mobile';
+import { SuppliesCollection, Supply } from '../../../services/collections/supplies.collection';
+import { AsyncPipe, DatePipe, NgForOf } from '@angular/common';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -12,11 +12,14 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
-import {PositionPipe} from '../../../pipes/position-pipe';
-import {SupplierPipe} from '../../../pipes/supplier-pipe';
-import {CacheService} from '../../../services/cache.service';
-import {PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
-import {SuppliersCollection} from '../../../services/collections/suppliers.collection';
+import { PositionPipe } from '../../../pipes/position-pipe';
+import { SupplierPipe } from '../../../pipes/supplier-pipe';
+import { CacheService } from '../../../services/cache.service';
+import {
+  PositionsCollection,
+  PositionType,
+} from '../../../services/collections/positions.collection';
+import { SuppliersCollection } from '../../../services/collections/suppliers.collection';
 
 @Component({
   selector: 'app-warehouse',
@@ -38,7 +41,6 @@ import {SuppliersCollection} from '../../../services/collections/suppliers.colle
   styleUrl: './supplies.scss',
 })
 export class Supplies implements OnInit {
-
   private readonly injector = inject(INJECTOR);
   private readonly supplies = inject(SuppliesCollection);
   private readonly positions = inject(PositionsCollection);
@@ -70,7 +72,7 @@ export class Supplies implements OnInit {
   }
 
   private async load(): Promise<void> {
-    return this.supplies.getList().then(supplies => {
+    return this.supplies.getList().then((supplies) => {
       this.data.set(supplies.sort((a, b) => (a.deleted ? 1 : 0) - (b.deleted ? 1 : 0)));
     });
   }

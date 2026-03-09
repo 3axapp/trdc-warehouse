@@ -1,16 +1,20 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {Manufacturing} from './manufacturing';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {
-  clearFirestoreEmulator,
-  provideAuthTest,
-  provideFirebaseAppTest,
-  provideFirestoreTest,
-  signOut,
-  signupAndSignin,
-} from '../../../../tests/utils';
-import {ActivatedRoute} from '@angular/router';
-import {Position, PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
+// import { ComponentFixture, TestBed } from '@angular/core/testing';
+// import { Manufacturing } from './manufacturing';
+// import { provideZonelessChangeDetection } from '@angular/core';
+// import {
+//   clearFirestoreEmulator,
+//   provideAuthTest,
+//   provideFirebaseAppTest,
+//   provideFirestoreTest,
+//   signOut,
+//   signupAndSignin,
+// } from '../../../../tests/utils';
+// import { ActivatedRoute } from '@angular/router';
+// import {
+//   Position,
+//   PositionsCollection,
+//   PositionType,
+// } from '../../../services/collections/positions.collection';
 
 // @todo тест падает с исключением firebase
 // describe('Manufacturing', () => {

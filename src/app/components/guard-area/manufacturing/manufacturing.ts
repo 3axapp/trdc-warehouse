@@ -1,7 +1,17 @@
-import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {TuiAlertService, TuiButton, tuiDialog, TuiDialogService, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
-import {PositionsCollection, PositionType} from '../../../services/collections/positions.collection';
-import {Executor, ExecutorsCollection} from '../../../services/collections/executors.collection';
+import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
+import {
+  TuiAlertService,
+  TuiButton,
+  tuiDialog,
+  TuiDialogService,
+  TuiHintDirective,
+  TuiIcon,
+} from '@taiga-ui/core';
+import {
+  PositionsCollection,
+  PositionType,
+} from '../../../services/collections/positions.collection';
+import { Executor, ExecutorsCollection } from '../../../services/collections/executors.collection';
 import {
   ExtraFieldKeys,
   findReceiptPositions,
@@ -10,7 +20,7 @@ import {
   Recipe,
   RecipeItem,
 } from '../../../services/manufacturing.service';
-import {ManufacturingForm} from './manufacturing-form/manufacturing-form';
+import { ManufacturingForm } from './manufacturing-form/manufacturing-form';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -20,16 +30,19 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
-import {AsyncPipe, DatePipe, NgFor} from '@angular/common';
+import { AsyncPipe, DatePipe, NgFor } from '@angular/common';
 import {
   ManufacturingProductionCollection,
   ProductionItem,
 } from '../../../services/collections/manufacturing-production.collection';
-import {CacheService} from '../../../services/cache.service';
-import {ExecutorPipe} from '../../../pipes/executor-pipe';
-import {ActivatedRoute} from '@angular/router';
-import {ManufacturingSuccess, ManufacturingSuccessOptions} from './manufacturing-success/manufacturing-success';
-import {UsedLot} from '../../../services/manufacturing/combination';
+import { CacheService } from '../../../services/cache.service';
+import { ExecutorPipe } from '../../../pipes/executor-pipe';
+import { ActivatedRoute } from '@angular/router';
+import {
+  ManufacturingSuccess,
+  ManufacturingSuccessOptions,
+} from './manufacturing-success/manufacturing-success';
+import { UsedLot } from '../../../services/manufacturing/combination';
 
 @Component({
   selector: 'app-manufacturing',
@@ -65,15 +78,23 @@ export class Manufacturing implements OnInit {
 
   protected block = signal(false);
   protected data = signal<ProductionItem[]>([]);
-  protected columns = ['date', 'executorId', 'recipient', 'docNumber', 'lot', 'quantity', 'controls'];
+  protected columns = [
+    'date',
+    'executorId',
+    'recipient',
+    'docNumber',
+    'lot',
+    'quantity',
+    'controls',
+  ];
 
   public async ngOnInit() {
     this.cache.add('executors', this.executors.getList());
     if (!this.recipe.extraFields?.recipient) {
-      this.columns = this.columns.filter(v => v != 'recipient');
+      this.columns = this.columns.filter((v) => v != 'recipient');
     }
     if (!this.recipe.extraFields?.docNumber) {
-      this.columns = this.columns.filter(v => v != 'docNumber');
+      this.columns = this.columns.filter((v) => v != 'docNumber');
     }
     if (!this.recipe.id) {
       const list = await this.positions.getList();
@@ -136,9 +157,9 @@ export class Manufacturing implements OnInit {
       if (!enable) {
         continue;
       }
-      extraFields[name as ExtraFieldKeys] = {value: (item as any)[name]};
+      extraFields[name as ExtraFieldKeys] = { value: (item as any)[name] };
     }
-    this.showSuccess({usedLots, date: item.date, executorId: item.executorId, extraFields});
+    this.showSuccess({ usedLots, date: item.date, executorId: item.executorId, extraFields });
   }
 
   private async showDialog(availability: NextMaxQuantity, executors: Executor[]) {
@@ -148,7 +169,7 @@ export class Manufacturing implements OnInit {
       label: 'Создать',
     });
 
-    dialog({executors, availability, extraFields: this.recipe.extraFields}).subscribe({
+    dialog({ executors, availability, extraFields: this.recipe.extraFields }).subscribe({
       next: async (data) => {
         try {
           const usedLots = await this.manufacturing.create(this.recipe, data);
@@ -157,12 +178,12 @@ export class Manufacturing implements OnInit {
             if (!enable) {
               continue;
             }
-            extraFields[name as ExtraFieldKeys] = {value: (data as any)[name]};
+            extraFields[name as ExtraFieldKeys] = { value: (data as any)[name] };
           }
-          this.showSuccess({usedLots, date: data.date, executorId: data.executorId, extraFields});
+          this.showSuccess({ usedLots, date: data.date, executorId: data.executorId, extraFields });
           await this.load();
         } catch (e: any) {
-          this.alerts.open(e.message || e, {appearance: 'negative'}).subscribe();
+          this.alerts.open(e.message || e, { appearance: 'negative' }).subscribe();
         }
       },
       complete: () => {
@@ -176,7 +197,10 @@ export class Manufacturing implements OnInit {
       return;
     }
     this.data.set(
-      await this.manufacturingProduction.getList().then(list => list.filter(i => i.positionId == this.recipe.id)));
+      await this.manufacturingProduction
+        .getList()
+        .then((list) => list.filter((i) => i.positionId == this.recipe.id)),
+    );
   }
 
   private showSuccess(options: ManufacturingSuccessOptions) {

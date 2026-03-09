@@ -1,46 +1,31 @@
-<button
-  tuiButton
-  iconEnd="@tui.plus"
-  type="button"
-  size="m"
-  (click)="add()"
-  [disabled]="block()"
->
+<button tuiButton iconEnd="@tui.plus" type="button" size="m" (click)="add()" [disabled]="block()">
   Добавить
 </button>
-<table
-  tuiTable
-  class="table table-striped table-hover"
-  [style.width.%]="100"
-  [columns]="columns"
->
+<table tuiTable class="table table-striped table-hover" [style.width.%]="100" [columns]="columns">
   <thead>
-  <tr tuiThGroup>
-    <th tuiTh>Дата производства</th>
-    <th tuiTh>Исполнитель</th>
-    @if (recipe.extraFields?.recipient) {
-      <th tuiTh>Получатель</th>
-    }
-    @if (recipe.extraFields?.docNumber) {
-      <th tuiTh>Номер документа</th>
-    }
-    <th tuiTh>Лот</th>
-    <th tuiTh>Количество</th>
-    <th tuiTh [maxWidth]="100">&nbsp;</th>
-  </tr>
+    <tr tuiThGroup>
+      <th tuiTh>Дата производства</th>
+      <th tuiTh>Исполнитель</th>
+      @if (recipe.extraFields?.recipient) {
+        <th tuiTh>Получатель</th>
+      }
+      @if (recipe.extraFields?.docNumber) {
+        <th tuiTh>Номер документа</th>
+      }
+      <th tuiTh>Лот</th>
+      <th tuiTh>Количество</th>
+      <th tuiTh [maxWidth]="100">&nbsp;</th>
+    </tr>
   </thead>
-  <tbody
-    tuiTbody
-    [data]="data()"
-  >
-  <tr tuiTr *ngFor="let item of data()" [class.row_deleted]="item.deleted">
-    <td *tuiCell="'date'" tuiTd>{{ item.date | date : 'short' }}</td>
-    <td *tuiCell="'executorId'" tuiTd>{{ (item.executorId | executor | async)?.name }}</td>
-    <td *tuiCell="'controls'" tuiTd>
-      <button tuiButton type="button" tuiHint="Состав" (click)="showParts(item)">
-        <tui-icon icon="@tui.clipboard-list"></tui-icon>
-      </button>
-    </td>
-  </tr>
+  <tbody tuiTbody [data]="data()">
+    <tr tuiTr *ngFor="let item of data()" [class.row_deleted]="item.deleted">
+      <td *tuiCell="'date'" tuiTd>{{ item.date | date: 'short' }}</td>
+      <td *tuiCell="'executorId'" tuiTd>{{ (item.executorId | executor | async)?.name }}</td>
+      <td *tuiCell="'controls'" tuiTd>
+        <button tuiButton type="button" tuiHint="Состав" (click)="showParts(item)">
+          <tui-icon icon="@tui.clipboard-list"></tui-icon>
+        </button>
+      </td>
+    </tr>
   </tbody>
 </table>

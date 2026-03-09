@@ -1,42 +1,19 @@
-<form
-  [formGroup]="positionForm"
-  tuiCardLarge
-  (ngSubmit)="submit()"
->
+<form [formGroup]="positionForm" tuiCardLarge (ngSubmit)="submit()">
   <tui-textfield>
     <label tuiLabel>Код</label>
-    <input
-      formControlName="code"
-      tuiTextfield
-    />
+    <input formControlName="code" tuiTextfield />
   </tui-textfield>
 
   <tui-textfield>
     <label tuiLabel>Название</label>
-    <input
-      formControlName="name"
-      tuiTextfield
-    />
+    <input formControlName="name" tuiTextfield />
   </tui-textfield>
   <tui-textfield tuiChevron>
-    <input
-      tuiSelect
-      formControlName="type"
-    />
+    <input tuiSelect formControlName="type" />
 
-    <tui-data-list-wrapper
-      *tuiTextfieldDropdown
-      new
-      [items]="types"
-    />
+    <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="types" />
   </tui-textfield>
   <footer>
-    <button
-      tuiButton
-      type="submit"
-      [disabled]="positionForm.invalid"
-    >
-      Сохранить
-    </button>
+    <button tuiButton type="submit" [disabled]="positionForm.invalid">Сохранить</button>
   </footer>
 </form>

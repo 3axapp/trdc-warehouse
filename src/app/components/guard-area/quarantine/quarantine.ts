@@ -1,14 +1,21 @@
-import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {TuiAlertService, TuiButton, tuiDialog, TuiHint, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
-import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
-import {switchMap} from 'rxjs';
-import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
+import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
+import {
+  TuiAlertService,
+  TuiButton,
+  tuiDialog,
+  TuiHint,
+  TuiHintDirective,
+  TuiIcon,
+} from '@taiga-ui/core';
+import { TUI_CONFIRM, TuiConfirmData } from '@taiga-ui/kit';
+import { switchMap } from 'rxjs';
+import { TuiResponsiveDialogService } from '@taiga-ui/addon-mobile';
 import {
   QuarantineInvoice,
   QuarantineInvoiceCollection,
   QuarantineInvoiceItem,
 } from '../../../services/collections/quarantine-invoice.collection';
-import {AsyncPipe, DatePipe, NgForOf} from '@angular/common';
+import { AsyncPipe, DatePipe, NgForOf } from '@angular/common';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -19,13 +26,13 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
-import {PositionPipe} from '../../../pipes/position-pipe';
-import {SupplierPipe} from '../../../pipes/supplier-pipe';
-import {CacheService} from '../../../services/cache.service';
-import {Position, PositionsCollection} from '../../../services/collections/positions.collection';
-import {SuppliersCollection} from '../../../services/collections/suppliers.collection';
-import {QuarantineQcService} from '../../../services/quarantine-qc.service';
-import {QuarantineInvoiceForm} from './quarantine-invoice-form/quarantine-invoice-form';
+import { PositionPipe } from '../../../pipes/position-pipe';
+import { SupplierPipe } from '../../../pipes/supplier-pipe';
+import { CacheService } from '../../../services/cache.service';
+import { Position, PositionsCollection } from '../../../services/collections/positions.collection';
+import { SuppliersCollection } from '../../../services/collections/suppliers.collection';
+import { QuarantineQcService } from '../../../services/quarantine-qc.service';
+import { QuarantineInvoiceForm } from './quarantine-invoice-form/quarantine-invoice-form';
 
 @Component({
   selector: 'app-quarantine',
@@ -91,7 +98,7 @@ export class Quarantine implements OnInit {
   }
 
   protected broken(item: QuarantineInvoiceItem): number {
-    return (item.brokenQuantity ?? 0);
+    return item.brokenQuantity ?? 0;
   }
 
   protected async add(): Promise<void> {
@@ -106,19 +113,22 @@ export class Quarantine implements OnInit {
           await this.invoices.add(data);
           await this.load();
         } catch (e: any) {
-          this.alerts.open(e.message || e, {appearance: 'negative'}).subscribe();
+          this.alerts.open(e.message || e, { appearance: 'negative' }).subscribe();
         }
       },
     });
   }
 
-  protected async qualityControl(invoice: QuarantineInvoice, item: QuarantineInvoiceItem): Promise<void> {
+  protected async qualityControl(
+    invoice: QuarantineInvoice,
+    item: QuarantineInvoiceItem,
+  ): Promise<void> {
     const position = await this.cache.get<Position>('positions', item.positionId);
     if (!position) {
       return;
     }
 
-    const {QuarantineQcForm} = await import('./quarantine-qc-form/quarantine-qc-form');
+    const { QuarantineQcForm } = await import('./quarantine-qc-form/quarantine-qc-form');
     const dialog = tuiDialog(QuarantineQcForm, {
       injector: this.injector,
       dismissible: true,
@@ -131,12 +141,19 @@ export class Quarantine implements OnInit {
       positionName: position.name,
       maxQuantity: this.remaining(item),
     }).subscribe({
-      next: async ({date, quantity, brokenQuantity}) => {
+      next: async ({ date, quantity, brokenQuantity }) => {
         try {
-          await this.qcService.processQc(invoice, itemIndex, position, date, quantity, brokenQuantity);
+          await this.qcService.processQc(
+            invoice,
+            itemIndex,
+            position,
+            date,
+            quantity,
+            brokenQuantity,
+          );
           await this.load();
         } catch (e: any) {
-          this.alerts.open(e.message || e, {appearance: 'negative'}).subscribe();
+          this.alerts.open(e.message || e, { appearance: 'negative' }).subscribe();
         }
       },
     });
@@ -155,20 +172,22 @@ export class Quarantine implements OnInit {
         size: 's',
         data,
       })
-      .pipe(switchMap(async (response) => {
-        if (!response) {
-          return;
-        }
-        await this.invoices.archive(invoice.id);
-        await this.load();
-        return this.alerts.open('Счёт удалён');
-      }))
+      .pipe(
+        switchMap(async (response) => {
+          if (!response) {
+            return;
+          }
+          await this.invoices.archive(invoice.id);
+          await this.load();
+          return this.alerts.open('Счёт удалён');
+        }),
+      )
       .subscribe();
   }
 
   private async load(): Promise<void> {
-    return this.invoices.getList().then(list => {
-      this.data.set(list.filter(i => !i.deleted));
+    return this.invoices.getList().then((list) => {
+      this.data.set(list.filter((i) => !i.deleted));
     });
   }
 }

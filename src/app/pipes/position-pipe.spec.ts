@@ -1,8 +1,8 @@
-import {PositionPipe} from './position-pipe';
-import {CacheService} from '../services/cache.service';
-import {TestBed} from '@angular/core/testing';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {Position, PositionType} from '../services/collections/positions.collection';
+import { PositionPipe } from './position-pipe';
+import { CacheService } from '../services/cache.service';
+import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { Position, PositionType } from '../services/collections/positions.collection';
 
 describe('PositionPipe', () => {
   let mockCacheService: jasmine.SpyObj<CacheService>;
@@ -13,7 +13,7 @@ describe('PositionPipe', () => {
       providers: [
         PositionPipe,
         provideZonelessChangeDetection(),
-        {provide: CacheService, useValue: mockCacheService},
+        { provide: CacheService, useValue: mockCacheService },
       ],
     });
   });
@@ -23,7 +23,7 @@ describe('PositionPipe', () => {
     expect(pipe).toBeTruthy();
   });
 
-  it('exists or doesn\'t exist', async () => {
+  it("exists or doesn't exist", async () => {
     mockCacheService.get.and.callFake((async (collection: string, key: string) => {
       if (key === 'position1') {
         return {
@@ -41,8 +41,12 @@ describe('PositionPipe', () => {
     await expectAsync(pipe.transform('' as any)).toBeResolvedTo(null);
     await expectAsync(pipe.transform(0 as any)).toBeResolvedTo(null);
     await expectAsync(pipe.transform('not found')).toBeResolvedTo(null);
-    await expectAsync(pipe.transform('position1'))
-      .toBeResolvedTo({id: 'position1', code: 'position1', name: 'position1', type: PositionType.Normal});
+    await expectAsync(pipe.transform('position1')).toBeResolvedTo({
+      id: 'position1',
+      code: 'position1',
+      name: 'position1',
+      type: PositionType.Normal,
+    });
     expect(pipe).toBeTruthy();
   });
 });

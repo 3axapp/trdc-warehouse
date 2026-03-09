@@ -1,9 +1,9 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {Layout} from './layout';
-import {AuthService} from '../../../services/auth.service';
-import {provideRouter} from '@angular/router';
-import {provideZonelessChangeDetection} from '@angular/core';
+import { Layout } from './layout';
+import { AuthService } from '../../../services/auth.service';
+import { provideRouter } from '@angular/router';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 describe('Layout', () => {
   let component: Layout;
@@ -17,11 +17,10 @@ describe('Layout', () => {
       imports: [Layout],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: AuthService, useValue: mockAuthService},
+        { provide: AuthService, useValue: mockAuthService },
         provideRouter([]),
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Layout);
     component = fixture.componentInstance;

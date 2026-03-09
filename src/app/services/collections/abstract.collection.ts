@@ -19,7 +19,7 @@ import {
   SnapshotOptions,
   WithFieldValue,
 } from '@firebase/firestore';
-import {inject, Injectable} from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 export interface Deletable {
   id: string;
@@ -34,7 +34,7 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
 
   protected firestore = inject(Firestore);
 
-  async get(id: string, transaction?: Transaction): Promise<T> {
+  public async get(id: string, transaction?: Transaction): Promise<T> {
     const docRef = doc(this.getCollection(), id);
     const docSnap = await (transaction ? transaction.get(docRef) : getDoc(docRef));
 
@@ -44,7 +44,7 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
     throw new Error(`Document ${id} not found`);
   }
 
-  async add(item: Omit<T, 'id'>, transaction?: Transaction): Promise<string> {
+  public async add(item: Omit<T, 'id'>, transaction?: Transaction): Promise<string> {
     const docRef = doc(this.getCollection());
 
     if (transaction) {
@@ -56,7 +56,11 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
     return docRef.id;
   }
 
-  async update(id: string, item: WithFieldValue<Partial<T>>, transaction?: Transaction): Promise<void> {
+  public async update(
+    id: string,
+    item: WithFieldValue<Partial<T>>,
+    transaction?: Transaction,
+  ): Promise<void> {
     const docRef = doc(this.getCollection(), id);
     if (transaction) {
       await transaction.update(docRef, item as DocumentData);
@@ -65,31 +69,30 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
     }
   }
 
-  async archive(id: string): Promise<void> {
-    await this.update(id, {deleted: true} as Partial<T>);
+  public async archive(id: string): Promise<void> {
+    await this.update(id, { deleted: true } as Partial<T>);
   }
 
-  async unarchive(id: string): Promise<void> {
-    await this.update(id, {deleted: false} as Partial<T>);
+  public async unarchive(id: string): Promise<void> {
+    await this.update(id, { deleted: false } as Partial<T>);
   }
 
-  async delete(id: string): Promise<void> {
+  public async delete(id: string): Promise<void> {
+    console.warn('Попытка удаления', id);
     alert('не используем');
     // return;
     // const docRef = doc(this.firestore, this.positionsCollection, id);
     // await deleteDoc(docRef);
   }
 
-  async getList(
-    orderField = 'name', orderDirection: OrderByDirection = 'asc', ...queryConstraints: QueryConstraint[]
+  public async getList(
+    orderField = 'name',
+    orderDirection: OrderByDirection = 'asc',
+    ...queryConstraints: QueryConstraint[]
   ): Promise<T[]> {
-    const q = query(
-      this.getCollection(),
-      orderBy(orderField, orderDirection),
-      ...queryConstraints,
-    );
+    const q = query(this.getCollection(), orderBy(orderField, orderDirection), ...queryConstraints);
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => doc.data() as T);
+    return querySnapshot.docs.map((doc) => doc.data() as T);
   }
 
   public getCollection() {
@@ -103,7 +106,10 @@ export abstract class AbstractCollection<T extends Deletable = Deletable> {
         delete dbModel.id;
         return dbModel;
       },
-      fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData, DocumentData>, options?: SnapshotOptions): T {
+      fromFirestore(
+        snapshot: QueryDocumentSnapshot<DocumentData, DocumentData>,
+        options?: SnapshotOptions,
+      ): T {
         const data = snapshot.data(options) as T;
         data.id = snapshot.id;
         return data;

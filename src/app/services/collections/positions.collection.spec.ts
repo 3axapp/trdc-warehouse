@@ -1,7 +1,7 @@
-import {TestBed} from '@angular/core/testing';
-import {PositionsCollection, PositionType} from './positions.collection';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {doc, Firestore, getDoc} from '@angular/fire/firestore';
+import { TestBed } from '@angular/core/testing';
+import { PositionsCollection, PositionType } from './positions.collection';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { doc, Firestore, getDoc } from '@angular/fire/firestore';
 import {
   clearFirestoreEmulator,
   provideAuthTest,
@@ -40,8 +40,7 @@ describe('PositionsCollection', () => {
   });
 
   it('404', async () => {
-    await expectAsync(service.get('444'))
-      .toBeRejectedWithError('Document 444 not found');
+    await expectAsync(service.get('444')).toBeRejectedWithError('Document 444 not found');
   });
 
   it('Создание позиции', async () => {
@@ -65,7 +64,7 @@ describe('PositionsCollection', () => {
       name: 'update_name',
       type: PositionType.Normal,
     });
-    await service.update(id, {name: 'new name'});
+    await service.update(id, { name: 'new name' });
     const position = await service.get(id);
     expect(position).toEqual({
       id,
@@ -114,18 +113,18 @@ describe('PositionsCollection', () => {
       name: 'unique_name2',
       type: PositionType.Normal,
     };
-    const id1 = await service.add(data1);
+    await service.add(data1);
     const id2 = await service.add(data2);
     await expectAsync(service.add(data1)).toBeRejectedWithError();
     await expectAsync(service.update(id2, data1)).toBeRejectedWithError();
-    await service.update(id2, {name: 'name'});
+    await service.update(id2, { name: 'name' });
     await expectAsync(service.get(id2)).toBeResolvedTo({
       id: id2,
       code: 'unique_code2',
       name: 'name',
       type: PositionType.Normal,
     });
-    await service.update(id2, {code: 'code2'});
+    await service.update(id2, { code: 'code2' });
     await expectAsync(service.get(id2)).toBeResolvedTo({
       id: id2,
       code: 'code2',

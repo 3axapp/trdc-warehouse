@@ -1,5 +1,5 @@
-import {TestBed} from '@angular/core/testing';
-import {provideZonelessChangeDetection} from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import {
   clearFirestoreEmulator,
   provideAuthTest,
@@ -7,12 +7,16 @@ import {
   provideFirestoreTest,
   signOut,
   signupAndSignin,
-  testUser, testUser2,
+  testUser,
+  testUser2,
 } from '../../tests/utils';
-import {QuarantineQcService} from './quarantine-qc.service';
-import {QuarantineInvoice, QuarantineInvoiceCollection} from './collections/quarantine-invoice.collection';
-import {SuppliesCollection, QualityControlStatus} from './collections/supplies.collection';
-import {Position, PositionType} from './collections/positions.collection';
+import { QuarantineQcService } from './quarantine-qc.service';
+import {
+  QuarantineInvoice,
+  QuarantineInvoiceCollection,
+} from './collections/quarantine-invoice.collection';
+import { SuppliesCollection, QualityControlStatus } from './collections/supplies.collection';
+import { Position, PositionType } from './collections/positions.collection';
 
 const TEST_DATE = new Date(2025, 5, 15, 0, 0, 0, 0); // 15 июня 2025, локальное время
 const EXPECTED_DATE_STR = [
@@ -29,7 +33,11 @@ const testPosition: Position = {
 };
 
 // Каждый тест использует уникальный номер счёта, чтобы ключи счётчиков не пересекались
-const makeInvoice = (lot: string, number = lot, items = [{positionId: testPosition.id, quantity: 20}]): Omit<QuarantineInvoice, 'id'> => ({
+const makeInvoice = (
+  lot: string,
+  number = lot,
+  items = [{ positionId: testPosition.id, quantity: 20 }],
+): Omit<QuarantineInvoice, 'id'> => ({
   date: new Date('2025-06-01T00:00:00.000Z'),
   number,
   lot,
@@ -75,7 +83,7 @@ describe('QuarantineQcService', () => {
 
     const expectedLot = `${testPosition.code}-${EXPECTED_DATE_STR}-lot-supply-fields-1`;
     const supplies = await suppliesCollection.getList('date', 'desc');
-    const supply = supplies.find(s => s.lot === expectedLot);
+    const supply = supplies.find((s) => s.lot === expectedLot);
 
     expect(supply).toBeTruthy();
     expect(supply!.positionId).toBe(testPosition.id);
@@ -94,15 +102,17 @@ describe('QuarantineQcService', () => {
 
     const supplies = await suppliesCollection.getList('date', 'desc');
     const expectedLot = `${testPosition.code}-${EXPECTED_DATE_STR}-lot-format-check-1`;
-    const supply = supplies.find(s => s.lot === expectedLot);
+    const supply = supplies.find((s) => s.lot === expectedLot);
 
     expect(supply?.lot).toBe(expectedLot);
   });
 
   it('N не инкрементируется при повторном КК того же дня, счёта, позиции и пользователя', async () => {
-    const invoiceId = await invoicesCollection.add(makeInvoice('lot-counter-same-user', 'lot-counter-same-user', [
-      {positionId: testPosition.id, quantity: 20},
-    ]));
+    const invoiceId = await invoicesCollection.add(
+      makeInvoice('lot-counter-same-user', 'lot-counter-same-user', [
+        { positionId: testPosition.id, quantity: 20 },
+      ]),
+    );
     let invoice = await invoicesCollection.get(invoiceId);
 
     await service.processQc(invoice, 0, testPosition, TEST_DATE, 5, 0);
@@ -111,16 +121,18 @@ describe('QuarantineQcService', () => {
 
     const supplies = await suppliesCollection.getList('date', 'desc');
     const prefix = `${testPosition.code}-${EXPECTED_DATE_STR}-lot-counter-same-user-`;
-    const lots = supplies.filter(s => s.lot?.toString().startsWith(prefix));
+    const lots = supplies.filter((s) => s.lot?.toString().startsWith(prefix));
 
     expect(lots).toHaveSize(1);
     expect(lots[0].quantity).toBe(8);
   });
 
   it('N инкрементируется при повторном КК того же дня, счёта, позиции и другим пользователем', async () => {
-    const invoiceId = await invoicesCollection.add(makeInvoice('lot-counter-diff-user', 'lot-counter-diff-user', [
-      {positionId: testPosition.id, quantity: 20},
-    ]));
+    const invoiceId = await invoicesCollection.add(
+      makeInvoice('lot-counter-diff-user', 'lot-counter-diff-user', [
+        { positionId: testPosition.id, quantity: 20 },
+      ]),
+    );
     let invoice = await invoicesCollection.get(invoiceId);
 
     await service.processQc(invoice, 0, testPosition, TEST_DATE, 5, 0);
@@ -131,7 +143,7 @@ describe('QuarantineQcService', () => {
 
     const prefix = `${testPosition.code}-${EXPECTED_DATE_STR}-lot-counter-diff-user-`;
     const supplies = await suppliesCollection.getList('date', 'desc');
-    const lots = supplies.map(s => s.lot?.toString()).filter(s => s?.startsWith(prefix));
+    const lots = supplies.map((s) => s.lot?.toString()).filter((s) => s?.startsWith(prefix));
 
     expect(lots).toHaveSize(2);
     expect(lots).toContain(`${prefix}1`);
@@ -162,10 +174,12 @@ describe('QuarantineQcService', () => {
   });
 
   it('Не обновляет другие позиции счёта', async () => {
-    const invoiceId = await invoicesCollection.add(makeInvoice('lot-multi-items', 'lot-multi-items', [
-      {positionId: testPosition.id, quantity: 20},
-      {positionId: 'other-pos', quantity: 15},
-    ]));
+    const invoiceId = await invoicesCollection.add(
+      makeInvoice('lot-multi-items', 'lot-multi-items', [
+        { positionId: testPosition.id, quantity: 20 },
+        { positionId: 'other-pos', quantity: 15 },
+      ]),
+    );
     const invoice = await invoicesCollection.get(invoiceId);
 
     await service.processQc(invoice, 0, testPosition, TEST_DATE, 5, 0);
@@ -179,24 +193,27 @@ describe('QuarantineQcService', () => {
     const invoiceId = await invoicesCollection.add(makeInvoice('lot-invalid-zero'));
     const invoice = await invoicesCollection.get(invoiceId);
 
-    await expectAsync(service.processQc(invoice, 0, testPosition, TEST_DATE, 0, 0))
-      .toBeRejectedWithError('Неверное количество');
+    await expectAsync(
+      service.processQc(invoice, 0, testPosition, TEST_DATE, 0, 0),
+    ).toBeRejectedWithError('Неверное количество');
   });
 
   it('Выбрасывает ошибку если brokenQuantity < 0', async () => {
     const invoiceId = await invoicesCollection.add(makeInvoice('lot-invalid-broken'));
     const invoice = await invoicesCollection.get(invoiceId);
 
-    await expectAsync(service.processQc(invoice, 0, testPosition, TEST_DATE, 5, -1))
-      .toBeRejectedWithError('Неверное количество');
+    await expectAsync(
+      service.processQc(invoice, 0, testPosition, TEST_DATE, 5, -1),
+    ).toBeRejectedWithError('Неверное количество');
   });
 
   it('Выбрасывает ошибку если quantity + brokenQuantity > доступного остатка', async () => {
     const invoiceId = await invoicesCollection.add(makeInvoice('lot-over-limit'));
     const invoice = await invoicesCollection.get(invoiceId);
 
-    await expectAsync(service.processQc(invoice, 0, testPosition, TEST_DATE, 15, 10))
-      .toBeRejectedWithError('Неверное количество');
+    await expectAsync(
+      service.processQc(invoice, 0, testPosition, TEST_DATE, 15, 10),
+    ).toBeRejectedWithError('Неверное количество');
   });
 
   it('Выбрасывает ошибку если остаток исчерпан', async () => {
@@ -206,24 +223,23 @@ describe('QuarantineQcService', () => {
     await service.processQc(invoice, 0, testPosition, TEST_DATE, 20, 0);
     invoice = await invoicesCollection.get(invoiceId);
 
-    await expectAsync(service.processQc(invoice, 0, testPosition, TEST_DATE, 1, 0))
-      .toBeRejectedWithError('Неверное количество');
+    await expectAsync(
+      service.processQc(invoice, 0, testPosition, TEST_DATE, 1, 0),
+    ).toBeRejectedWithError('Неверное количество');
   });
 
   it('Допускает brokenQuantity = 0', async () => {
     const invoiceId = await invoicesCollection.add(makeInvoice('lot-zero-broken'));
     const invoice = await invoicesCollection.get(invoiceId);
 
-    await expectAsync(service.processQc(invoice, 0, testPosition, TEST_DATE, 10, 0))
-      .toBeResolved();
+    await expectAsync(service.processQc(invoice, 0, testPosition, TEST_DATE, 10, 0)).toBeResolved();
   });
 
   it('quantity + brokenQuantity = доступный остаток - валидно', async () => {
     const invoiceId = await invoicesCollection.add(makeInvoice('lot-exact-limit'));
     const invoice = await invoicesCollection.get(invoiceId);
 
-    await expectAsync(service.processQc(invoice, 0, testPosition, TEST_DATE, 12, 8))
-      .toBeResolved();
+    await expectAsync(service.processQc(invoice, 0, testPosition, TEST_DATE, 12, 8)).toBeResolved();
 
     const updated = await invoicesCollection.get(invoiceId);
     expect(updated.items[0].usedQuantity).toBe(20);

@@ -1,9 +1,19 @@
-import {inject, Injectable} from '@angular/core';
-import {Auth} from '@angular/fire/auth';
-import {collection, doc, DocumentReference, Firestore, runTransaction} from '@angular/fire/firestore';
-import {Position} from './collections/positions.collection';
-import {QuarantineInvoice, QuarantineInvoiceCollection, QuarantineInvoiceItem} from './collections/quarantine-invoice.collection';
-import {QualityControlStatus} from './collections/supplies.collection';
+import { inject, Injectable } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
+import {
+  collection,
+  doc,
+  DocumentReference,
+  Firestore,
+  runTransaction,
+} from '@angular/fire/firestore';
+import { Position } from './collections/positions.collection';
+import {
+  QuarantineInvoice,
+  QuarantineInvoiceCollection,
+  QuarantineInvoiceItem,
+} from './collections/quarantine-invoice.collection';
+import { QualityControlStatus } from './collections/supplies.collection';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +23,7 @@ export class QuarantineQcService {
   private readonly auth = inject(Auth);
   private readonly invoicesCollection = inject(QuarantineInvoiceCollection);
 
-  async processQc(
+  public async processQc(
     invoice: QuarantineInvoice,
     itemIndex: number,
     position: Position,
@@ -54,7 +64,7 @@ export class QuarantineQcService {
       let currentQty: number | null = null;
 
       if (userDoc.exists()) {
-        const {supplyId} = userDoc.data() as {supplyId: string};
+        const { supplyId } = userDoc.data() as { supplyId: string };
         existingSupplyRef = doc(suppliesRef, supplyId);
         const currentSupply = await transaction.get(existingSupplyRef);
         currentQty = (currentSupply.data()?.['quantity'] ?? 0) as number;
@@ -63,14 +73,18 @@ export class QuarantineQcService {
       // Записи
       const updatedItems: QuarantineInvoiceItem[] = invoice.items.map((it, idx) =>
         idx === itemIndex
-          ? {...it, usedQuantity: (it.usedQuantity ?? 0) + total, brokenQuantity: (it.brokenQuantity ?? 0) + brokenQuantity}
+          ? {
+              ...it,
+              usedQuantity: (it.usedQuantity ?? 0) + total,
+              brokenQuantity: (it.brokenQuantity ?? 0) + brokenQuantity,
+            }
           : it,
       );
-      await this.invoicesCollection.update(invoice.id, {items: updatedItems}, transaction);
+      await this.invoicesCollection.update(invoice.id, { items: updatedItems }, transaction);
 
       if (existingSupplyRef !== null && currentQty !== null) {
         // Тот же пользователь — обновляем существующую поставку
-        transaction.update(existingSupplyRef, {quantity: currentQty + quantity});
+        transaction.update(existingSupplyRef, { quantity: currentQty + quantity });
       } else {
         // Новый пользователь — создаём поставку с инкрементом N
         const n = (counterDoc.exists() ? (counterDoc.data()['count'] as number) : 0) + 1;
@@ -89,8 +103,8 @@ export class QuarantineQcService {
           lot,
         });
 
-        transaction.set(counterRef, {count: n});
-        transaction.set(userRef, {supplyId: supplyRef.id, lot});
+        transaction.set(counterRef, { count: n });
+        transaction.set(userRef, { supplyId: supplyRef.id, lot });
       }
     });
   }

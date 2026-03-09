@@ -1,7 +1,7 @@
-import {TestBed} from '@angular/core/testing';
-import {ExecutorsCollection} from './executors.collection';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {provideFirebaseAppTest, provideFirestoreTest} from '../../../tests/utils';
+import { TestBed } from '@angular/core/testing';
+import { ExecutorsCollection } from './executors.collection';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideFirebaseAppTest, provideFirestoreTest } from '../../../tests/utils';
 
 describe('ExecutorsCollection', () => {
   let service: ExecutorsCollection;

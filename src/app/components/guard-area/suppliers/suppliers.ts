@@ -1,6 +1,6 @@
-import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {NgForOf} from '@angular/common';
-import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
+import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
+import { NgForOf } from '@angular/common';
+import { TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon } from '@taiga-ui/core';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -10,11 +10,11 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
-import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
-import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
-import {switchMap} from 'rxjs';
-import {Supplier, SuppliersCollection} from '../../../services/collections/suppliers.collection';
-import {SupplierForm} from './supplier-form/supplier-form';
+import { TuiResponsiveDialogService } from '@taiga-ui/addon-mobile';
+import { TUI_CONFIRM, TuiConfirmData } from '@taiga-ui/kit';
+import { switchMap } from 'rxjs';
+import { Supplier, SuppliersCollection } from '../../../services/collections/suppliers.collection';
+import { SupplierForm } from './supplier-form/supplier-form';
 
 @Component({
   selector: 'app-suppliers',
@@ -40,10 +40,7 @@ export class Suppliers implements OnInit {
   private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly alerts = inject(TuiAlertService);
 
-  protected columns = [
-    'name',
-    'actions',
-  ];
+  protected columns = ['name', 'actions'];
 
   protected data = signal<Supplier[]>([]);
 
@@ -72,14 +69,16 @@ export class Suppliers implements OnInit {
         size: 's',
         data,
       })
-      .pipe(switchMap(async (response) => {
-        if (!response) {
-          return;
-        }
-        await this.suppliers.archive(supplier.id);
-        await this.load();
-        return this.alerts.open('Поставщик удален');
-      }))
+      .pipe(
+        switchMap(async (response) => {
+          if (!response) {
+            return;
+          }
+          await this.suppliers.archive(supplier.id);
+          await this.load();
+          return this.alerts.open('Поставщик удален');
+        }),
+      )
       .subscribe();
   }
 
@@ -96,14 +95,16 @@ export class Suppliers implements OnInit {
         size: 's',
         data,
       })
-      .pipe(switchMap(async (response) => {
-        if (!response) {
-          return;
-        }
-        await this.suppliers.unarchive(supplier.id);
-        await this.load();
-        return this.alerts.open('Поставщик восстановлен');
-      }))
+      .pipe(
+        switchMap(async (response) => {
+          if (!response) {
+            return;
+          }
+          await this.suppliers.unarchive(supplier.id);
+          await this.load();
+          return this.alerts.open('Поставщик восстановлен');
+        }),
+      )
       .subscribe();
   }
 
@@ -131,7 +132,7 @@ export class Suppliers implements OnInit {
   }
 
   private async load(): Promise<void> {
-    return this.suppliers.getList().then(suppliers => {
+    return this.suppliers.getList().then((suppliers) => {
       this.data.set(suppliers.sort((a, b) => (a.deleted ? 1 : 0) - (b.deleted ? 1 : 0)));
     });
   }

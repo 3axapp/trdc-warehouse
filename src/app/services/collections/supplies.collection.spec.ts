@@ -1,6 +1,6 @@
-import {TestBed} from '@angular/core/testing';
-import {SuppliesCollection} from './supplies.collection';
-import {provideZonelessChangeDetection} from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { SuppliesCollection } from './supplies.collection';
+import { provideZonelessChangeDetection } from '@angular/core';
 import {
   signOut,
   provideAuthTest,

@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {AbstractCollection, Deletable} from './abstract.collection';
-import {doc, runTransaction} from '@angular/fire/firestore';
-import {OrderByDirection, QueryDocumentSnapshot, SnapshotOptions} from '@firebase/firestore';
+import { Injectable } from '@angular/core';
+import { AbstractCollection, Deletable } from './abstract.collection';
+import { doc, runTransaction } from '@angular/fire/firestore';
+import { OrderByDirection, QueryDocumentSnapshot, SnapshotOptions } from '@firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +12,9 @@ export class QuarantineInvoiceCollection extends AbstractCollection<QuarantineIn
   private readonly lotUnique = 'quarantineInvoiceLots';
 
   public override async getList(
-    orderField: string = 'date', orderDirection: OrderByDirection = 'desc'): Promise<QuarantineInvoice[]> {
+    orderField = 'date',
+    orderDirection: OrderByDirection = 'desc',
+  ): Promise<QuarantineInvoice[]> {
     return super.getList(orderField, orderDirection);
   }
 
@@ -25,7 +27,7 @@ export class QuarantineInvoiceCollection extends AbstractCollection<QuarantineIn
       if (check.exists()) {
         throw new Error(`Лот "${item.lot}" уже существует`);
       }
-      transaction.set(lotRef, {id: invoiceDoc.id});
+      transaction.set(lotRef, { id: invoiceDoc.id });
       transaction.set(invoiceDoc, item);
     });
 
@@ -34,7 +36,10 @@ export class QuarantineInvoiceCollection extends AbstractCollection<QuarantineIn
 
   protected override getConverter() {
     const converter = super.getConverter()!;
-    converter.fromFirestore = (snapshot: QueryDocumentSnapshot, options?: SnapshotOptions): QuarantineInvoice => {
+    converter.fromFirestore = (
+      snapshot: QueryDocumentSnapshot,
+      options?: SnapshotOptions,
+    ): QuarantineInvoice => {
       const data = snapshot.data(options) as QuarantineInvoice;
       return {
         ...data,

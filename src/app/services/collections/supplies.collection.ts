@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {AbstractCollection, Deletable} from './abstract.collection';
-import {OrderByDirection, QueryDocumentSnapshot, SnapshotOptions} from '@firebase/firestore';
+import { Injectable } from '@angular/core';
+import { AbstractCollection, Deletable } from './abstract.collection';
+import { OrderByDirection, QueryDocumentSnapshot, SnapshotOptions } from '@firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -9,14 +9,19 @@ export class SuppliesCollection extends AbstractCollection<Supply> {
   protected override collectionName = 'supplies';
 
   public override async getList(
-    orderField: string = 'date', orderDirection: OrderByDirection = 'desc'): Promise<Supply[]> {
-    console.log(orderDirection)
+    orderField = 'date',
+    orderDirection: OrderByDirection = 'desc',
+  ): Promise<Supply[]> {
+    console.log(orderDirection);
     return super.getList(orderField, orderDirection);
   }
 
   protected override getConverter() {
     const converter = super.getConverter()!;
-    converter.fromFirestore = (snapshot: QueryDocumentSnapshot, options?: SnapshotOptions): Supply => {
+    converter.fromFirestore = (
+      snapshot: QueryDocumentSnapshot,
+      options?: SnapshotOptions,
+    ): Supply => {
       const data = snapshot.data(options) as Supply;
       const result = {
         ...data,

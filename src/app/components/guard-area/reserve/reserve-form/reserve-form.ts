@@ -1,9 +1,9 @@
-import {Component, inject} from '@angular/core';
-import {injectContext} from '@taiga-ui/polymorpheus';
-import {TuiButton, TuiDialogContext, TuiTextfield} from '@taiga-ui/core';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {TuiCardLarge} from '@taiga-ui/layout';
-import {TuiInputNumber} from '@taiga-ui/kit';
+import { Component, inject } from '@angular/core';
+import { injectContext } from '@taiga-ui/polymorpheus';
+import { TuiButton, TuiDialogContext, TuiTextfield } from '@taiga-ui/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TuiCardLarge } from '@taiga-ui/layout';
+import { TuiInputNumber } from '@taiga-ui/kit';
 
 export interface ReserveFormOptions {
   available: number;
@@ -11,13 +11,7 @@ export interface ReserveFormOptions {
 
 @Component({
   selector: 'app-reserve-form',
-  imports: [
-    ReactiveFormsModule,
-    TuiButton,
-    TuiCardLarge,
-    TuiInputNumber,
-    TuiTextfield,
-  ],
+  imports: [ReactiveFormsModule, TuiButton, TuiCardLarge, TuiInputNumber, TuiTextfield],
   templateUrl: './reserve-form.html',
   styleUrl: './reserve-form.scss',
 })

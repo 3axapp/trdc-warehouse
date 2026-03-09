@@ -1,10 +1,10 @@
-import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
-import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
-import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
-import {switchMap} from 'rxjs';
-import {Executor, ExecutorsCollection} from '../../../services/collections/executors.collection';
-import {NgForOf} from '@angular/common';
+import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
+import { TuiResponsiveDialogService } from '@taiga-ui/addon-mobile';
+import { TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon } from '@taiga-ui/core';
+import { TUI_CONFIRM, TuiConfirmData } from '@taiga-ui/kit';
+import { switchMap } from 'rxjs';
+import { Executor, ExecutorsCollection } from '../../../services/collections/executors.collection';
+import { NgForOf } from '@angular/common';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -14,7 +14,7 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
-import {ExecutorForm} from './executor-form/executor-form';
+import { ExecutorForm } from './executor-form/executor-form';
 
 @Component({
   selector: 'app-executors',
@@ -40,11 +40,7 @@ export class Executors implements OnInit {
   private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly alerts = inject(TuiAlertService);
 
-  protected columns = [
-    'name',
-    'post',
-    'actions',
-  ];
+  protected columns = ['name', 'post', 'actions'];
 
   protected data = signal<Executor[]>([]);
 
@@ -73,14 +69,16 @@ export class Executors implements OnInit {
         size: 's',
         data,
       })
-      .pipe(switchMap(async (response) => {
-        if (!response) {
-          return;
-        }
-        await this.executors.archive(executor.id);
-        await this.load();
-        return this.alerts.open('Исполнитель удален');
-      }))
+      .pipe(
+        switchMap(async (response) => {
+          if (!response) {
+            return;
+          }
+          await this.executors.archive(executor.id);
+          await this.load();
+          return this.alerts.open('Исполнитель удален');
+        }),
+      )
       .subscribe();
   }
 
@@ -97,14 +95,16 @@ export class Executors implements OnInit {
         size: 's',
         data,
       })
-      .pipe(switchMap(async (response) => {
-        if (!response) {
-          return;
-        }
-        await this.executors.unarchive(executor.id);
-        await this.load();
-        return this.alerts.open('Исполнитель восстановлен');
-      }))
+      .pipe(
+        switchMap(async (response) => {
+          if (!response) {
+            return;
+          }
+          await this.executors.unarchive(executor.id);
+          await this.load();
+          return this.alerts.open('Исполнитель восстановлен');
+        }),
+      )
       .subscribe();
   }
 
@@ -131,7 +131,7 @@ export class Executors implements OnInit {
   }
 
   private async load(): Promise<void> {
-    return this.executors.getList().then(suppliers => {
+    return this.executors.getList().then((suppliers) => {
       this.data.set(suppliers.sort((a, b) => (a.deleted ? 1 : 0) - (b.deleted ? 1 : 0)));
     });
   }

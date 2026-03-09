@@ -1,25 +1,20 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {injectContext} from '@taiga-ui/polymorpheus';
-import {TuiButton, TuiDialogContext, TuiTextfield} from '@taiga-ui/core';
-import {Supplier} from '../../../../services/collections/suppliers.collection';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {TuiCard} from '@taiga-ui/layout';
-import {Executor} from '../../../../services/collections/executors.collection';
+import { Component, inject, OnInit } from '@angular/core';
+import { injectContext } from '@taiga-ui/polymorpheus';
+import { TuiButton, TuiDialogContext, TuiTextfield } from '@taiga-ui/core';
+import { Supplier } from '../../../../services/collections/suppliers.collection';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TuiCard } from '@taiga-ui/layout';
+import { Executor } from '../../../../services/collections/executors.collection';
 
 @Component({
   selector: 'app-executor-form',
-  imports: [
-    ReactiveFormsModule,
-    TuiCard,
-    TuiTextfield,
-    TuiButton,
-  ],
+  imports: [ReactiveFormsModule, TuiCard, TuiTextfield, TuiButton],
   templateUrl: './executor-form.html',
   styleUrl: './executor-form.scss',
 })
 export class ExecutorForm implements OnInit {
-
-  public readonly context = injectContext<TuiDialogContext<Omit<Executor, 'id'>, Executor | undefined>>();
+  public readonly context =
+    injectContext<TuiDialogContext<Omit<Executor, 'id'>, Executor | undefined>>();
 
   private fb = inject(FormBuilder);
 

@@ -1,8 +1,8 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {ExecutorForm} from './executor-form';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {Supplier} from '../../../../services/collections/suppliers.collection';
-import {POLYMORPHEUS_CONTEXT} from '@taiga-ui/polymorpheus';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ExecutorForm } from './executor-form';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { Supplier } from '../../../../services/collections/suppliers.collection';
+import { POLYMORPHEUS_CONTEXT } from '@taiga-ui/polymorpheus';
 
 describe('ExecutorForm', () => {
   let component: ExecutorForm;
@@ -25,8 +25,7 @@ describe('ExecutorForm', () => {
           useValue: mockDialogContext,
         },
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ExecutorForm);
     component = fixture.componentInstance;

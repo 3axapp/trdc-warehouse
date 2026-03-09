@@ -1,9 +1,9 @@
-import {environment} from '../environments/environment.development';
-import {initializeApp, provideFirebaseApp} from '@angular/fire/app';
-import {connectFirestoreEmulator, getFirestore, provideFirestore} from '@angular/fire/firestore';
-import {Auth, connectAuthEmulator, getAuth, provideAuth} from '@angular/fire/auth';
-import {TestBedStatic} from '@angular/core/testing';
-import {AuthService} from '../app/services/auth.service';
+import { environment } from '../environments/environment.development';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { connectFirestoreEmulator, getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { Auth, connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
+import { TestBedStatic } from '@angular/core/testing';
+import { AuthService } from '../app/services/auth.service';
 
 export const testUser = {
   id: '',
@@ -39,17 +39,20 @@ export async function clearFirestoreEmulator(): Promise<void> {
   }
 }
 
-export const provideFirebaseAppTest = () => provideFirebaseApp(() => initializeApp(environment.firebaseConfig));
-export const provideFirestoreTest = () => provideFirestore(() => {
-  const firestoreInstance = getFirestore();
-  connectFirestoreEmulator(firestoreInstance, 'localhost', 8080);
-  return firestoreInstance;
-});
-export const provideAuthTest = () => provideAuth(() => {
-  const auth = getAuth();
-  connectAuthEmulator(auth, 'http://localhost:9099');
-  return auth;
-});
+export const provideFirebaseAppTest = () =>
+  provideFirebaseApp(() => initializeApp(environment.firebaseConfig));
+export const provideFirestoreTest = () =>
+  provideFirestore(() => {
+    const firestoreInstance = getFirestore();
+    connectFirestoreEmulator(firestoreInstance, 'localhost', 8080);
+    return firestoreInstance;
+  });
+export const provideAuthTest = () =>
+  provideAuth(() => {
+    const auth = getAuth();
+    connectAuthEmulator(auth, 'http://localhost:9099');
+    return auth;
+  });
 export const signupAndSignin = async (TestBed: TestBedStatic, user = testUser) => {
   const auth = TestBed.inject(Auth);
   if (!auth.currentUser) {

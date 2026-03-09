@@ -1,29 +1,13 @@
-<form
-  [formGroup]="positionForm"
-  tuiCardLarge
-  (ngSubmit)="submit()"
->
+<form [formGroup]="positionForm" tuiCardLarge (ngSubmit)="submit()">
   <tui-textfield>
     <label tuiLabel>ФИО</label>
-    <input
-      formControlName="name"
-      tuiTextfield
-    />
+    <input formControlName="name" tuiTextfield />
   </tui-textfield>
   <tui-textfield>
     <label tuiLabel>Должность</label>
-    <input
-      formControlName="post"
-      tuiTextfield
-    />
+    <input formControlName="post" tuiTextfield />
   </tui-textfield>
   <footer>
-    <button
-      tuiButton
-      type="submit"
-      [disabled]="positionForm.invalid"
-    >
-      Сохранить
-    </button>
+    <button tuiButton type="submit" [disabled]="positionForm.invalid">Сохранить</button>
   </footer>
 </form>

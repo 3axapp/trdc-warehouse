@@ -1,34 +1,20 @@
-<form [formGroup]="form"
-      tuiCardLarge
-      (ngSubmit)="submit()">
-
+<form [formGroup]="form" tuiCardLarge (ngSubmit)="submit()">
   <p class="position-name">{{ context.data.positionName }}</p>
 
   <tui-textfield>
     <label tuiLabel>Дата</label>
-    <input
-      tuiInputDate
-      formControlName="date"
-    />
-    <tui-calendar *tuiTextfieldDropdown/>
+    <input tuiInputDate formControlName="date" />
+    <tui-calendar *tuiTextfieldDropdown />
   </tui-textfield>
 
   <tui-textfield>
     <label tuiLabel>Принято (макс. {{ context.data.maxQuantity }})</label>
-    <input
-      tuiInputNumber
-      formControlName="quantity"
-      [min]="1"
-    />
+    <input tuiInputNumber formControlName="quantity" [min]="1" />
   </tui-textfield>
 
   <tui-textfield>
     <label tuiLabel>Брак</label>
-    <input
-      tuiInputNumber
-      formControlName="brokenQuantity"
-      [min]="0"
-    />
+    <input tuiInputNumber formControlName="brokenQuantity" [min]="0" />
   </tui-textfield>
 
   <tui-error
@@ -37,12 +23,6 @@
   />
 
   <footer>
-    <button
-      tuiButton
-      type="submit"
-      [disabled]="form.invalid"
-    >
-      Подтвердить
-    </button>
+    <button tuiButton type="submit" [disabled]="form.invalid">Подтвердить</button>
   </footer>
 </form>

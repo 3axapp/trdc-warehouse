@@ -1,8 +1,8 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {Login} from './login';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {AuthService} from '../../services/auth.service';
+import { Login } from './login';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
 
 describe('Login', () => {
   let component: Login;
@@ -15,10 +15,9 @@ describe('Login', () => {
       imports: [Login],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: AuthService, useValue: mockAuthService},
+        { provide: AuthService, useValue: mockAuthService },
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Login);
     component = fixture.componentInstance;

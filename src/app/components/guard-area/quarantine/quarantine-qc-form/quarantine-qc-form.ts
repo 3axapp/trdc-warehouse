@@ -1,17 +1,17 @@
-import {Component, inject} from '@angular/core';
-import {injectContext} from '@taiga-ui/polymorpheus';
+import { Component, inject } from '@angular/core';
+import { injectContext } from '@taiga-ui/polymorpheus';
+import { TuiButton, TuiCalendar, TuiDialogContext, TuiError, TuiTextfield } from '@taiga-ui/core';
 import {
-  TuiButton,
-  TuiCalendar,
-  TuiDialogContext,
-  TuiError,
-  TuiTextfield,
-} from '@taiga-ui/core';
-import {AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
-import {NgIf} from '@angular/common';
-import {TuiCardLarge} from '@taiga-ui/layout';
-import {TuiInputDate, TuiInputNumber} from '@taiga-ui/kit';
-import {TuiDay} from '@taiga-ui/cdk';
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
+import { NgIf } from '@angular/common';
+import { TuiCardLarge } from '@taiga-ui/layout';
+import { TuiInputDate, TuiInputNumber } from '@taiga-ui/kit';
+import { TuiDay } from '@taiga-ui/cdk';
 
 export interface QcFormData {
   positionName: string;
@@ -51,16 +51,20 @@ export class QuarantineQcForm {
       quantity: [null as unknown as number, [Validators.required, Validators.min(1)]],
       brokenQuantity: [null as unknown as number, [Validators.required, Validators.min(0)]],
     },
-    {validators: (g: AbstractControl): ValidationErrors | null => {
-      const qty = g.get('quantity')?.value ?? 0;
-      const broken = g.get('brokenQuantity')?.value ?? 0;
-      return qty + broken > this.context.data.maxQuantity ? {exceedsMax: true} : null;
-    }},
+    {
+      validators: (g: AbstractControl): ValidationErrors | null => {
+        const qty = g.get('quantity')?.value ?? 0;
+        const broken = g.get('brokenQuantity')?.value ?? 0;
+        return qty + broken > this.context.data.maxQuantity ? { exceedsMax: true } : null;
+      },
+    },
   );
 
   protected get totalError(): boolean {
-    return this.form.hasError('exceedsMax') &&
-      (this.form.controls.quantity.dirty || this.form.controls.brokenQuantity.dirty);
+    return (
+      this.form.hasError('exceedsMax') &&
+      (this.form.controls.quantity.dirty || this.form.controls.brokenQuantity.dirty)
+    );
   }
 
   protected submit(): void {

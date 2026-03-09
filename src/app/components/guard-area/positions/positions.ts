@@ -1,24 +1,17 @@
-import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {TuiTable} from '@taiga-ui/addon-table';
-import {Position, PositionsCollection} from '../../../services/collections/positions.collection';
-import {TuiAlertService, TuiButton, tuiDialog, TuiHint, TuiIcon} from '@taiga-ui/core';
-import {switchMap} from 'rxjs';
-import {NgForOf} from '@angular/common';
-import {PositionTypePipe} from '../../../pipes/position-type-pipe';
-import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
-import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
-import {PositionForm} from './position-form/position-form';
+import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
+import { TuiTable } from '@taiga-ui/addon-table';
+import { Position, PositionsCollection } from '../../../services/collections/positions.collection';
+import { TuiAlertService, TuiButton, tuiDialog, TuiHint, TuiIcon } from '@taiga-ui/core';
+import { switchMap } from 'rxjs';
+import { NgForOf } from '@angular/common';
+import { PositionTypePipe } from '../../../pipes/position-type-pipe';
+import { TuiResponsiveDialogService } from '@taiga-ui/addon-mobile';
+import { TUI_CONFIRM, TuiConfirmData } from '@taiga-ui/kit';
+import { PositionForm } from './position-form/position-form';
 
 @Component({
   selector: 'app-positions',
-  imports: [
-    TuiTable,
-    TuiButton,
-    TuiIcon,
-    TuiHint,
-    NgForOf,
-    PositionTypePipe,
-  ],
+  imports: [TuiTable, TuiButton, TuiIcon, TuiHint, NgForOf, PositionTypePipe],
   templateUrl: './positions.html',
   styleUrl: './positions.scss',
 })
@@ -28,12 +21,7 @@ export class Positions implements OnInit {
   private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly alerts = inject(TuiAlertService);
 
-  protected columns = [
-    'code',
-    'name',
-    'type',
-    'actions',
-  ];
+  protected columns = ['code', 'name', 'type', 'actions'];
 
   protected data = signal<Position[]>([]);
 
@@ -62,14 +50,16 @@ export class Positions implements OnInit {
         size: 's',
         data,
       })
-      .pipe(switchMap(async (response) => {
-        if (!response) {
-          return;
-        }
-        await this.positions.archive(position.id);
-        await this.load();
-        return this.alerts.open('Позиция удалена');
-      }))
+      .pipe(
+        switchMap(async (response) => {
+          if (!response) {
+            return;
+          }
+          await this.positions.archive(position.id);
+          await this.load();
+          return this.alerts.open('Позиция удалена');
+        }),
+      )
       .subscribe();
   }
 
@@ -86,14 +76,16 @@ export class Positions implements OnInit {
         size: 's',
         data,
       })
-      .pipe(switchMap(async (response) => {
-        if (!response) {
-          return;
-        }
-        await this.positions.unarchive(position.id);
-        await this.load();
-        return this.alerts.open('Позиция восстановлена');
-      }))
+      .pipe(
+        switchMap(async (response) => {
+          if (!response) {
+            return;
+          }
+          await this.positions.unarchive(position.id);
+          await this.load();
+          return this.alerts.open('Позиция восстановлена');
+        }),
+      )
       .subscribe();
   }
 
@@ -116,7 +108,7 @@ export class Positions implements OnInit {
   }
 
   private async load(): Promise<void> {
-    return this.positions.getList().then(positions => {
+    return this.positions.getList().then((positions) => {
       this.data.set(positions.sort((a, b) => (a.deleted ? 1 : 0) - (b.deleted ? 1 : 0)));
     });
   }

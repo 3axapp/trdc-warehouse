@@ -1,5 +1,5 @@
-import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon} from '@taiga-ui/core';
+import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
+import { TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon } from '@taiga-ui/core';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -10,10 +10,10 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
-import {DatePipe, NgFor} from '@angular/common';
-import {Reserve, ReserveCollection} from '../../../services/collections/reserve.collection';
-import {ReserveService} from '../../../services/reserve.service';
-import {ReserveForm} from './reserve-form/reserve-form';
+import { DatePipe, NgFor } from '@angular/common';
+import { Reserve, ReserveCollection } from '../../../services/collections/reserve.collection';
+import { ReserveService } from '../../../services/reserve.service';
+import { ReserveForm } from './reserve-form/reserve-form';
 
 @Component({
   selector: 'app-reserve',
@@ -68,7 +68,7 @@ export class ReserveComponent implements OnInit {
     try {
       availability = await this.reserveService.getMaxQuantity();
     } catch (e: any) {
-      this.alerts.open(e.message || e, {appearance: 'negative'}).subscribe();
+      this.alerts.open(e.message || e, { appearance: 'negative' }).subscribe();
       return;
     }
 
@@ -83,19 +83,19 @@ export class ReserveComponent implements OnInit {
       label: 'Новый резерв',
     });
 
-    dialog({available: availability.available}).subscribe({
+    dialog({ available: availability.available }).subscribe({
       next: async (quantity) => {
         try {
           await this.reserveService.createReserve(quantity);
           await this.load();
         } catch (e: any) {
-          this.alerts.open(e.message || e, {appearance: 'negative'}).subscribe();
+          this.alerts.open(e.message || e, { appearance: 'negative' }).subscribe();
         }
       },
     });
   }
 
   private async load(): Promise<void> {
-    this.data.set((await this.reserveCollection.getList()).filter(r => !r.deleted));
+    this.data.set((await this.reserveCollection.getList()).filter((r) => !r.deleted));
   }
 }

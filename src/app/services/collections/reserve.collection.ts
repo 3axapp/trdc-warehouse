@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {AbstractCollection, Deletable} from './abstract.collection';
-import {OrderByDirection, QueryDocumentSnapshot, SnapshotOptions} from '@firebase/firestore';
+import { Injectable } from '@angular/core';
+import { AbstractCollection, Deletable } from './abstract.collection';
+import { OrderByDirection, QueryDocumentSnapshot, SnapshotOptions } from '@firebase/firestore';
 
 export interface ReserveItem {
   positionId: string;
@@ -23,14 +23,18 @@ export class ReserveCollection extends AbstractCollection<Reserve> {
   protected override collectionName = 'reserves';
 
   public override async getList(
-    orderField = 'date', orderDirection: OrderByDirection = 'asc',
+    orderField = 'date',
+    orderDirection: OrderByDirection = 'asc',
   ): Promise<Reserve[]> {
     return super.getList(orderField, orderDirection);
   }
 
   protected override getConverter() {
     const converter = super.getConverter()!;
-    converter.fromFirestore = (snapshot: QueryDocumentSnapshot, options?: SnapshotOptions): Reserve => {
+    converter.fromFirestore = (
+      snapshot: QueryDocumentSnapshot,
+      options?: SnapshotOptions,
+    ): Reserve => {
       const data = snapshot.data(options) as Reserve;
       return {
         ...data,

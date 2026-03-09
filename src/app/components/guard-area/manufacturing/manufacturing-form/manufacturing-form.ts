@@ -1,5 +1,5 @@
-import {Component, inject, signal} from '@angular/core';
-import {injectContext} from '@taiga-ui/polymorpheus';
+import { Component, inject, signal } from '@angular/core';
+import { injectContext } from '@taiga-ui/polymorpheus';
 import {
   TuiButton,
   TuiCalendar,
@@ -9,10 +9,10 @@ import {
   TuiTextfield,
   TuiTextfieldComponent,
 } from '@taiga-ui/core';
-import {Executor} from '../../../../services/collections/executors.collection';
-import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Deletable} from '../../../../services/collections/abstract.collection';
-import {TuiCardLarge} from '@taiga-ui/layout';
+import { Executor } from '../../../../services/collections/executors.collection';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Deletable } from '../../../../services/collections/abstract.collection';
+import { TuiCardLarge } from '@taiga-ui/layout';
 import {
   TuiChevron,
   TuiDataListWrapperComponent,
@@ -21,8 +21,12 @@ import {
   TuiInputNumberDirective,
   TuiSelectDirective,
 } from '@taiga-ui/kit';
-import {ExtraFieldKeys, ExtraFields, NextMaxQuantity} from '../../../../services/manufacturing.service';
-import {TuiDay, TuiTime} from '@taiga-ui/cdk';
+import {
+  ExtraFieldKeys,
+  ExtraFields,
+  NextMaxQuantity,
+} from '../../../../services/manufacturing.service';
+import { TuiDay, TuiTime } from '@taiga-ui/cdk';
 
 @Component({
   selector: 'app-manufacturing-form',
@@ -45,7 +49,7 @@ import {TuiDay, TuiTime} from '@taiga-ui/cdk';
   styleUrl: './manufacturing-form.scss',
   providers: [
     tuiItemsHandlersProvider<Deletable & { name: string }>({
-      stringify: signal((v => v.name)),
+      stringify: signal((v) => v.name),
       identityMatcher: signal((a, b) => a.id === b.id),
       disabledItemHandler: signal((x) => !!x.deleted),
     }),
@@ -57,12 +61,9 @@ import {TuiDay, TuiTime} from '@taiga-ui/cdk';
             new TuiTime(value.getUTCHours(), value.getUTCMinutes()),
           ],
         toControlValue: (value: [TuiDay, TuiTime | null] | null): Date | null => {
-          const {hours = 0, minutes = 0} = value?.[1] ?? {};
+          const { hours = 0, minutes = 0 } = value?.[1] ?? {};
 
-          return (
-            value &&
-            new Date(value[0].toUtcNativeDate().setUTCHours(hours, minutes))
-          );
+          return value && new Date(value[0].toUtcNativeDate().setUTCHours(hours, minutes));
         },
       },
     }),
@@ -108,13 +109,13 @@ export class ManufacturingForm {
 }
 
 export interface Options {
-  availability: NextMaxQuantity,
+  availability: NextMaxQuantity;
   executors: Executor[];
   result?: Result;
   extraFields?: Partial<Record<ExtraFieldKeys, boolean>>;
 }
 
-export interface Result extends ExtraFields{
+export interface Result extends ExtraFields {
   date: Date;
   executorId: string;
   quantity: number;

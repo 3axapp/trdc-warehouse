@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {AbstractCollection, Deletable} from './abstract.collection';
+import { Injectable } from '@angular/core';
+import { AbstractCollection, Deletable } from './abstract.collection';
 import {
   DocumentData,
   FirestoreDataConverter,
@@ -15,14 +15,18 @@ export class ManufacturingProductionCollection extends AbstractCollection<Produc
   protected override collectionName = 'manufacturingProduction';
 
   public override async getList(
-    orderField: string = 'date', orderDirection: OrderByDirection = 'desc'
+    orderField = 'date',
+    orderDirection: OrderByDirection = 'desc',
   ): Promise<ProductionItem[]> {
     return super.getList(orderField, orderDirection);
   }
 
   protected override getConverter(): FirestoreDataConverter<ProductionItem, DocumentData> {
     const converter = super.getConverter();
-    converter.fromFirestore = (snapshot: QueryDocumentSnapshot, options?: SnapshotOptions): ProductionItem => {
+    converter.fromFirestore = (
+      snapshot: QueryDocumentSnapshot,
+      options?: SnapshotOptions,
+    ): ProductionItem => {
       const data = snapshot.data(options) as ProductionItem;
       return {
         ...data,
