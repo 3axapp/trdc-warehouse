@@ -71,6 +71,7 @@ Packing and shipment routes reuse the same manufacturing component, differing on
 ## Quality Gates
 - **All tests must pass** before considering any task complete. Run `ng test --no-watch` after making changes and fix any failures.
 - **Build must succeed** — run `ng build` to verify there are no compilation errors.
+- **Lint must pass** — run `ng lint` after making changes; fix with `ng lint --fix` then resolve remaining errors manually.
 
 ## Code Style
 - 2-space indentation, single quotes for TypeScript, UTF-8
