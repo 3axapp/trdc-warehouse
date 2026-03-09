@@ -4,7 +4,7 @@ import { TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon } from
 import { TUI_CONFIRM, TuiConfirmData } from '@taiga-ui/kit';
 import { switchMap } from 'rxjs';
 import { Executor, ExecutorsCollection } from '../../../services/collections/executors.collection';
-import { NgForOf } from '@angular/common';
+
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -19,7 +19,6 @@ import { ExecutorForm } from './executor-form/executor-form';
 @Component({
   selector: 'app-executors',
   imports: [
-    NgForOf,
     TuiButton,
     TuiHintDirective,
     TuiIcon,

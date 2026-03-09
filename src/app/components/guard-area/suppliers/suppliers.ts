@@ -1,5 +1,5 @@
 import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
-import { NgForOf } from '@angular/common';
+
 import { TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon } from '@taiga-ui/core';
 import {
   TuiTableCell,
@@ -19,7 +19,6 @@ import { SupplierForm } from './supplier-form/supplier-form';
 @Component({
   selector: 'app-suppliers',
   imports: [
-    NgForOf,
     TuiButton,
     TuiHintDirective,
     TuiIcon,

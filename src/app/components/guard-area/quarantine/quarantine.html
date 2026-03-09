@@ -12,7 +12,7 @@
     </tr>
   </thead>
   <tbody tuiTbody [data]="data()">
-    <ng-container *ngFor="let invoice of data()">
+    @for (invoice of data(); track invoice.id) {
       <tr tuiTr>
         <td *tuiCell="'expand'" tuiTd class="expand-cell">
           <tui-icon
@@ -66,6 +66,6 @@
           </tr>
         }
       </tui-table-expand>
-    </ng-container>
+    }
   </tbody>
 </table>

@@ -3,7 +3,7 @@ import { TuiTable } from '@taiga-ui/addon-table';
 import { Position, PositionsCollection } from '../../../services/collections/positions.collection';
 import { TuiAlertService, TuiButton, tuiDialog, TuiHint, TuiIcon } from '@taiga-ui/core';
 import { switchMap } from 'rxjs';
-import { NgForOf } from '@angular/common';
+
 import { PositionTypePipe } from '../../../pipes/position-type-pipe';
 import { TuiResponsiveDialogService } from '@taiga-ui/addon-mobile';
 import { TUI_CONFIRM, TuiConfirmData } from '@taiga-ui/kit';
@@ -11,7 +11,7 @@ import { PositionForm } from './position-form/position-form';
 
 @Component({
   selector: 'app-positions',
-  imports: [TuiTable, TuiButton, TuiIcon, TuiHint, NgForOf, PositionTypePipe],
+  imports: [TuiTable, TuiButton, TuiIcon, TuiHint, PositionTypePipe],
   templateUrl: './positions.html',
   styleUrl: './positions.scss',
 })

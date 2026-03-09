@@ -18,14 +18,16 @@
     </tr>
   </thead>
   <tbody tuiTbody [data]="data()">
-    <tr tuiTr *ngFor="let item of data()" [class.row_deleted]="item.deleted">
-      <td *tuiCell="'date'" tuiTd>{{ item.date | date: 'short' }}</td>
-      <td *tuiCell="'executorId'" tuiTd>{{ (item.executorId | executor | async)?.name }}</td>
-      <td *tuiCell="'controls'" tuiTd>
-        <button tuiButton type="button" tuiHint="Состав" (click)="showParts(item)">
-          <tui-icon icon="@tui.clipboard-list"></tui-icon>
-        </button>
-      </td>
-    </tr>
+    @for (item of data(); track item.id) {
+      <tr tuiTr [class.row_deleted]="item.deleted">
+        <td *tuiCell="'date'" tuiTd>{{ item.date | date: 'short' }}</td>
+        <td *tuiCell="'executorId'" tuiTd>{{ (item.executorId | executor | async)?.name }}</td>
+        <td *tuiCell="'controls'" tuiTd>
+          <button tuiButton type="button" tuiHint="Состав" (click)="showParts(item)">
+            <tui-icon icon="@tui.clipboard-list"></tui-icon>
+          </button>
+        </td>
+      </tr>
+    }
   </tbody>
 </table>

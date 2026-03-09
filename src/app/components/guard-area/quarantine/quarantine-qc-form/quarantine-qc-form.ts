@@ -8,7 +8,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { NgIf } from '@angular/common';
+
 import { TuiCardLarge } from '@taiga-ui/layout';
 import { TuiInputDate, TuiInputNumber } from '@taiga-ui/kit';
 import { TuiDay } from '@taiga-ui/cdk';
@@ -27,7 +27,6 @@ export interface QcFormResult {
 @Component({
   selector: 'app-quarantine-qc-form',
   imports: [
-    NgIf,
     ReactiveFormsModule,
     TuiButton,
     TuiCalendar,

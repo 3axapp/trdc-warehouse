@@ -9,7 +9,7 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
-import { AsyncPipe, DatePipe, NgFor } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { ExecutorPipe } from '../../../../pipes/executor-pipe';
 import { ExtraFieldKeys } from '../../../../services/manufacturing.service';
 
@@ -21,7 +21,6 @@ import { ExtraFieldKeys } from '../../../../services/manufacturing.service';
     TuiTableTh,
     TuiTableThGroup,
     TuiTableTr,
-    NgFor,
     DatePipe,
     ExecutorPipe,
     AsyncPipe,

@@ -8,7 +8,7 @@ import {
   TuiTextfield,
 } from '@taiga-ui/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NgForOf } from '@angular/common';
+
 import {
   TuiChevron,
   TuiDataListWrapperComponent,
@@ -60,7 +60,6 @@ interface ItemControls {
     TuiSelectDirective,
     TuiCalendar,
     TuiInputDate,
-    NgForOf,
     TuiTableCell,
     TuiTableDirective,
     TuiTableTbody,

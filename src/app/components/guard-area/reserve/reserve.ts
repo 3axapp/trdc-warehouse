@@ -10,7 +10,7 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
-import { DatePipe, NgFor } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Reserve, ReserveCollection } from '../../../services/collections/reserve.collection';
 import { ReserveService } from '../../../services/reserve.service';
 import { ReserveForm } from './reserve-form/reserve-form';
@@ -19,7 +19,6 @@ import { ReserveForm } from './reserve-form/reserve-form';
   selector: 'app-reserve',
   imports: [
     TuiButton,
-    NgFor,
     TuiHintDirective,
     TuiIcon,
     TuiTableCell,

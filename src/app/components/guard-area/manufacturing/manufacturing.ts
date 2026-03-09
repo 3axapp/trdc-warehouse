@@ -30,7 +30,7 @@ import {
   TuiTableThGroup,
   TuiTableTr,
 } from '@taiga-ui/addon-table';
-import { AsyncPipe, DatePipe, NgFor } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import {
   ManufacturingProductionCollection,
   ProductionItem,
@@ -60,7 +60,6 @@ import { UsedLot } from '../../../services/manufacturing/combination';
     TuiTableTh,
     TuiTableThGroup,
     TuiTableTr,
-    NgFor,
   ],
   templateUrl: './manufacturing.html',
   styleUrl: './manufacturing.scss',

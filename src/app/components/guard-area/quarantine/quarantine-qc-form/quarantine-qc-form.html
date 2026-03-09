@@ -17,10 +17,9 @@
     <input tuiInputNumber formControlName="brokenQuantity" [min]="0" />
   </tui-textfield>
 
-  <tui-error
-    *ngIf="totalError"
-    [error]="'Принято + брак не может превышать ' + context.data.maxQuantity"
-  />
+  @if (totalError) {
+    <tui-error [error]="'Принято + брак не может превышать ' + context.data.maxQuantity" />
+  }
 
   <footer>
     <button tuiButton type="submit" [disabled]="form.invalid">Подтвердить</button>

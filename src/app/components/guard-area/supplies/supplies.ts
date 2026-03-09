@@ -2,7 +2,7 @@ import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
 import { TuiAlertService } from '@taiga-ui/core';
 import { TuiResponsiveDialogService } from '@taiga-ui/addon-mobile';
 import { SuppliesCollection, Supply } from '../../../services/collections/supplies.collection';
-import { AsyncPipe, DatePipe, NgForOf } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -24,7 +24,6 @@ import { SuppliersCollection } from '../../../services/collections/suppliers.col
 @Component({
   selector: 'app-warehouse',
   imports: [
-    NgForOf,
     TuiTableCell,
     TuiTableDirective,
     TuiTableTbody,

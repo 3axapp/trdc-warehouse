@@ -13,16 +13,18 @@
     </tr>
   </thead>
   <tbody tuiTbody [data]="data()">
-    <tr tuiTr *ngFor="let item of data()" [class.row_deleted]="item.deleted">
-      @let position = item.positionId | position | async;
-      <td *tuiCell="'date'" tuiTd>{{ item.date | date: 'shortDate' }}</td>
-      <td *tuiCell="'positionId'" tuiTd>{{ position?.name }}</td>
-      <td *tuiCell="'positionCode'" tuiTd>{{ position?.code }}</td>
-      <td *tuiCell="'supplierId'" tuiTd>{{ (item.supplierId | supplier | async)?.name }}</td>
-      <td *tuiCell="'remainingQuantity'" tuiTd>{{ item.quantity - item.usedQuantity }}</td>
-      <td *tuiCell="'actions'" tuiTd>
-        <div class="table-actions"></div>
-      </td>
-    </tr>
+    @for (item of data(); track item.id) {
+      <tr tuiTr [class.row_deleted]="item.deleted">
+        @let position = item.positionId | position | async;
+        <td *tuiCell="'date'" tuiTd>{{ item.date | date: 'shortDate' }}</td>
+        <td *tuiCell="'positionId'" tuiTd>{{ position?.name }}</td>
+        <td *tuiCell="'positionCode'" tuiTd>{{ position?.code }}</td>
+        <td *tuiCell="'supplierId'" tuiTd>{{ (item.supplierId | supplier | async)?.name }}</td>
+        <td *tuiCell="'remainingQuantity'" tuiTd>{{ item.quantity - item.usedQuantity }}</td>
+        <td *tuiCell="'actions'" tuiTd>
+          <div class="table-actions"></div>
+        </td>
+      </tr>
+    }
   </tbody>
 </table>

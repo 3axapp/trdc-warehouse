@@ -9,30 +9,32 @@
     </tr>
   </thead>
   <tbody tuiTbody [data]="data()">
-    <tr tuiTr *ngFor="let item of data()" [class.row_deleted]="item.deleted">
-      <td *tuiCell="'type'" tuiTd>{{ item.type | positionType }}</td>
-      <td *tuiCell="'actions'" tuiTd>
-        <div class="table-actions">
-          @if (item.deleted) {
-            <button tuiButton type="button" tuiHint="Восстановить" (click)="restore(item)">
-              <tui-icon icon="@tui.archive-restore"></tui-icon>
-            </button>
-          } @else {
-            <button tuiButton type="button" tuiHint="Изменить" (click)="edit(item)">
-              <tui-icon icon="@tui.edit"></tui-icon>
-            </button>
-            <button
-              tuiButton
-              type="button"
-              appearance="accent"
-              tuiHint="Удалить"
-              (click)="remove(item)"
-            >
-              <tui-icon icon="@tui.archive-x"></tui-icon>
-            </button>
-          }
-        </div>
-      </td>
-    </tr>
+    @for (item of data(); track item.id) {
+      <tr tuiTr [class.row_deleted]="item.deleted">
+        <td *tuiCell="'type'" tuiTd>{{ item.type | positionType }}</td>
+        <td *tuiCell="'actions'" tuiTd>
+          <div class="table-actions">
+            @if (item.deleted) {
+              <button tuiButton type="button" tuiHint="Восстановить" (click)="restore(item)">
+                <tui-icon icon="@tui.archive-restore"></tui-icon>
+              </button>
+            } @else {
+              <button tuiButton type="button" tuiHint="Изменить" (click)="edit(item)">
+                <tui-icon icon="@tui.edit"></tui-icon>
+              </button>
+              <button
+                tuiButton
+                type="button"
+                appearance="accent"
+                tuiHint="Удалить"
+                (click)="remove(item)"
+              >
+                <tui-icon icon="@tui.archive-x"></tui-icon>
+              </button>
+            }
+          </div>
+        </td>
+      </tr>
+    }
   </tbody>
 </table>

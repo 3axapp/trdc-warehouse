@@ -15,7 +15,7 @@ import {
   QuarantineInvoiceCollection,
   QuarantineInvoiceItem,
 } from '../../../services/collections/quarantine-invoice.collection';
-import { AsyncPipe, DatePipe, NgForOf } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -38,7 +38,6 @@ import { QuarantineInvoiceForm } from './quarantine-invoice-form/quarantine-invo
   selector: 'app-quarantine',
   imports: [
     TuiButton,
-    NgForOf,
     TuiHintDirective,
     TuiIcon,
     TuiHint,

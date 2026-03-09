@@ -25,29 +25,31 @@
       </tr>
     </thead>
     <tbody tuiTbody [data]="items.controls">
-      <tr tuiTr *ngFor="let row of items.controls; let i = index" [formGroup]="row">
-        <td *tuiCell="'position'" tuiTd>
-          <tui-textfield tuiChevron>
-            <input tuiSelect formControlName="position" />
-            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="positions()" />
-          </tui-textfield>
-        </td>
-        <td *tuiCell="'quantity'" tuiTd>
-          <tui-textfield>
-            <input tuiInputNumber formControlName="quantity" [min]="1" />
-          </tui-textfield>
-        </td>
-        <td *tuiCell="'remove'" tuiTd>
-          <button
-            tuiIconButton
-            type="button"
-            iconStart="@tui.trash-2"
-            appearance="secondary-destructive"
-            size="xs"
-            (click)="removeItem(i)"
-          ></button>
-        </td>
-      </tr>
+      @for (row of items.controls; track row; let i = $index) {
+        <tr tuiTr [formGroup]="row">
+          <td *tuiCell="'position'" tuiTd>
+            <tui-textfield tuiChevron>
+              <input tuiSelect formControlName="position" />
+              <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="positions()" />
+            </tui-textfield>
+          </td>
+          <td *tuiCell="'quantity'" tuiTd>
+            <tui-textfield>
+              <input tuiInputNumber formControlName="quantity" [min]="1" />
+            </tui-textfield>
+          </td>
+          <td *tuiCell="'remove'" tuiTd>
+            <button
+              tuiIconButton
+              type="button"
+              iconStart="@tui.trash-2"
+              appearance="secondary-destructive"
+              size="xs"
+              (click)="removeItem(i)"
+            ></button>
+          </td>
+        </tr>
+      }
     </tbody>
   </table>
 
