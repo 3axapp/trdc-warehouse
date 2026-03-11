@@ -33,7 +33,7 @@ import { Position, PositionsCollection } from '../../../services/collections/pos
 import { SuppliersCollection } from '../../../services/collections/suppliers.collection';
 import { QuarantineQcService } from '../../../services/quarantine-qc.service';
 import { QuarantineInvoiceForm } from './quarantine-invoice-form/quarantine-invoice-form';
-import {QuarantineQcForm} from './quarantine-qc-form/quarantine-qc-form';
+import { QuarantineQcForm } from './quarantine-qc-form/quarantine-qc-form';
 
 @Component({
   selector: 'app-quarantine',

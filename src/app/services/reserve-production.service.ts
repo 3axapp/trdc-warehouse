@@ -83,9 +83,12 @@ export class ReserveProductionService {
         const lotId = `${chipRecipe.code}_${idDate}_${executorId}_${parts.join('_')}`;
 
         const allSupplies = await this.supplies.getList();
-        const nextId = allSupplies
-            .filter((s) => s.positionId === chipRecipe.id && s.date.toISOString().substring(0, 10) === date.toISOString().substring(0, 10))
-            .length + 1;
+        const nextId =
+          allSupplies.filter(
+            (s) =>
+              s.positionId === chipRecipe.id &&
+              s.date.toISOString().substring(0, 10) === date.toISOString().substring(0, 10),
+          ).length + 1;
         const lotColRef = collection(this.firestore, 'manufacturingLots');
         const lotRef = fireDoc(lotColRef, lotId);
         const lotDoc = await transaction.get(lotRef);

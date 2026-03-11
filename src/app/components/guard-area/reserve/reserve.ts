@@ -1,5 +1,8 @@
 import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
 import { TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon } from '@taiga-ui/core';
+import { TUI_CONFIRM, TuiConfirmData } from '@taiga-ui/kit';
+import { TuiResponsiveDialogService } from '@taiga-ui/addon-mobile';
+import { switchMap } from 'rxjs';
 import {
   TuiTableCell,
   TuiTableDirective,
@@ -43,6 +46,7 @@ export class ReserveComponent implements OnInit {
   private readonly reserveService = inject(ReserveService);
   private readonly reserveProductionService = inject(ReserveProductionService);
   private readonly alerts = inject(TuiAlertService);
+  private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly authService = inject(AuthService);
 
   protected readonly columns = ['expand', 'date', 'quantity', 'producedQuantity', 'actions'];
@@ -133,13 +137,33 @@ export class ReserveComponent implements OnInit {
     });
   }
 
-  protected async returnRemainder(reserve: Reserve): Promise<void> {
-    try {
-      await this.reserveProductionService.returnRemainder(reserve);
-      await this.load();
-    } catch (e: any) {
-      this.alerts.open(e.message || e, { appearance: 'negative' }).subscribe();
-    }
+  protected returnRemainder(reserve: Reserve): void {
+    const data: TuiConfirmData = {
+      content: 'Вернуть остаток материалов из резерва на склад?',
+      yes: 'Да',
+      no: 'Нет',
+    };
+
+    this.dialogs
+      .open<boolean>(TUI_CONFIRM, {
+        label: 'Подтвердите',
+        size: 's',
+        data,
+      })
+      .pipe(
+        switchMap(async (response) => {
+          if (!response) {
+            return;
+          }
+          try {
+            await this.reserveProductionService.returnRemainder(reserve);
+            await this.load();
+          } catch (e: any) {
+            this.alerts.open(e.message || e, { appearance: 'negative' }).subscribe();
+          }
+        }),
+      )
+      .subscribe();
   }
 
   private async load(): Promise<void> {
