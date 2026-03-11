@@ -5,7 +5,9 @@
     <tr tuiThGroup>
       <th tuiTh [style.width.px]="40"></th>
       <th tuiTh>Дата и время резерва</th>
-      <th tuiTh>Количество</th>
+      <th tuiTh>Зарезервировано под</th>
+      <th tuiTh>Произведено</th>
+      <th tuiTh></th>
     </tr>
   </thead>
   <tbody tuiTbody [data]="data()">
@@ -21,6 +23,24 @@
         </td>
         <td *tuiCell="'date'" tuiTd>{{ reserve.date | date: 'short' }}</td>
         <td *tuiCell="'quantity'" tuiTd>{{ reserve.quantity }}</td>
+        <td *tuiCell="'producedQuantity'" tuiTd>{{ reserve.producedQuantity ?? 0 }}</td>
+        <td *tuiCell="'actions'" tuiTd>
+          <button
+            tuiIconButton
+            type="button"
+            iconStart="@tui.package-check"
+            [disabled]="!canProductionConfirmed(reserve)"
+            (click)="openConfirmProduction(reserve)"
+          ></button>
+          <button
+            tuiIconButton
+            type="button"
+            appearance="accent"
+            iconStart="@tui.database-backup"
+            [disabled]="!canReturnRemainder(reserve)"
+            (click)="returnRemainder(reserve)"
+          ></button>
+        </td>
       </tr>
       <tui-table-expand [expanded]="isExpanded(reserve.id)">
         @for (item of reserve.items; track $index) {
@@ -29,7 +49,18 @@
               <div class="detail-item">
                 <span class="detail-item__name">{{ item.name ?? item.positionId }}</span>
                 <span class="detail-item__lot" tuiHint="Лот">{{ item.lot }}</span>
-                <span class="detail-item__qty">{{ item.quantity }} шт.</span>
+                <span class="detail-item__qty" tuiHint="Зарезервированное количество"
+                  >{{ item.quantity }} шт.</span
+                >
+                <span class="detail-item__qty" tuiHint="Использованное количество"
+                  >{{ item.usedQuantity ?? 0 }} шт.</span
+                >
+                <span class="detail-item__qty" tuiHint="Испроченное количество"
+                  >{{ item.brokenQuantity ?? 0 }} шт.</span
+                >
+                <span class="detail-item__qty" tuiHint="Возвращенное количество"
+                  >{{ item.returnedQuantity ?? 0 }} шт.</span
+                >
               </div>
             </td>
           </tr>

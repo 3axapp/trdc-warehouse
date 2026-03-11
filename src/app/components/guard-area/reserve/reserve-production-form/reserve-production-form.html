@@ -1,0 +1,31 @@
+<form [formGroup]="form" tuiCardLarge (ngSubmit)="submit()">
+  <tui-textfield>
+    <label tuiLabel>Дата</label>
+    <input tuiInputDateTime formControlName="date" />
+    <tui-calendar *tuiTextfieldDropdown />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Произведено (макс. {{ context.data.maxQuantity }})</label>
+    <input
+      tuiInputNumber
+      formControlName="producedQuantity"
+      [min]="0"
+      [max]="context.data.maxQuantity"
+    />
+  </tui-textfield>
+
+  <h2>Испорчено</h2>
+  <div formGroupName="brokenQuantities" class="items">
+    @for (item of context.data.reserve.items; track item.positionId) {
+      <tui-textfield>
+        <label tuiLabel>{{ item.name ?? item.positionId }} ({{ item.lot }})</label>
+        <input tuiInputNumber [formControlName]="item.positionId" [min]="0" />
+      </tui-textfield>
+    }
+  </div>
+
+  <footer>
+    <button tuiButton type="submit" [disabled]="form.invalid">Подтвердить</button>
+  </footer>
+</form>

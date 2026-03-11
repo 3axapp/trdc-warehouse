@@ -13,6 +13,10 @@ import {
 export class AuthService {
   private auth = inject(Auth);
 
+  public getIdentity() {
+    return this.auth.currentUser;
+  }
+
   public register(email: string, password: string): Promise<UserCredential> {
     return createUserWithEmailAndPassword(this.auth, email, password);
   }

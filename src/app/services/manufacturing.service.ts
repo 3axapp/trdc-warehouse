@@ -43,7 +43,7 @@ export class ManufacturingService {
     }
     await runTransaction(this.firestore, async (transaction) => {
       const supplies = await this.supplies.getList();
-      const availability = await getAvailability(recipe, supplies);
+      const availability = getAvailability(recipe, supplies);
       if (!availability.available) {
         throw new Error(`Неправильное количество. Максимум 0`);
       }

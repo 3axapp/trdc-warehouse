@@ -14,6 +14,7 @@ import {
   QuarantineInvoiceItem,
 } from './collections/quarantine-invoice.collection';
 import { QualityControlStatus } from './collections/supplies.collection';
+import { formatDateForId } from './utils';
 
 @Injectable({
   providedIn: 'root',
@@ -39,10 +40,7 @@ export class QuarantineQcService {
       throw new Error('Неверное количество');
     }
 
-    const dd = String(date.getDate()).padStart(2, '0');
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const yy = String(date.getFullYear()).slice(-2);
-    const dateStr = `${dd}${mm}${yy}`;
+    const dateStr = formatDateForId(date);
     const userId = this.auth.currentUser!.uid;
 
     // Глобальный счётчик N для связки позиция-дата-счёт (без userId)

@@ -1,7 +1,7 @@
 import { QualityControlStatus, Supply } from '../collections/supplies.collection';
 import { PositionType } from '../collections/positions.collection';
 import { generateCombinations, UsedLot } from './combination';
-import { NextMaxQuantity, Recipe } from '../manufacturing.service';
+import { NextMaxQuantity, Recipe } from './recipe';
 
 function filterReceiptSupplies(receipt: Recipe, supplies: Supply[]) {
   const map: ReceiptSupplies = {
@@ -73,20 +73,14 @@ function calculateAvailability(receipt: Recipe, supplies: ReceiptSupplies): Avai
   };
 }
 
-export async function getAvailability(
-  recipe: Recipe,
-  supplies: Supply[],
-): Promise<AvailabilityResult> {
+export function getAvailability(recipe: Recipe, supplies: Supply[]): AvailabilityResult {
   const receiptSupplies = filterReceiptSupplies(recipe, supplies);
   return calculateAvailability(recipe, receiptSupplies);
 }
 
-export async function getNextMaxQuantity(
-  receipt: Recipe,
-  supplies: Supply[],
-): Promise<NextMaxQuantity> {
-  const availability = await getAvailability(receipt, supplies);
-  if (!availability.available) {
+export function getNextMaxQuantity(receipt: Recipe, supplies: Supply[]): NextMaxQuantity {
+  const availability = getAvailability(receipt, supplies);
+  if (availability.available < 1) {
     return {
       available: availability.available,
       message: availability.message,

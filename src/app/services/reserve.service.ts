@@ -32,7 +32,7 @@ export class ReserveService {
     await this.ensureRecipeLoaded();
     const allSupplies = await this.supplies.getList();
 
-    const availability = await getAvailability(chipRecipe, allSupplies);
+    const availability = getAvailability(chipRecipe, allSupplies);
 
     if (!availability.available) {
       throw new Error(`Неправильное количество. Максимум 0`);
@@ -80,7 +80,7 @@ export class ReserveService {
     });
   }
 
-  private async ensureRecipeLoaded(): Promise<void> {
+  public async ensureRecipeLoaded(): Promise<void> {
     if (!chipRecipe.items[0].id) {
       findReceiptPositions(chipRecipe, await this.positions.getList());
     }

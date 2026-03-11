@@ -8,12 +8,17 @@ export interface ReserveItem {
   lot: string | number;
   quantity: number;
   name?: string;
+  usedQuantity?: number;
+  brokenQuantity?: number;
+  returnedQuantity?: number;
 }
 
 export interface Reserve extends Deletable {
   date: Date;
   quantity: number;
   items: ReserveItem[];
+  producedQuantity?: number;
+  returnedQuantity?: number;
 }
 
 @Injectable({
