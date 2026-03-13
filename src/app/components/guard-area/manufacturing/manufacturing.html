@@ -1,6 +1,8 @@
-<button tuiButton iconEnd="@tui.plus" type="button" size="m" (click)="add()" [disabled]="block()">
-  Добавить
-</button>
+@if (recipe.code !== 'chip') {
+  <button tuiButton iconEnd="@tui.plus" type="button" size="m" (click)="add()" [disabled]="block()">
+    Добавить
+  </button>
+}
 <table tuiTable class="table table-striped table-hover" [style.width.%]="100" [columns]="columns">
   <thead>
     <tr tuiThGroup>

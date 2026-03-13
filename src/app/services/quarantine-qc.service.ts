@@ -36,7 +36,7 @@ export class QuarantineQcService {
     const available = item.quantity - (item.usedQuantity ?? 0);
     const total = quantity + brokenQuantity;
 
-    if (quantity <= 0 || brokenQuantity < 0 || total > available) {
+    if (quantity < 0 || brokenQuantity < 0 || total === 0 || total > available) {
       throw new Error('Неверное количество');
     }
 

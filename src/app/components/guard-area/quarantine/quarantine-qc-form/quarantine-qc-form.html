@@ -9,7 +9,7 @@
 
   <tui-textfield>
     <label tuiLabel>Принято (макс. {{ context.data.maxQuantity }})</label>
-    <input tuiInputNumber formControlName="quantity" [min]="1" />
+    <input tuiInputNumber formControlName="quantity" [min]="0" />
   </tui-textfield>
 
   <tui-textfield>
@@ -18,7 +18,7 @@
   </tui-textfield>
 
   @if (totalError) {
-    <tui-error [error]="'Принято + брак не может превышать ' + context.data.maxQuantity" />
+    <tui-error [error]="totalError" />
   }
 
   <footer>

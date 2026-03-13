@@ -189,13 +189,33 @@ describe('QuarantineQcService', () => {
     expect(updated.items[1].quantity).toBe(15);
   });
 
-  it('Выбрасывает ошибку если quantity <= 0', async () => {
-    const invoiceId = await invoicesCollection.add(makeInvoice('lot-invalid-zero'));
+  it('Выбрасывает ошибку если quantity < 0', async () => {
+    const invoiceId = await invoicesCollection.add(makeInvoice('lot-invalid-neg'));
+    const invoice = await invoicesCollection.get(invoiceId);
+
+    await expectAsync(
+      service.processQc(invoice, 0, testPosition, TEST_DATE, -1, 0),
+    ).toBeRejectedWithError('Неверное количество');
+  });
+
+  it('Выбрасывает ошибку если quantity и brokenQuantity оба 0', async () => {
+    const invoiceId = await invoicesCollection.add(makeInvoice('lot-both-zero'));
     const invoice = await invoicesCollection.get(invoiceId);
 
     await expectAsync(
       service.processQc(invoice, 0, testPosition, TEST_DATE, 0, 0),
     ).toBeRejectedWithError('Неверное количество');
+  });
+
+  it('Допускает quantity = 0 при brokenQuantity > 0', async () => {
+    const invoiceId = await invoicesCollection.add(makeInvoice('lot-zero-qty-with-broken'));
+    const invoice = await invoicesCollection.get(invoiceId);
+
+    await expectAsync(service.processQc(invoice, 0, testPosition, TEST_DATE, 0, 5)).toBeResolved();
+
+    const updated = await invoicesCollection.get(invoiceId);
+    expect(updated.items[0].usedQuantity).toBe(5);
+    expect(updated.items[0].brokenQuantity).toBe(5);
   });
 
   it('Выбрасывает ошибку если brokenQuantity < 0', async () => {

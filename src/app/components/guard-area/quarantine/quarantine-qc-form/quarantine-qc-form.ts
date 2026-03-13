@@ -47,23 +47,33 @@ export class QuarantineQcForm {
   protected readonly form = this.fb.group(
     {
       date: [null as unknown as TuiDay, [Validators.required]],
-      quantity: [null as unknown as number, [Validators.required, Validators.min(1)]],
+      quantity: [null as unknown as number, [Validators.required, Validators.min(0)]],
       brokenQuantity: [null as unknown as number, [Validators.required, Validators.min(0)]],
     },
     {
       validators: (g: AbstractControl): ValidationErrors | null => {
         const qty = g.get('quantity')?.value ?? 0;
         const broken = g.get('brokenQuantity')?.value ?? 0;
+        if (qty === 0 && broken === 0) {
+          return { bothZero: true };
+        }
         return qty + broken > this.context.data.maxQuantity ? { exceedsMax: true } : null;
       },
     },
   );
 
-  protected get totalError(): boolean {
-    return (
-      this.form.hasError('exceedsMax') &&
-      (this.form.controls.quantity.dirty || this.form.controls.brokenQuantity.dirty)
-    );
+  protected get totalError(): string | null {
+    const dirty = this.form.controls.quantity.dirty || this.form.controls.brokenQuantity.dirty;
+    if (!dirty) {
+      return null;
+    }
+    if (this.form.hasError('bothZero')) {
+      return 'Необходимо указать принятое или бракованное количество';
+    }
+    if (this.form.hasError('exceedsMax')) {
+      return `Принято + брак не может превышать ${this.context.data.maxQuantity}`;
+    }
+    return null;
   }
 
   protected submit(): void {
