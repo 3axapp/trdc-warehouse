@@ -16,8 +16,15 @@ export class AuthService {
   private usersCollection = inject(UsersCollection);
   private user: User | null = null;
 
-  public getIdentity() {
+  public getIdentity(): User | null {
     return this.user;
+  }
+
+  public async loadUser(): Promise<void> {
+    const firebaseUser = this.auth.currentUser;
+    if (firebaseUser && !this.user) {
+      this.user = await this.usersCollection.get(firebaseUser.uid);
+    }
   }
 
   public async register(

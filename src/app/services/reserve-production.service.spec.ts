@@ -131,11 +131,7 @@ describe('ReserveProductionService', () => {
       for (const item of reserve.items) {
         brokenQuantities[item.positionId] = 1;
       }
-      await service.confirmProduction(
-        reserve.id,
-        makeConfirmData(2, brokenQuantities),
-        testUser,
-      );
+      await service.confirmProduction(reserve.id, makeConfirmData(2, brokenQuantities), testUser);
       const updated = await getUpdatedReserve(reserve.id);
       // reserved=5, used=2, broken=1 → remaining=2
       expect(service.getNextMaxQuantity(updated)).toBe(2);
@@ -225,11 +221,7 @@ describe('ReserveProductionService', () => {
         brokenQuantities[item.positionId] = 5;
       }
       await expectAsync(
-        service.confirmProduction(
-          reserve.id,
-          makeConfirmData(1, brokenQuantities),
-          testUser,
-        ),
+        service.confirmProduction(reserve.id, makeConfirmData(1, brokenQuantities), testUser),
       ).toBeRejectedWithError(/Превышено количество/);
     });
 
@@ -312,11 +304,7 @@ describe('ReserveProductionService', () => {
       for (const item of reserve.items) {
         brokenQuantities[item.positionId] = 1;
       }
-      await service.confirmProduction(
-        reserve.id,
-        makeConfirmData(0, brokenQuantities),
-        testUser,
-      );
+      await service.confirmProduction(reserve.id, makeConfirmData(0, brokenQuantities), testUser);
 
       const updated = await getUpdatedReserve(reserve.id);
       expect(updated.producedQuantity).toBe(0);
@@ -405,11 +393,7 @@ describe('ReserveProductionService', () => {
       for (const item of reserve.items) {
         brokenQuantities[item.positionId] = 2;
       }
-      await service.confirmProduction(
-        reserve.id,
-        makeConfirmData(1, brokenQuantities),
-        testUser,
-      );
+      await service.confirmProduction(reserve.id, makeConfirmData(1, brokenQuantities), testUser);
       const confirmed = await getUpdatedReserve(reserve.id);
       // reserved=5, used=1, broken=2 → remainder=2
       await service.returnRemainder(confirmed);

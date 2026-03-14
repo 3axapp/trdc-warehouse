@@ -3,6 +3,7 @@ import { Login } from './components/login/login';
 import { Register } from './components/register/register';
 import { Supplies } from './components/guard-area/supplies/supplies';
 import { AuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
+import { authGuardWithUser } from './services/auth.guard';
 import { Layout } from './components/guard-area/layout/layout';
 import { Positions } from './components/guard-area/positions/positions';
 import { Suppliers } from './components/guard-area/suppliers/suppliers';
@@ -19,7 +20,7 @@ export const routes: Routes = [
   {
     path: '',
     component: Layout,
-    canActivate: [AuthGuard],
+    canActivate: [authGuardWithUser],
     data: { authGuardPipe: redirectUnauthorizedToLogin },
     children: [
       { path: 'quarantine', component: Quarantine },
