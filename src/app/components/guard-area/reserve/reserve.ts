@@ -124,11 +124,11 @@ export class ReserveComponent implements OnInit {
     }).subscribe({
       next: async (data) => {
         try {
-          await this.reserveProductionService.confirmProduction(
-            reserve.id,
-            data,
-            this.authService.getIdentity()!.uid,
-          );
+          const user = this.authService.getIdentity();
+          if (!user?.number) {
+            throw new Error('Не удалось определить номер пользователя');
+          }
+          await this.reserveProductionService.confirmProduction(reserve.id, data, user);
           await this.load();
         } catch (e: any) {
           this.alerts.open(e.message || e, { appearance: 'negative' }).subscribe();

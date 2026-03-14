@@ -17,6 +17,7 @@ import { findReceiptPositions } from './manufacturing.service';
 import { chipRecipe } from '../recipes';
 import { formatDateForId } from './utils';
 import { getNextMaxQuantity } from './manufacturing/supply-planning';
+import { User } from './collections/users.collection';
 
 export interface ConfirmProductionData {
   producedQuantity: number;
@@ -67,7 +68,7 @@ export class ReserveProductionService {
   public async confirmProduction(
     reserveId: string,
     data: ConfirmProductionData,
-    executorId: string,
+    user: User,
   ): Promise<void> {
     await this.ensureRecipeLoaded();
     await runTransaction(this.firestore, async (transaction) => {
@@ -80,7 +81,7 @@ export class ReserveProductionService {
         const parts = chipRecipe.items
           .map((item) => reserve.items.find((i) => i.positionId === item.id)?.lot)
           .filter((v) => v !== undefined && v !== null) as (string | number)[];
-        const lotId = `${chipRecipe.code}_${idDate}_${executorId}_${parts.join('_')}`;
+        const lotId = `${chipRecipe.code}_${idDate}_${user.number}_${parts.join('_')}`;
 
         const allSupplies = await this.supplies.getList();
         const nextId =
@@ -114,7 +115,7 @@ export class ReserveProductionService {
             transaction,
           );
         } else {
-          lot = `${formatDateForId(date)}-${executorId}-${nextId}`;
+          lot = `${formatDateForId(date)}-${user.number}-${nextId}`;
           supplyId = await this.supplies.add(
             {
               positionId: chipRecipe.id!,
@@ -137,7 +138,7 @@ export class ReserveProductionService {
           quantity: producedQuantity,
           positionId: chipRecipe.id!,
           parts,
-          executorId,
+          executorId: user.id,
           date,
         });
       }

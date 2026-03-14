@@ -6,7 +6,7 @@ import {
   signOut,
   UserCredential,
 } from '@angular/fire/auth';
-import { UsersCollection } from './collections/users.collection';
+import { User, UsersCollection } from './collections/users.collection';
 
 @Injectable({
   providedIn: 'root',
@@ -14,9 +14,10 @@ import { UsersCollection } from './collections/users.collection';
 export class AuthService {
   private auth = inject(Auth);
   private usersCollection = inject(UsersCollection);
+  private user: User | null = null;
 
   public getIdentity() {
-    return this.auth.currentUser;
+    return this.user;
   }
 
   public async register(
@@ -34,11 +35,13 @@ export class AuthService {
     return credential;
   }
 
-  public login(email: string, password: string): Promise<UserCredential> {
-    return signInWithEmailAndPassword(this.auth, email, password);
+  public async login(email: string, password: string): Promise<void> {
+    const result = await signInWithEmailAndPassword(this.auth, email, password);
+    this.user = await this.usersCollection.get(result.user.uid);
   }
 
-  public logout(): Promise<void> {
-    return signOut(this.auth);
+  public async logout(): Promise<void> {
+    await signOut(this.auth);
+    this.user = null;
   }
 }

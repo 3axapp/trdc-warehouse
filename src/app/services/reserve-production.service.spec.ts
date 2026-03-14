@@ -14,6 +14,7 @@ import { Reserve, ReserveCollection } from './collections/reserve.collection';
 import { PositionsCollection, PositionType } from './collections/positions.collection';
 import { QualityControlStatus, SuppliesCollection } from './collections/supplies.collection';
 import { chipRecipe } from '../recipes';
+import { User } from './collections/users.collection';
 
 describe('ReserveProductionService', () => {
   let service: ReserveProductionService;
@@ -23,7 +24,13 @@ describe('ReserveProductionService', () => {
   let positionIds: Record<string, string>;
 
   const chipCodes = ['КО', 'МБ', 'НК', 'ВК', 'КЛ'];
-  const executorId = 'test-executor';
+  const testUser: User = {
+    id: 'test-executor',
+    email: 'test@test.com',
+    fullName: 'Test User',
+    position: 'Тестовая должность',
+    number: 1,
+  };
   const productionDate = new Date('2025-06-01');
 
   beforeEach(async () => {
@@ -112,7 +119,7 @@ describe('ReserveProductionService', () => {
     it('учитывает уже использованное количество', async () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(5);
-      await service.confirmProduction(reserve.id, makeConfirmData(2), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(2), testUser);
       const updated = await getUpdatedReserve(reserve.id);
       expect(service.getNextMaxQuantity(updated)).toBe(3);
     });
@@ -124,7 +131,11 @@ describe('ReserveProductionService', () => {
       for (const item of reserve.items) {
         brokenQuantities[item.positionId] = 1;
       }
-      await service.confirmProduction(reserve.id, makeConfirmData(2, brokenQuantities), executorId);
+      await service.confirmProduction(
+        reserve.id,
+        makeConfirmData(2, brokenQuantities),
+        testUser,
+      );
       const updated = await getUpdatedReserve(reserve.id);
       // reserved=5, used=2, broken=1 → remaining=2
       expect(service.getNextMaxQuantity(updated)).toBe(2);
@@ -133,7 +144,7 @@ describe('ReserveProductionService', () => {
     it('возвращает 0 когда всё использовано', async () => {
       await addAllMaterials(3);
       const reserve = await createReserveAndGet(3);
-      await service.confirmProduction(reserve.id, makeConfirmData(3), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(3), testUser);
       const updated = await getUpdatedReserve(reserve.id);
       expect(service.getNextMaxQuantity(updated)).toBe(0);
     });
@@ -149,7 +160,7 @@ describe('ReserveProductionService', () => {
     it('возвращает false когда всё использовано', async () => {
       await addAllMaterials(3);
       const reserve = await createReserveAndGet(1);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
       const updated = await getUpdatedReserve(reserve.id);
       expect(service.canProductionConfirmed(updated)).toBeFalse();
     });
@@ -157,7 +168,7 @@ describe('ReserveProductionService', () => {
     it('возвращает true когда есть остаток для производства', async () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(3);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
       const updated = await getUpdatedReserve(reserve.id);
       expect(service.canProductionConfirmed(updated)).toBeTrue();
     });
@@ -173,7 +184,7 @@ describe('ReserveProductionService', () => {
     it('возвращает false когда всё использовано', async () => {
       await addAllMaterials(3);
       const reserve = await createReserveAndGet(1);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
       const updated = await getUpdatedReserve(reserve.id);
       expect(service.canReturnRemainder(updated)).toBeFalse();
     });
@@ -181,7 +192,7 @@ describe('ReserveProductionService', () => {
     it('возвращает true когда есть остаток после производства', async () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(3);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
       const updated = await getUpdatedReserve(reserve.id);
       expect(service.canReturnRemainder(updated)).toBeTrue();
     });
@@ -189,7 +200,7 @@ describe('ReserveProductionService', () => {
     it('возвращает false после полного возврата', async () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(3);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
       const confirmed = await getUpdatedReserve(reserve.id);
       await service.returnRemainder(confirmed);
       const returned = await getUpdatedReserve(reserve.id);
@@ -202,7 +213,7 @@ describe('ReserveProductionService', () => {
       await addAllMaterials(3);
       const reserve = await createReserveAndGet(1);
       await expectAsync(
-        service.confirmProduction(reserve.id, makeConfirmData(0), executorId),
+        service.confirmProduction(reserve.id, makeConfirmData(0), testUser),
       ).toBeRejectedWithError(/Необходимо указать или произведенное количество или испорченное/);
     });
 
@@ -214,14 +225,18 @@ describe('ReserveProductionService', () => {
         brokenQuantities[item.positionId] = 5;
       }
       await expectAsync(
-        service.confirmProduction(reserve.id, makeConfirmData(1, brokenQuantities), executorId),
+        service.confirmProduction(
+          reserve.id,
+          makeConfirmData(1, brokenQuantities),
+          testUser,
+        ),
       ).toBeRejectedWithError(/Превышено количество/);
     });
 
     it('создаёт поставку чипов', async () => {
       await addAllMaterials(3);
       const reserve = await createReserveAndGet(1);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
 
       const allSupplies = await suppliesCollection.getList();
       const chipSupply = allSupplies.find((s) => s.positionId === positionIds['chip']);
@@ -232,7 +247,7 @@ describe('ReserveProductionService', () => {
     it('обновляет usedQuantity в резерве', async () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(3);
-      await service.confirmProduction(reserve.id, makeConfirmData(2), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(2), testUser);
 
       const updated = await getUpdatedReserve(reserve.id);
       for (const item of updated.items) {
@@ -243,7 +258,7 @@ describe('ReserveProductionService', () => {
     it('обновляет producedQuantity в резерве', async () => {
       await addAllMaterials(3);
       const reserve = await createReserveAndGet(2);
-      await service.confirmProduction(reserve.id, makeConfirmData(2), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(2), testUser);
 
       const updated = await getUpdatedReserve(reserve.id);
       expect(updated.producedQuantity).toBe(2);
@@ -253,14 +268,14 @@ describe('ReserveProductionService', () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(3);
 
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
       const after1 = await getUpdatedReserve(reserve.id);
       expect(after1.producedQuantity).toBe(1);
       for (const item of after1.items) {
         expect(item.usedQuantity).toBe(1);
       }
 
-      await service.confirmProduction(reserve.id, makeConfirmData(2), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(2), testUser);
       const after2 = await getUpdatedReserve(reserve.id);
       expect(after2.producedQuantity).toBe(3);
       for (const item of after2.items) {
@@ -271,8 +286,8 @@ describe('ReserveProductionService', () => {
     it('увеличивает количество чипов при повторном производстве с тем же лотом', async () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(3);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
-      await service.confirmProduction(reserve.id, makeConfirmData(2), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
+      await service.confirmProduction(reserve.id, makeConfirmData(2), testUser);
 
       const allSupplies = await suppliesCollection.getList();
       const chipSupply = allSupplies.find((s) => s.positionId === positionIds['chip']);
@@ -283,10 +298,10 @@ describe('ReserveProductionService', () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(5);
       // Первое производство: 2 чипа
-      await service.confirmProduction(reserve.id, makeConfirmData(2), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(2), testUser);
       // Второе производство: запрашиваем 4, но max = 5-2 = 3
       await expectAsync(
-        service.confirmProduction(reserve.id, makeConfirmData(4), executorId),
+        service.confirmProduction(reserve.id, makeConfirmData(4), testUser),
       ).toBeRejectedWithError(/Максимальное количество с учетом испорченного: 3/);
     });
 
@@ -297,7 +312,11 @@ describe('ReserveProductionService', () => {
       for (const item of reserve.items) {
         brokenQuantities[item.positionId] = 1;
       }
-      await service.confirmProduction(reserve.id, makeConfirmData(0, brokenQuantities), executorId);
+      await service.confirmProduction(
+        reserve.id,
+        makeConfirmData(0, brokenQuantities),
+        testUser,
+      );
 
       const updated = await getUpdatedReserve(reserve.id);
       expect(updated.producedQuantity).toBe(0);
@@ -313,7 +332,7 @@ describe('ReserveProductionService', () => {
     it('выбрасывает ошибку если нечего возвращать', async () => {
       await addAllMaterials(3);
       const reserve = await createReserveAndGet(1);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
       const confirmed = await getUpdatedReserve(reserve.id);
       await expectAsync(service.returnRemainder(confirmed)).toBeRejectedWithError(
         /Нечего возвращать/,
@@ -323,7 +342,7 @@ describe('ReserveProductionService', () => {
     it('уменьшает usedQuantity в поставках', async () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(3);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
       const confirmed = await getUpdatedReserve(reserve.id);
       await service.returnRemainder(confirmed);
 
@@ -338,7 +357,7 @@ describe('ReserveProductionService', () => {
     it('записывает returnedQuantity в элементы резерва', async () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(3);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
       const confirmed = await getUpdatedReserve(reserve.id);
       await service.returnRemainder(confirmed);
 
@@ -352,7 +371,7 @@ describe('ReserveProductionService', () => {
     it('не изменяет поставки если всё использовано', async () => {
       await addAllMaterials(3);
       const reserve = await createReserveAndGet(3);
-      await service.confirmProduction(reserve.id, makeConfirmData(3), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(3), testUser);
       const confirmed = await getUpdatedReserve(reserve.id);
 
       await expectAsync(service.returnRemainder(confirmed)).toBeRejectedWithError(
@@ -369,7 +388,7 @@ describe('ReserveProductionService', () => {
     it('повторный возврат невозможен', async () => {
       await addAllMaterials(5);
       const reserve = await createReserveAndGet(3);
-      await service.confirmProduction(reserve.id, makeConfirmData(1), executorId);
+      await service.confirmProduction(reserve.id, makeConfirmData(1), testUser);
       const confirmed = await getUpdatedReserve(reserve.id);
       await service.returnRemainder(confirmed);
 
@@ -386,7 +405,11 @@ describe('ReserveProductionService', () => {
       for (const item of reserve.items) {
         brokenQuantities[item.positionId] = 2;
       }
-      await service.confirmProduction(reserve.id, makeConfirmData(1, brokenQuantities), executorId);
+      await service.confirmProduction(
+        reserve.id,
+        makeConfirmData(1, brokenQuantities),
+        testUser,
+      );
       const confirmed = await getUpdatedReserve(reserve.id);
       // reserved=5, used=1, broken=2 → remainder=2
       await service.returnRemainder(confirmed);

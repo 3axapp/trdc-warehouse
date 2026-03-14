@@ -160,7 +160,7 @@ export class Manufacturing implements OnInit {
     });
 
     dialog({
-      executorId: this.auth.getIdentity()!.uid,
+      executorId: this.auth.getIdentity()!.id,
       availability,
       extraFields: this.recipe.extraFields,
     }).subscribe({

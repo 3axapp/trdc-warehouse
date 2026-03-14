@@ -18,25 +18,36 @@ export const testUser2 = {
 };
 
 export async function clearFirestoreEmulator(): Promise<void> {
+  const projectId = environment.firebaseConfig.projectId;
   try {
-    const response = await fetch(
-      `http://localhost:8080/emulator/v1/projects/${environment.firebaseConfig.projectId}/databases/(default)/documents`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    );
+    // Разлогиниваем текущего пользователя перед очисткой
+    const auth = getAuth();
+    if (auth.currentUser) {
+      await auth.signOut();
+    }
 
-    if (response.ok) {
+    const [firestoreResponse, authResponse] = await Promise.all([
+      fetch(
+        `http://localhost:8080/emulator/v1/projects/${projectId}/databases/(default)/documents`,
+        { method: 'DELETE' },
+      ),
+      fetch(`http://localhost:9099/emulator/v1/projects/${projectId}/accounts`, {
+        method: 'DELETE',
+      }),
+    ]);
+
+    if (firestoreResponse.ok && authResponse.ok) {
       console.log('🧹 Firestore emulator data cleared');
     } else {
-      console.warn(`⚠️ Failed to clear emulator: ${response.status}`);
+      console.warn(
+        `⚠️ Failed to clear emulator: Firestore ${firestoreResponse.status}, Auth ${authResponse.status}`,
+      );
     }
   } catch (error) {
     console.warn('⚠️ Could not clear emulator:', error);
   }
+  testUser.id = '';
+  testUser2.id = '';
 }
 
 export const provideFirebaseAppTest = () =>
