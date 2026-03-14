@@ -9,17 +9,13 @@ import {
   TuiTextfield,
   TuiTextfieldComponent,
 } from '@taiga-ui/core';
-import { Executor } from '../../../../services/collections/executors.collection';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Deletable } from '../../../../services/collections/abstract.collection';
 import { TuiCardLarge } from '@taiga-ui/layout';
 import {
-  TuiChevron,
-  TuiDataListWrapperComponent,
   TuiInputDateTime,
   tuiInputDateTimeOptionsProvider,
   TuiInputNumberDirective,
-  TuiSelectDirective,
 } from '@taiga-ui/kit';
 import {
   ExtraFieldKeys,
@@ -35,10 +31,7 @@ import { TuiDay, TuiTime } from '@taiga-ui/cdk';
     TuiCardLarge,
     TuiButton,
     ReactiveFormsModule,
-    TuiChevron,
-    TuiDataListWrapperComponent,
     TuiLabel,
-    TuiSelectDirective,
     TuiTextfieldComponent,
     TuiInputNumberDirective,
     TuiTextfield,
@@ -76,7 +69,6 @@ export class ManufacturingForm {
 
   protected form = this.fb.group({
     date: [new Date(), [Validators.required]],
-    executor: [null as unknown as Executor, [Validators.required]],
     quantity: [
       null as unknown as number,
       [Validators.required, Validators.min(1), Validators.max(this.data.availability.available)],
@@ -95,7 +87,7 @@ export class ManufacturingForm {
     }
     const data: Result = {
       date: this.form.value.date!,
-      executorId: this.form.value.executor!.id,
+      executorId: this.data.executorId,
       quantity: this.form.value.quantity!,
     };
     if (this.data.extraFields?.recipient) {
@@ -110,7 +102,7 @@ export class ManufacturingForm {
 
 export interface Options {
   availability: NextMaxQuantity;
-  executors: Executor[];
+  executorId: string;
   result?: Result;
   extraFields?: Partial<Record<ExtraFieldKeys, boolean>>;
 }

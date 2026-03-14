@@ -66,7 +66,7 @@ export const signupAndSignin = async (TestBed: TestBedStatic, user = testUser) =
       console.log('login 1', error);
     }
     try {
-      await authService.register(user.email, user.password);
+      await authService.register(user.email, user.password, 'Test User', 'Тестовая должность');
       await authService.login(user.email, user.password);
       user.id = auth.currentUser!.uid;
     } catch (error) {

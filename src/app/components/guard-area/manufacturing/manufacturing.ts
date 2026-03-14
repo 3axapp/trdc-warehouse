@@ -1,17 +1,9 @@
 import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
-import {
-  TuiAlertService,
-  TuiButton,
-  tuiDialog,
-  TuiDialogService,
-  TuiHintDirective,
-  TuiIcon,
-} from '@taiga-ui/core';
+import { TuiAlertService, TuiButton, tuiDialog, TuiHintDirective, TuiIcon } from '@taiga-ui/core';
 import {
   PositionsCollection,
   PositionType,
 } from '../../../services/collections/positions.collection';
-import { Executor, ExecutorsCollection } from '../../../services/collections/executors.collection';
 import {
   ExtraFieldKeys,
   findReceiptPositions,
@@ -43,6 +35,8 @@ import {
   ManufacturingSuccessOptions,
 } from './manufacturing-success/manufacturing-success';
 import { UsedLot } from '../../../services/manufacturing/combination';
+import { UsersCollection } from '../../../services/collections/users.collection';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-manufacturing',
@@ -67,13 +61,13 @@ import { UsedLot } from '../../../services/manufacturing/combination';
 export class Manufacturing implements OnInit {
   private readonly injector = inject(INJECTOR);
   private readonly manufacturing = inject(ManufacturingService);
-  private readonly executors = inject(ExecutorsCollection);
+  private readonly executors = inject(UsersCollection);
   private readonly manufacturingProduction = inject(ManufacturingProductionCollection);
   private readonly positions = inject(PositionsCollection);
   private readonly cache = inject(CacheService);
   private readonly alerts = inject(TuiAlertService);
   protected readonly recipe = inject(ActivatedRoute).snapshot.data['recipe'] as Recipe;
-  private readonly dialogs = inject(TuiDialogService);
+  private readonly auth = inject(AuthService);
 
   protected block = signal(false);
   protected data = signal<ProductionItem[]>([]);
@@ -104,10 +98,7 @@ export class Manufacturing implements OnInit {
 
   protected async add() {
     this.block.set(true);
-    const [executors, availability] = await Promise.all([
-      this.cache.getList<Executor>('executors'),
-      this.manufacturing.getNextMaxQuantity(this.recipe),
-    ]);
+    const availability = await this.manufacturing.getNextMaxQuantity(this.recipe);
 
     if (availability.available === 0) {
       this.alerts.open(availability.message).subscribe();
@@ -115,7 +106,7 @@ export class Manufacturing implements OnInit {
       return;
     }
 
-    await this.showDialog(availability, executors);
+    await this.showDialog(availability);
   }
 
   protected showParts(item: ProductionItem) {
@@ -161,14 +152,18 @@ export class Manufacturing implements OnInit {
     this.showSuccess({ usedLots, date: item.date, executorId: item.executorId, extraFields });
   }
 
-  private async showDialog(availability: NextMaxQuantity, executors: Executor[]) {
+  private async showDialog(availability: NextMaxQuantity) {
     const dialog = tuiDialog(ManufacturingForm, {
       injector: this.injector,
       dismissible: true,
       label: 'Создать',
     });
 
-    dialog({ executors, availability, extraFields: this.recipe.extraFields }).subscribe({
+    dialog({
+      executorId: this.auth.getIdentity()!.uid,
+      availability,
+      extraFields: this.recipe.extraFields,
+    }).subscribe({
       next: async (data) => {
         try {
           const usedLots = await this.manufacturing.create(this.recipe, data);

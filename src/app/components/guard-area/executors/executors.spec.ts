@@ -2,12 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Executors } from './executors';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { ExecutorsCollection } from '../../../services/collections/executors.collection';
+import { UsersCollection } from '../../../services/collections/users.collection';
 
 describe('Executors', () => {
   let component: Executors;
   let fixture: ComponentFixture<Executors>;
-  let mockExecutorsService: jasmine.SpyObj<ExecutorsCollection>;
+  let mockExecutorsService: jasmine.SpyObj<UsersCollection>;
 
   beforeEach(async () => {
     mockExecutorsService = jasmine.createSpyObj('ExecutorsService', [
@@ -21,7 +21,7 @@ describe('Executors', () => {
       imports: [Executors],
       providers: [
         provideZonelessChangeDetection(),
-        { provide: ExecutorsCollection, useValue: mockExecutorsService },
+        { provide: UsersCollection, useValue: mockExecutorsService },
       ],
     }).compileComponents();
 

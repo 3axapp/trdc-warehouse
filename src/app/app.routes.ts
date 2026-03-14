@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Login } from './components/login/login';
+import { Register } from './components/register/register';
 import { Supplies } from './components/guard-area/supplies/supplies';
 import { AuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 import { Layout } from './components/guard-area/layout/layout';
@@ -35,6 +36,12 @@ export const routes: Routes = [
   {
     path: 'login',
     component: Login,
+    canActivate: [AuthGuard],
+    data: { authGuardPipe: redirectLoggedInToItems },
+  },
+  {
+    path: 'register',
+    component: Register,
     canActivate: [AuthGuard],
     data: { authGuardPipe: redirectLoggedInToItems },
   },

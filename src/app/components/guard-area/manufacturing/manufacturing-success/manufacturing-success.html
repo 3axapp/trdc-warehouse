@@ -1,4 +1,4 @@
-<div>Исполнитель: {{ (data.executorId | executor | async)?.name }}</div>
+<div>Исполнитель: {{ (data.executorId | executor | async)?.fullName }}</div>
 <div>Дата: {{ data.date | date }}</div>
 @if (data.extraFields?.recipient) {
   <div>Получатель: {{ data.extraFields!.recipient!.value }}</div>
