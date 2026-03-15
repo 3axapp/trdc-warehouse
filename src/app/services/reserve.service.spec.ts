@@ -79,6 +79,7 @@ describe('ReserveService', () => {
       usedQuantity,
       qualityControlStatus: QualityControlStatus.Completed,
       lot,
+      supplierId: 'supplier1',
     });
   }
 
@@ -141,6 +142,7 @@ describe('ReserveService', () => {
           date: new Date('2025-01-01'),
           quantity: 10,
           usedQuantity: 0,
+          supplierId: 'supplier1',
           // qualityControlStatus намеренно не задан
         });
       }
@@ -244,6 +246,7 @@ describe('ReserveService', () => {
         date: new Date('2025-01-01'),
         quantity: 10,
         usedQuantity: 0,
+        supplierId: 'supplier1',
       });
       for (const code of chipCodes.filter((c) => c !== 'КО')) {
         await addSupply(code, 10);
@@ -260,6 +263,7 @@ describe('ReserveService', () => {
         qualityControlStatus: QualityControlStatus.Completed,
         lot: 1,
         deleted: true,
+        supplierId: 'supplier1',
       });
       for (const code of chipCodes.filter((c) => c !== 'КО')) {
         await addSupply(code, 10);

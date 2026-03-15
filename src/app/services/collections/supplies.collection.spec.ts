@@ -40,6 +40,7 @@ describe('SuppliesCollection', () => {
       quantity: 12,
       usedQuantity: 0,
       qualityControlDate: new Date('2025-01-01 00:01:00'),
+      supplierId: 'supplier1',
     });
     await expectAsync(service.get(id)).toBeResolvedTo({
       id,
@@ -48,6 +49,7 @@ describe('SuppliesCollection', () => {
       quantity: 12,
       usedQuantity: 0,
       qualityControlDate: new Date('2025-01-01 00:01:00'),
+      supplierId: 'supplier1',
     });
   });
 });

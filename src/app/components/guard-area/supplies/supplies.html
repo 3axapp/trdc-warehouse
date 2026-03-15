@@ -19,7 +19,13 @@
         <td *tuiCell="'date'" tuiTd>{{ item.date | date: 'shortDate' }}</td>
         <td *tuiCell="'positionId'" tuiTd>{{ position?.name }}</td>
         <td *tuiCell="'positionCode'" tuiTd>{{ position?.code }}</td>
-        <td *tuiCell="'supplierId'" tuiTd>{{ (item.supplierId | supplier | async)?.name }}</td>
+        <td *tuiCell="'supplierId'" tuiTd>
+          @if (position?.type === PositionType.Produced) {
+            {{ (item.supplierId | executor | async)?.fullName }}
+          } @else {
+            {{ (item.supplierId | supplier | async)?.name }}
+          }
+        </td>
         <td *tuiCell="'remainingQuantity'" tuiTd>{{ item.quantity - item.usedQuantity }}</td>
         <td *tuiCell="'actions'" tuiTd>
           <div class="table-actions"></div>

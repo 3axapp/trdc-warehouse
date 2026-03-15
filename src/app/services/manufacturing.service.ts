@@ -130,7 +130,7 @@ export class ManufacturingService {
         supplyId = await this.supplies.add(
           {
             positionId: receipt.id!,
-            // supplierId: string,
+            supplierId: data.executorId,
             manufacturingCode: ref.id,
             date: data.date,
             quantity,

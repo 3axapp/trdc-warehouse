@@ -1,6 +1,4 @@
-import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
-import { TuiAlertService } from '@taiga-ui/core';
-import { TuiResponsiveDialogService } from '@taiga-ui/addon-mobile';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { SuppliesCollection, Supply } from '../../../services/collections/supplies.collection';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import {
@@ -20,6 +18,8 @@ import {
   PositionType,
 } from '../../../services/collections/positions.collection';
 import { SuppliersCollection } from '../../../services/collections/suppliers.collection';
+import { ExecutorPipe } from '../../../pipes/executor-pipe';
+import { UsersCollection } from '../../../services/collections/users.collection';
 
 @Component({
   selector: 'app-warehouse',
@@ -31,22 +31,21 @@ import { SuppliersCollection } from '../../../services/collections/suppliers.col
     TuiTableTh,
     TuiTableThGroup,
     TuiTableTr,
-    PositionPipe,
-    SupplierPipe,
     AsyncPipe,
     DatePipe,
+    ExecutorPipe,
+    PositionPipe,
+    SupplierPipe,
   ],
   templateUrl: './supplies.html',
   styleUrl: './supplies.scss',
 })
 export class Supplies implements OnInit {
-  private readonly injector = inject(INJECTOR);
-  private readonly supplies = inject(SuppliesCollection);
-  private readonly positions = inject(PositionsCollection);
-  private readonly suppliers = inject(SuppliersCollection);
   private readonly cache = inject(CacheService);
-  private readonly dialogs = inject(TuiResponsiveDialogService);
-  private readonly alerts = inject(TuiAlertService);
+  private readonly positions = inject(PositionsCollection);
+  private readonly supplies = inject(SuppliesCollection);
+  private readonly suppliers = inject(SuppliersCollection);
+  private readonly users = inject(UsersCollection);
 
   protected columns = [
     'positionId',
@@ -67,6 +66,7 @@ export class Supplies implements OnInit {
   public ngOnInit(): void {
     this.cache.add('suppliers', this.suppliers.getList());
     this.cache.add('positions', this.positions.getList());
+    this.cache.add('executors', this.users.getList());
     this.load();
   }
 

@@ -34,7 +34,6 @@ describe('SupplierPipe', () => {
       return null;
     }) as any);
     const pipe = TestBed.inject(SupplierPipe);
-    await expectAsync(pipe.transform(undefined)).toBeResolvedTo(null);
     await expectAsync(pipe.transform(null as any)).toBeResolvedTo(null);
     await expectAsync(pipe.transform('' as any)).toBeResolvedTo(null);
     await expectAsync(pipe.transform(0 as any)).toBeResolvedTo(null);

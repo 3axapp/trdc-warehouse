@@ -47,6 +47,7 @@ export class ReserveProductionService {
         positionId: item.positionId,
         date: reserve.date,
         quantity: item.quantity,
+        supplierId: '',
         usedQuantity:
           (item.usedQuantity ?? 0) + (item.brokenQuantity ?? 0) + (item.returnedQuantity ?? 0),
         qualityControlStatus: QualityControlStatus.Completed,
@@ -88,6 +89,7 @@ export class ReserveProductionService {
           allSupplies.filter(
             (s) =>
               s.positionId === chipRecipe.id &&
+              s.supplierId === user.id &&
               s.date.toISOString().substring(0, 10) === date.toISOString().substring(0, 10),
           ).length + 1;
         const lotColRef = collection(this.firestore, 'manufacturingLots');
@@ -124,6 +126,7 @@ export class ReserveProductionService {
               quantity: producedQuantity,
               usedQuantity: 0,
               lot,
+              supplierId: user.id,
             },
             transaction,
           );

@@ -12,7 +12,6 @@ export class SuppliesCollection extends AbstractCollection<Supply> {
     orderField = 'date',
     orderDirection: OrderByDirection = 'desc',
   ): Promise<Supply[]> {
-    console.log(orderDirection);
     return super.getList(orderField, orderDirection);
   }
 
@@ -40,7 +39,7 @@ export class SuppliesCollection extends AbstractCollection<Supply> {
 
 export interface Supply extends Deletable {
   positionId: string;
-  supplierId?: string;
+  supplierId: string;
   date: Date;
   quantity: number;
   usedQuantity: number;

@@ -84,6 +84,7 @@ describe('ReserveProductionService', () => {
         usedQuantity,
         qualityControlStatus: QualityControlStatus.Completed,
         lot: 1,
+        supplierId: 'supplier1',
       });
     }
   }
