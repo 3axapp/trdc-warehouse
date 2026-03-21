@@ -7,7 +7,7 @@ import { PositionsCollection } from '../../../services/collections/positions.col
 import { SuppliersCollection } from '../../../services/collections/suppliers.collection';
 import { CacheService } from '../../../services/cache.service';
 import { Auth } from '@angular/fire/auth';
-import {UsersCollection} from '../../../services/collections/users.collection';
+import { UsersCollection } from '../../../services/collections/users.collection';
 
 describe('Supplies', () => {
   let component: Supplies;

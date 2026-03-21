@@ -167,6 +167,16 @@ export class Manufacturing implements OnInit {
       next: async (data) => {
         try {
           const usedLots = await this.manufacturing.create(this.recipe, data);
+          for (const part of this.recipe.items) {
+            if (part.type === PositionType.Normal) {
+              usedLots.push({
+                supplyId: '',
+                name: part.name,
+                taken: data.quantity * part.quantity,
+                originalTaken: data.quantity * part.quantity,
+              });
+            }
+          }
           const extraFields: Partial<Record<ExtraFieldKeys, { value: any }>> = {};
           for (const [name, enable] of Object.entries(this.recipe.extraFields || {})) {
             if (!enable) {

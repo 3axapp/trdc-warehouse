@@ -115,7 +115,7 @@ describe('ManufacturingService', () => {
 
     const recipe1: Recipe = {
       code: 'code',
-      items: [{ code: 'notexists', type: PositionType.Normal, quantity: 3 }],
+      items: [{ code: 'notexists', type: PositionType.Checked, quantity: 3 }],
     };
     let result = await service.getNextMaxQuantity(recipe1);
     expect(recipe1.id).toBeFalsy();
@@ -273,7 +273,7 @@ describe('ManufacturingService', () => {
       {
         id: supplies[4].id,
         quantity: supplies[4].quantity,
-        usedQuantity: supplies[4].usedQuantity + 1,
+        usedQuantity: supplies[4].usedQuantity,
       },
     ];
 
@@ -377,7 +377,7 @@ describe('ManufacturingService', () => {
       {
         id: supplies[4].id,
         quantity: supplies[4].quantity,
-        usedQuantity: supplies[4].usedQuantity + 1 + 1 + 1 + 1,
+        usedQuantity: supplies[4].usedQuantity,
       },
     ];
 

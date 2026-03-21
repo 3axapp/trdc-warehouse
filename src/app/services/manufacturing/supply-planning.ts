@@ -45,6 +45,10 @@ function calculateAvailability(receipt: Recipe, supplies: ReceiptSupplies): Avai
       break;
     }
 
+    if (item.type === PositionType.Normal) {
+      continue;
+    }
+
     if (!supplies[item.id]?.quantity) {
       available = 0;
       message = `Материал «${item.name!}» не поставлен`;
@@ -100,6 +104,9 @@ export function reserveComponents(
   const usedLots: Record<string, UsedLot[]> = {};
 
   for (const item of receipt.items) {
+    if (item.type === PositionType.Normal) {
+      continue;
+    }
     usedLots[item.id!] = [];
     let remainingToTake = quantityToProduce * item.quantity;
 
@@ -136,6 +143,9 @@ export function reserveComponents(
 export function generateLotCombinations(receipt: Recipe, usedLots: Record<string, UsedLot[]>) {
   const cells: string[] = [];
   for (const item of receipt.items) {
+    if (item.type === PositionType.Normal) {
+      continue;
+    }
     cells.push(...Array(item.quantity).fill(item.id!));
   }
 
