@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ManufacturingSuccess } from './manufacturing-success';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {POLYMORPHEUS_CONTEXT} from '@taiga-ui/polymorpheus';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { POLYMORPHEUS_CONTEXT } from '@taiga-ui/polymorpheus';
 
 describe('ManufacturingSuccess', () => {
   let component: ManufacturingSuccess;
@@ -14,12 +14,11 @@ describe('ManufacturingSuccess', () => {
         provideZonelessChangeDetection(),
         {
           provide: POLYMORPHEUS_CONTEXT,
-          useValue: {data: []},
+          useValue: { data: [] },
         },
       ],
-      imports: [ManufacturingSuccess]
-    })
-    .compileComponents();
+      imports: [ManufacturingSuccess],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ManufacturingSuccess);
     component = fixture.componentInstance;

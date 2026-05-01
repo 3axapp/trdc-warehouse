@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {AbstractCollection, Deletable} from './abstract.collection';
-import {doc, runTransaction} from '@angular/fire/firestore';
+import { Injectable } from '@angular/core';
+import { AbstractCollection, Deletable } from './abstract.collection';
+import { doc, runTransaction } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +20,7 @@ export class PositionsCollection extends AbstractCollection<Position> {
         throw new Error('Код позиции не уникален');
       }
 
-      transaction.set(uniqueRef, {id: position.id});
+      transaction.set(uniqueRef, { id: position.id });
       transaction.set(position, item);
     });
 
@@ -40,7 +40,7 @@ export class PositionsCollection extends AbstractCollection<Position> {
           if (checkNewUnique.exists() && checkNewUnique.data()['id'] != id) {
             throw new Error('Код позиции не уникален');
           }
-          transaction.set(newUniqueRef, {id: position.id});
+          transaction.set(newUniqueRef, { id: position.id });
           transaction.delete(currentUniqueRef);
         }
       }
@@ -60,8 +60,4 @@ export interface Position extends Deletable {
   code: string;
   name: string;
   type: PositionType;
-}
-
-interface PositionUniqueCode {
-  id: string;
 }

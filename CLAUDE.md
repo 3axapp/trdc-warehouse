@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TRDC Warehouse — a Russian-language warehouse management and manufacturing control system. Manages the full supply chain: material reception → quality control → multi-stage manufacturing → shipment.
+TRDC Warehouse — a Russian-language warehouse management and manufacturing control system. Manages the full supply chain: quarantine intake → quality control → material reservation → multi-stage manufacturing → shipment.
 
 **Stack:** Angular 20, Taiga UI 4, Firebase (Firestore + Auth), TypeScript (strict mode)
 
@@ -37,24 +37,46 @@ Both `npm run firebase` and `ng serve` must be running simultaneously for local 
 - **Soft deletes** via `deleted` boolean flag (hard delete is disabled)
 
 ### Key Directories
-- `src/app/components/guard-area/` — all authenticated routes (supplies, manufacturing, packing, shipments, master data)
+- `src/app/components/guard-area/` — all authenticated routes (quarantine, supplies, reserve, manufacturing, packing, shipments, master data)
+- `src/app/components/login/` — login page
+- `src/app/components/register/` — registration page (separate from login)
 - `src/app/services/collections/` — Firestore collection wrappers extending `AbstractCollection<T>`
-- `src/app/services/` — domain services (manufacturing logic, quality control, auth, cache)
+- `src/app/services/` — domain services (manufacturing, reserve, quarantine QC, auth, cache)
 - `src/app/pipes/` — display pipes for translating IDs to names
 
 ### Data Layer Pattern
 `AbstractCollection<T extends Deletable>` (in `services/collections/abstract.collection.ts`) provides base CRUD: `get`, `add`, `update`, `archive`, `getList`. Each collection class sets `collectionName` and optionally overrides the Firestore converter. Transactions are passed as optional parameters for multi-document consistency.
 
+### Quarantine & Quality Control
+Materials enter through quarantine invoices (`quarantineInvoices` collection) before becoming available supplies. `QuarantineQcService` processes QC: validates quantities, generates lots in format `КОД-ДДММГГ-НОМЕР_СЧЕТА-N`, creates supplies on the warehouse, and tracks used/broken quantities per invoice item. Lot uniqueness is enforced via `quarantineQcCounters` and `quarantineQcUserLots` collections.
+
+### Reserve System
+Before manufacturing chips, materials are reserved from available supplies via `ReserveService`. `ReserveProductionService` handles production from reserves: validates quantities, creates chip supplies with lots, logs production to `manufacturingProduction`, and supports returning unused remainder back to supplies.
+
 ### Manufacturing Pipeline (Recipe System)
 Three sequential stages defined in `src/app/recipes.ts`:
-1. **chipRecipe:** 5 checked materials → 1 chip
+1. **chipRecipe:** 5 checked materials → 1 chip (produced from reserve via `ReserveProductionService`)
 2. **packRecipe:** 5 chips + packaging → 1 pack
 3. **shipRecipe:** 10 packs + box + label → 1 shipment (with recipient and docNumber fields)
 
 Packing and shipment routes reuse the same manufacturing component, differing only by recipe.
+Chip production uses a separate reserve-based flow with its own component and service.
+
+### Authentication & Users
+- Login and registration are separate pages (`/login`, `/register`)
+- Registration collects email, password, full name (ФИО), and position (Должность)
+- `users` collection stores user profiles; document ID = Firebase Auth UID
+- Each user gets a sequential `number` (unique, enforced via `userNumbers` collection)
+- `authGuardWithUser` guard wraps Firebase `AuthGuard` and loads `User` into `AuthService` on protected routes (handles page refresh)
+- `AuthService.getIdentity()` returns `User | null`; `loadUser()` fetches from Firestore if not cached
 
 ### Firestore Collections
-`positions`, `supplies`, `suppliers`, `executors`, `manufacturingProduction`, `manufacturingLots`, `positionCodes` (uniqueness enforcer), `positionLots` (uniqueness enforcer)
+- `positions`, `positionCodes` (uniqueness enforcer)
+- `supplies`, `suppliers`
+- `users`, `userNumbers` (uniqueness enforcer for sequential user numbers)
+- `quarantineInvoices`, `quarantineInvoiceLots` (uniqueness enforcer), `quarantineQcCounters`, `quarantineQcUserLots`
+- `reserves`
+- `manufacturingProduction`, `manufacturingLots`
 
 ### Position Types
 - **Normal** — no QC required
@@ -63,17 +85,28 @@ Packing and shipment routes reuse the same manufacturing component, differing on
 
 ## Domain Constraints
 - Position `code` must be unique (enforced via `positionCodes` collection in a transaction)
-- Lot = unique combination of position code + materials composition + executor + date
+- User `number` must be unique (enforced via `userNumbers` collection in a transaction)
+- Quarantine invoice `lot` must be unique (enforced via `quarantineInvoiceLots` collection)
+- Production lot = unique combination of recipe code + date + user number + material lots
 - Only single lot combinations allowed per production run
 - Supply position cannot be changed after QC approval or partial use
 - Quantity validation: available = total − broken − used
+- Reserve: materials reserved from supplies, produced quantity + broken + returned ≤ reserved
+
+## Quality Gates
+- **All tests must pass** before considering any task complete. Run `ng test --no-watch` after making changes and fix any failures.
+- **Build must succeed** — run `ng build` to verify there are no compilation errors.
+- **Lint must pass** — run `ng lint` after making changes; fix with `ng lint --fix` then resolve remaining errors manually.
 
 ## Code Style
 - 2-space indentation, single quotes for TypeScript, UTF-8
+- Always use curly braces for `if`, `for`, `while` etc. — even single-line bodies (`curly: all`)
+- All class members must have explicit access modifiers (`public`/`protected`/`private`)
 - Angular schematics generate SCSS for component styles
 - Icons from [Lucide](https://lucide.dev/icons/)
 - Domain terms (UI labels, docs, comments) in Russian; code identifiers in English
 - Component prefix: `app`
+- Full style reference: `docs/code_style.md`
 
 ## Firebase
 - Project: `trdc-warehouse-0x3`

@@ -1,8 +1,7 @@
 import { ExecutorPipe } from './executor-pipe';
-import {CacheService} from '../services/cache.service';
-import {TestBed} from '@angular/core/testing';
-import {PositionPipe} from './position-pipe';
-import {provideZonelessChangeDetection} from '@angular/core';
+import { CacheService } from '../services/cache.service';
+import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 describe('ExecutorPipe', () => {
   let mockCacheService: jasmine.SpyObj<CacheService>;
@@ -13,7 +12,7 @@ describe('ExecutorPipe', () => {
       providers: [
         ExecutorPipe,
         provideZonelessChangeDetection(),
-        {provide: CacheService, useValue: mockCacheService},
+        { provide: CacheService, useValue: mockCacheService },
       ],
     });
   });

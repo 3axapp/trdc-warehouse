@@ -1,8 +1,9 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {Login} from './login';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {AuthService} from '../../services/auth.service';
+import { Login } from './login';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
+import { provideRouter } from '@angular/router';
 
 describe('Login', () => {
   let component: Login;
@@ -10,15 +11,15 @@ describe('Login', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    mockAuthService = jasmine.createSpyObj('AuthService', ['login', 'register']);
+    mockAuthService = jasmine.createSpyObj('AuthService', ['login']);
     await TestBed.configureTestingModule({
       imports: [Login],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: AuthService, useValue: mockAuthService},
+        provideRouter([]),
+        { provide: AuthService, useValue: mockAuthService },
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Login);
     component = fixture.componentInstance;

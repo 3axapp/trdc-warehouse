@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PositionForm } from './position-form';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {PositionsCollection} from '../../../../services/collections/positions.collection';
-import {POLYMORPHEUS_CONTEXT} from '@taiga-ui/polymorpheus';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { PositionsCollection } from '../../../../services/collections/positions.collection';
+import { POLYMORPHEUS_CONTEXT } from '@taiga-ui/polymorpheus';
 
 describe('PositionForm', () => {
   let component: PositionForm;
@@ -17,14 +17,13 @@ describe('PositionForm', () => {
       imports: [PositionForm],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: PositionsCollection, useValue: mockPositionsService},
+        { provide: PositionsCollection, useValue: mockPositionsService },
         {
           provide: POLYMORPHEUS_CONTEXT,
           useValue: {},
         },
       ],
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(PositionForm);
     component = fixture.componentInstance;

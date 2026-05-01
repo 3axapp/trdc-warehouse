@@ -1,23 +1,17 @@
-import {Component, inject, INJECTOR, OnInit, signal} from '@angular/core';
-import {TuiTable} from '@taiga-ui/addon-table';
-import {Position, PositionsCollection} from '../../../services/collections/positions.collection';
-import {TuiAlertService, TuiButton, tuiDialog, TuiHint, TuiIcon} from '@taiga-ui/core';
-import {Observable, switchMap} from 'rxjs';
-import {NgForOf} from '@angular/common';
-import {PositionTypePipe} from '../../../pipes/position-type-pipe';
-import {TuiResponsiveDialogService} from '@taiga-ui/addon-mobile';
-import {TUI_CONFIRM, TuiConfirmData} from '@taiga-ui/kit';
+import { Component, inject, INJECTOR, OnInit, signal } from '@angular/core';
+import { TuiTable } from '@taiga-ui/addon-table';
+import { Position, PositionsCollection } from '../../../services/collections/positions.collection';
+import { TuiAlertService, TuiButton, tuiDialog, TuiHint, TuiIcon } from '@taiga-ui/core';
+import { switchMap } from 'rxjs';
+
+import { PositionTypePipe } from '../../../pipes/position-type-pipe';
+import { TuiResponsiveDialogService } from '@taiga-ui/addon-mobile';
+import { TUI_CONFIRM, TuiConfirmData } from '@taiga-ui/kit';
+import { PositionForm } from './position-form/position-form';
 
 @Component({
   selector: 'app-positions',
-  imports: [
-    TuiTable,
-    TuiButton,
-    TuiIcon,
-    TuiHint,
-    NgForOf,
-    PositionTypePipe,
-  ],
+  imports: [TuiTable, TuiButton, TuiIcon, TuiHint, PositionTypePipe],
   templateUrl: './positions.html',
   styleUrl: './positions.scss',
 })
@@ -27,12 +21,7 @@ export class Positions implements OnInit {
   private readonly dialogs = inject(TuiResponsiveDialogService);
   private readonly alerts = inject(TuiAlertService);
 
-  protected columns = [
-    'code',
-    'name',
-    'type',
-    'actions',
-  ];
+  protected columns = ['code', 'name', 'type', 'actions'];
 
   protected data = signal<Position[]>([]);
 
@@ -61,14 +50,16 @@ export class Positions implements OnInit {
         size: 's',
         data,
       })
-      .pipe(switchMap(async (response) => {
-        if (!response) {
-          return;
-        }
-        await this.positions.archive(position.id);
-        await this.load();
-        return this.alerts.open('Позиция удалена');
-      }))
+      .pipe(
+        switchMap(async (response) => {
+          if (!response) {
+            return;
+          }
+          await this.positions.archive(position.id);
+          await this.load();
+          return this.alerts.open('Позиция удалена');
+        }),
+      )
       .subscribe();
   }
 
@@ -85,19 +76,25 @@ export class Positions implements OnInit {
         size: 's',
         data,
       })
-      .pipe(switchMap(async (response) => {
-        if (!response) {
-          return;
-        }
-        await this.positions.unarchive(position.id);
-        await this.load();
-        return this.alerts.open('Позиция восстановлена');
-      }))
+      .pipe(
+        switchMap(async (response) => {
+          if (!response) {
+            return;
+          }
+          await this.positions.unarchive(position.id);
+          await this.load();
+          return this.alerts.open('Позиция восстановлена');
+        }),
+      )
       .subscribe();
   }
 
   protected async showDialog(position?: Position): Promise<void> {
-    const dialog = await this.lazyLoad(position);
+    const dialog = tuiDialog(PositionForm, {
+      injector: this.injector,
+      dismissible: true,
+      label: position ? 'Изменить' : 'Добавить',
+    });
 
     dialog(position).subscribe({
       next: async (data) => {
@@ -110,18 +107,8 @@ export class Positions implements OnInit {
     });
   }
 
-  private async lazyLoad(position?: Position): Promise<(position?: Position) => Observable<Position>> {
-    const {PositionForm} = await import('./position-form/position-form');
-
-    return tuiDialog(PositionForm, {
-      injector: this.injector,
-      dismissible: true,
-      label: position ? 'Изменить' : 'Добавить',
-    });
-  }
-
   private async load(): Promise<void> {
-    return this.positions.getList().then(positions => {
+    return this.positions.getList().then((positions) => {
       this.data.set(positions.sort((a, b) => (a.deleted ? 1 : 0) - (b.deleted ? 1 : 0)));
     });
   }

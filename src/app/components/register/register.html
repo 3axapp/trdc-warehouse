@@ -1,0 +1,53 @@
+<form
+  (ngSubmit)="onSubmit()"
+  tuiAppearance="floating"
+  tuiCardLarge
+  tuiForm="m"
+  [formGroup]="registerForm"
+>
+  <header tuiHeader>
+    <h2 tuiTitle>Регистрация</h2>
+  </header>
+
+  <tui-textfield>
+    <label tuiLabel>ФИО</label>
+    <input tuiTextfield formControlName="fullName" />
+    <tui-icon icon="@tui.user" />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Должность</label>
+    <input tuiTextfield formControlName="position" />
+    <tui-icon icon="@tui.briefcase" />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Email</label>
+    <input tuiTextfield type="email" formControlName="email" />
+    <tui-icon icon="@tui.mail" />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Пароль</label>
+    <input
+      tuiTextfield
+      type="password"
+      formControlName="password"
+      placeholder="Минимум 8 символов"
+    />
+    <tui-icon icon="@tui.key" />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Подтвердите пароль</label>
+    <input tuiTextfield type="password" formControlName="confirmPassword" />
+    <tui-icon icon="@tui.key" />
+  </tui-textfield>
+
+  <tui-error [error]="error()"></tui-error>
+
+  <footer>
+    <button tuiButton [disabled]="registerForm.invalid" type="submit">Зарегистрироваться</button>
+    <a appearance="flat" tuiButton routerLink="/login"> => Войти </a>
+  </footer>
+</form>

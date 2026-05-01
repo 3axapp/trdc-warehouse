@@ -1,8 +1,8 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {Positions} from './positions';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {Position, PositionsCollection} from '../../../services/collections/positions.collection';
+import { Positions } from './positions';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { PositionsCollection } from '../../../services/collections/positions.collection';
 
 describe('Positions', () => {
   let component: Positions;
@@ -16,10 +16,9 @@ describe('Positions', () => {
       imports: [Positions],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: PositionsCollection, useValue: mockPositionsService},
+        { provide: PositionsCollection, useValue: mockPositionsService },
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Positions);
     component = fixture.componentInstance;

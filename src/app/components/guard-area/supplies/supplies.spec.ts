@@ -1,13 +1,13 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {Supplies} from './supplies';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {SuppliesCollection} from '../../../services/collections/supplies.collection';
-import {PositionsCollection} from '../../../services/collections/positions.collection';
-import {SuppliersCollection} from '../../../services/collections/suppliers.collection';
-import {CacheService} from '../../../services/cache.service';
-import {AuthService} from '../../../services/auth.service';
-import {Auth} from '@angular/fire/auth';
+import { Supplies } from './supplies';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { SuppliesCollection } from '../../../services/collections/supplies.collection';
+import { PositionsCollection } from '../../../services/collections/positions.collection';
+import { SuppliersCollection } from '../../../services/collections/suppliers.collection';
+import { CacheService } from '../../../services/cache.service';
+import { Auth } from '@angular/fire/auth';
+import { UsersCollection } from '../../../services/collections/users.collection';
 
 describe('Supplies', () => {
   let component: Supplies;
@@ -15,6 +15,7 @@ describe('Supplies', () => {
   let mockSuppliesService: jasmine.SpyObj<SuppliesCollection>;
   let mockPositionsService: jasmine.SpyObj<PositionsCollection>;
   let mockSuppliersService: jasmine.SpyObj<SuppliersCollection>;
+  let mockUsersService: jasmine.SpyObj<UsersCollection>;
   let mockCacheService: jasmine.SpyObj<CacheService>;
   let mockAuth: jasmine.SpyObj<Auth>;
 
@@ -22,25 +23,27 @@ describe('Supplies', () => {
     mockSuppliesService = jasmine.createSpyObj('SuppliesService', ['getList']);
     mockPositionsService = jasmine.createSpyObj('PositionsService', ['getList']);
     mockSuppliersService = jasmine.createSpyObj('SuppliersService', ['getList']);
+    mockUsersService = jasmine.createSpyObj('UsersCollection', ['getList']);
     mockCacheService = jasmine.createSpyObj('CacheService', ['get', 'add']);
     mockAuth = jasmine.createSpyObj('Auth', [], ['currentUser']);
 
     mockSuppliesService.getList.and.resolveTo([]);
     mockPositionsService.getList.and.resolveTo([]);
     mockSuppliersService.getList.and.resolveTo([]);
+    mockUsersService.getList.and.resolveTo([]);
 
     await TestBed.configureTestingModule({
       imports: [Supplies],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: SuppliesCollection, useValue: mockSuppliesService},
-        {provide: PositionsCollection, useValue: mockPositionsService},
-        {provide: SuppliersCollection, useValue: mockSuppliersService},
-        {provide: CacheService, useValue: mockCacheService},
-        {provide: Auth, useValue: mockAuth},
+        { provide: SuppliesCollection, useValue: mockSuppliesService },
+        { provide: PositionsCollection, useValue: mockPositionsService },
+        { provide: SuppliersCollection, useValue: mockSuppliersService },
+        { provide: UsersCollection, useValue: mockUsersService },
+        { provide: CacheService, useValue: mockCacheService },
+        { provide: Auth, useValue: mockAuth },
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Supplies);
     component = fixture.componentInstance;

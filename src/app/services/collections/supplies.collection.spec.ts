@@ -1,6 +1,6 @@
-import {TestBed} from '@angular/core/testing';
-import {SuppliesCollection} from './supplies.collection';
-import {provideZonelessChangeDetection} from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { SuppliesCollection } from './supplies.collection';
+import { provideZonelessChangeDetection } from '@angular/core';
 import {
   signOut,
   provideAuthTest,
@@ -38,18 +38,18 @@ describe('SuppliesCollection', () => {
       positionId: 'positionId',
       date: new Date('2025-01-01 00:00:00'),
       quantity: 12,
-      brokenQuantity: 0,
       usedQuantity: 0,
       qualityControlDate: new Date('2025-01-01 00:01:00'),
+      supplierId: 'supplier1',
     });
     await expectAsync(service.get(id)).toBeResolvedTo({
       id,
       positionId: 'positionId',
       date: new Date('2025-01-01 00:00:00'),
       quantity: 12,
-      brokenQuantity: 0,
       usedQuantity: 0,
       qualityControlDate: new Date('2025-01-01 00:01:00'),
+      supplierId: 'supplier1',
     });
   });
 });

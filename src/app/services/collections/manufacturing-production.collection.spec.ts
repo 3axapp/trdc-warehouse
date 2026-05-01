@@ -1,8 +1,8 @@
-import {TestBed} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {ManufacturingProductionCollection} from './manufacturing-production.collection';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {provideFirebaseAppTest, provideFirestoreTest} from '../../../tests/utils';
+import { ManufacturingProductionCollection } from './manufacturing-production.collection';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideFirebaseAppTest, provideFirestoreTest } from '../../../tests/utils';
 
 describe('ManufacturingProductionCollection', () => {
   let service: ManufacturingProductionCollection;

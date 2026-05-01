@@ -1,8 +1,8 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {ManufacturingForm} from './manufacturing-form';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {POLYMORPHEUS_CONTEXT} from '@taiga-ui/polymorpheus';
+import { ManufacturingForm } from './manufacturing-form';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { POLYMORPHEUS_CONTEXT } from '@taiga-ui/polymorpheus';
 
 describe('ManufacturingForm', () => {
   let component: ManufacturingForm;
@@ -15,11 +15,10 @@ describe('ManufacturingForm', () => {
         provideZonelessChangeDetection(),
         {
           provide: POLYMORPHEUS_CONTEXT,
-          useValue: {data: {availability: {available: 5}}},
+          useValue: { data: { availability: { available: 5 } } },
         },
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ManufacturingForm);
     component = fixture.componentInstance;

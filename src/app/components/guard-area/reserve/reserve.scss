@@ -1,0 +1,36 @@
+.expand-cell {
+  cursor: pointer;
+  padding: 0;
+  text-align: center;
+}
+
+.expand-icon {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.expand-icon_open {
+  transform: rotate(90deg);
+}
+
+.detail-cell {
+  padding: 0.5rem 1rem 0.5rem 3rem;
+  background: var(--tui-background-neutral-1);
+}
+
+.detail-item {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.125rem 0;
+
+  &__name {
+    flex: 1;
+  }
+
+  &__lot,
+  &__qty {
+    color: var(--tui-text-secondary);
+    white-space: nowrap;
+  }
+}

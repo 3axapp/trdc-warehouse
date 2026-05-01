@@ -1,8 +1,8 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {Suppliers} from './suppliers';
-import {provideZonelessChangeDetection} from '@angular/core';
-import {SuppliersCollection} from '../../../services/collections/suppliers.collection';
+import { Suppliers } from './suppliers';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { SuppliersCollection } from '../../../services/collections/suppliers.collection';
 
 describe('Suppliers', () => {
   let component: Suppliers;
@@ -16,10 +16,9 @@ describe('Suppliers', () => {
       imports: [Suppliers],
       providers: [
         provideZonelessChangeDetection(),
-        {provide: SuppliersCollection, useValue: mockSuppliersService},
+        { provide: SuppliersCollection, useValue: mockSuppliersService },
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Suppliers);
     component = fixture.componentInstance;

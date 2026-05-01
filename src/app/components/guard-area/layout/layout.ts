@@ -1,23 +1,12 @@
-import {Component, inject} from '@angular/core';
-import {
-  Router,
-  RouterLink,
-  RouterLinkActive,
-  RouterOutlet,
-} from '@angular/router';
-import {TuiTabs} from '@taiga-ui/kit';
-import {TuiHint} from '@taiga-ui/core';
-import {AuthService} from '../../../services/auth.service';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { TuiTabs } from '@taiga-ui/kit';
+import { TuiHint } from '@taiga-ui/core';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-layout',
-  imports: [
-    RouterOutlet,
-    TuiTabs,
-    RouterLink,
-    TuiHint,
-    RouterLinkActive,
-  ],
+  imports: [RouterOutlet, TuiTabs, RouterLink, TuiHint, RouterLinkActive],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
 })
@@ -26,16 +15,18 @@ export class Layout {
   private readonly router = inject(Router);
 
   protected readonly urls = [
-    {route: '', title: 'Склад'},
-    {route: 'manufacturing', title: 'Производство'},
-    {route: 'packing', title: 'Упаковка'},
-    {route: 'shipments', title: 'Отгрузка'},
-    {route: 'positions', title: 'Позиции'},
-    {route: 'suppliers', title: 'Поставщики'},
-    {route: 'executors', title: 'Исполнители'},
+    { route: 'quarantine', title: 'Карантин' },
+    { route: '', title: 'Склад' },
+    { route: 'reserve', title: 'Резерв' },
+    { route: 'manufacturing', title: 'Производство' },
+    { route: 'packing', title: 'Упаковка' },
+    { route: 'shipments', title: 'Отгрузка' },
+    { route: 'positions', title: 'Позиции' },
+    { route: 'suppliers', title: 'Поставщики' },
+    { route: 'executors', title: 'Исполнители' },
   ];
 
-  async logout() {
+  protected async logout() {
     await this.authService.logout();
     await this.router.navigate(['login']);
   }

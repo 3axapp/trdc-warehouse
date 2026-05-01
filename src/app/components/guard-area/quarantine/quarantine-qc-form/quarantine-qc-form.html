@@ -1,0 +1,27 @@
+<form [formGroup]="form" tuiCardLarge (ngSubmit)="submit()">
+  <p class="position-name">{{ context.data.positionName }}</p>
+
+  <tui-textfield>
+    <label tuiLabel>Дата</label>
+    <input tuiInputDate formControlName="date" />
+    <tui-calendar *tuiTextfieldDropdown />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Принято (макс. {{ context.data.maxQuantity }})</label>
+    <input tuiInputNumber formControlName="quantity" [min]="0" />
+  </tui-textfield>
+
+  <tui-textfield>
+    <label tuiLabel>Брак</label>
+    <input tuiInputNumber formControlName="brokenQuantity" [min]="0" />
+  </tui-textfield>
+
+  @if (totalError) {
+    <tui-error [error]="totalError" />
+  }
+
+  <footer>
+    <button tuiButton type="submit" [disabled]="form.invalid">Подтвердить</button>
+  </footer>
+</form>
