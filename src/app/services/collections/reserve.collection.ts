@@ -29,7 +29,7 @@ export class ReserveCollection extends AbstractCollection<Reserve> {
 
   public override async getList(
     orderField = 'date',
-    orderDirection: OrderByDirection = 'asc',
+    orderDirection: OrderByDirection = 'desc',
   ): Promise<Reserve[]> {
     return super.getList(orderField, orderDirection);
   }

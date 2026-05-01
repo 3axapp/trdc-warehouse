@@ -49,14 +49,14 @@ export class Supplies implements OnInit {
 
   protected columns = [
     'positionId',
-    'positionCode',
+    // 'positionCode',
     'supplierId',
     'date',
     'quantity',
     'usedQuantity',
     'remainingQuantity',
     'lot',
-    'actions',
+    // 'actions',
   ];
 
   protected readonly PositionType = PositionType;

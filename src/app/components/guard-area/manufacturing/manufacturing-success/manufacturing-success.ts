@@ -42,5 +42,6 @@ export interface ManufacturingSuccessOptions {
   usedLots: UsedLot[];
   executorId: string;
   date: Date;
+  lot: string;
   extraFields?: Partial<Record<ExtraFieldKeys, { value: any }>>;
 }

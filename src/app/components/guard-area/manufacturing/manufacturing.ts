@@ -149,7 +149,13 @@ export class Manufacturing implements OnInit {
       }
       extraFields[name as ExtraFieldKeys] = { value: (item as any)[name] };
     }
-    this.showSuccess({ usedLots, date: item.date, executorId: item.executorId, extraFields });
+    this.showSuccess({
+      usedLots,
+      date: item.date,
+      executorId: item.executorId,
+      extraFields,
+      lot: String(item.lot),
+    });
   }
 
   private async showDialog(availability: NextMaxQuantity) {
@@ -166,10 +172,10 @@ export class Manufacturing implements OnInit {
     }).subscribe({
       next: async (data) => {
         try {
-          const usedLots = await this.manufacturing.create(this.recipe, data);
+          const result = await this.manufacturing.create(this.recipe, data);
           for (const part of this.recipe.items) {
             if (part.type === PositionType.Normal) {
-              usedLots.push({
+              result.usedLots.push({
                 supplyId: '',
                 name: part.name,
                 taken: data.quantity * part.quantity,
@@ -184,7 +190,13 @@ export class Manufacturing implements OnInit {
             }
             extraFields[name as ExtraFieldKeys] = { value: (data as any)[name] };
           }
-          this.showSuccess({ usedLots, date: data.date, executorId: data.executorId, extraFields });
+          this.showSuccess({
+            usedLots: result.usedLots,
+            date: data.date,
+            executorId: data.executorId,
+            extraFields,
+            lot: result.lot,
+          });
           await this.load();
         } catch (e: any) {
           this.alerts.open(e.message || e, { appearance: 'negative' }).subscribe();
@@ -211,7 +223,7 @@ export class Manufacturing implements OnInit {
     const dialog = tuiDialog(ManufacturingSuccess, {
       injector: this.injector,
       dismissible: true,
-      label: 'Снова успех! Материалы',
+      label: `Состав лота "${options.lot}"`,
     });
     dialog(options).subscribe();
   }

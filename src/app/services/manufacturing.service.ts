@@ -37,7 +37,7 @@ export class ManufacturingService {
   }
 
   public async create(recipe: Recipe, data: Result) {
-    let result: UsedLot[] = [];
+    const result: { usedLots: UsedLot[]; lot: string } = { usedLots: [], lot: '' };
     if (!recipe.id) {
       throw new Error(`Неизвестная производимая позиция с кодом «${recipe.code}»`);
     }
@@ -65,7 +65,7 @@ export class ManufacturingService {
         throw new Error(`Неправильное количество. Максимум ${lotCombinations[0].quantity}`);
       }
 
-      await this.recordProduction(
+      const productionRecords = await this.recordProduction(
         recipe,
         [lotCombinations[0]],
         availability.nextId,
@@ -74,7 +74,8 @@ export class ManufacturingService {
       );
       await this.updateComponents(usedLots, transaction);
 
-      result = Object.values(usedLots).flat();
+      result.usedLots = Object.values(usedLots).flat();
+      result.lot = String(productionRecords[0].lot);
     });
 
     return result;
@@ -146,6 +147,8 @@ export class ManufacturingService {
     }
 
     this.recordProductionLog(productionRecords, data, transaction);
+
+    return productionRecords;
   }
 
   private getLotCollection() {
