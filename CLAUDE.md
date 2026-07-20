@@ -70,6 +70,25 @@ Chip production uses a separate reserve-based flow with its own component and se
 - `authGuardWithUser` guard wraps Firebase `AuthGuard` and loads `User` into `AuthService` on protected routes (handles page refresh)
 - `AuthService.getIdentity()` returns `User | null`; `loadUser()` fetches from Firestore if not cached
 
+### Roles
+- `User.role` is an optional free-text field on the `users` document. Only `'admin'` (`ADMIN_ROLE`) grants elevated access; absent or any other value means a regular user.
+- **There is no UI to assign roles** — this is deliberate. Roles are set by hand in the Firebase console. `UsersCollection.addWithUid` takes `Omit<User, 'id' | 'number' | 'role'>`, so registration structurally cannot write one.
+- `AuthService.isAdmin()` checks the loaded profile; `adminGuard` (`services/admin.guard.ts`) protects admin-only routes and redirects non-admins to `/` (they are authenticated, just unauthorized).
+- Currently only `/backup` is admin-only. `Layout` also filters the tab out of the menu, but the guard is what actually blocks the route.
+- **This is UI/route-level enforcement, not a security boundary.** Firestore rules still allow any authenticated user to read/write every collection, so a user could set their own `role` or run a restore directly via the SDK. Rules cannot distinguish restore writes from normal writes, so backup access cannot be enforced there; genuine escalation-proofing would require a Firebase Auth custom claim instead of a document field.
+
+### Backup & Restore
+`BackupService` (`services/backup.service.ts`) exports each Firestore collection and restores it back; `backup-archive.ts` packs those per-collection JSON files into a single ZIP (via `fflate`). UI lives at `/backup` (Бэкап).
+
+- Export produces one `backup-YYYY-MM-DD.zip` containing `positions.json`, `supplies.json`, … — one file per collection.
+- Restore accepts either the archive or loose `.json` files; both paths go through `parseBackupFile` → `restoreCollection`.
+- Firebase Auth is **not** backed up (client SDK has no access). `users` docs are keyed by Auth UID, so restoring into a fresh project leaves profiles without accounts.
+
+- The client SDK cannot enumerate collections — `BACKUP_COLLECTIONS` is a hardcoded list. **Adding a new Firestore collection requires adding it there**, including uniqueness-enforcer collections.
+- Reads bypass `AbstractCollection` converters so document IDs are preserved; restore writes with `setDoc` on the original ID (enforcer collections encode meaning in the ID itself).
+- Restore is a **full replacement**: existing documents in the collection are hard-deleted, then backup contents are written via chunked `writeBatch` (500-op limit).
+- `Timestamp`/`GeoPoint`/`Bytes`/`DocumentReference` are serialized with a `__type` tag and decoded back on restore.
+
 ### Firestore Collections
 - `positions`, `positionCodes` (uniqueness enforcer)
 - `supplies`, `suppliers`

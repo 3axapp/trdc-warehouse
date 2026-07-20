@@ -1,0 +1,75 @@
+<button
+  tuiButton
+  iconEnd="@tui.download"
+  type="button"
+  size="m"
+  tuiHint="Формируется архив backup-ГГГГ-ММ-ДД.zip, внутри которого каждая коллекция лежит отдельным файлом вида positions.json"
+  [disabled]="busy()"
+  (click)="exportAll()"
+>
+  Выгрузить бэкап
+</button>
+
+<label
+  tuiInputFiles
+  tuiHint="Можно выбрать архив целиком или отдельные JSON-файлы"
+  [tuiHintShowDelay]="500"
+>
+  <input
+    tuiInputFiles
+    multiple
+    accept=".zip,.json"
+    [formControl]="filesControl"
+    (reject)="onReject($event)"
+  />
+</label>
+
+@if (selectedFiles().length) {
+  <tui-files>
+    @for (file of selectedFiles(); track file.name) {
+      <tui-file *tuiItem [file]="file" [showSize]="true" (remove)="removeFile(file)"></tui-file>
+    }
+  </tui-files>
+
+  <button
+    tuiButton
+    appearance="accent"
+    iconEnd="@tui.upload"
+    type="button"
+    size="m"
+    tuiHint="Каждая коллекция из выбранных файлов заменяется целиком — её текущие документы удаляются безвозвратно"
+    [disabled]="busy()"
+    (click)="restore()"
+  >
+    Восстановить
+  </button>
+}
+
+@if (busy()) {
+  <tui-loader [textContent]="status()"></tui-loader>
+}
+
+@if (log().length) {
+  <ul>
+    @for (line of log(); track $index) {
+      <li>{{ line }}</li>
+    }
+  </ul>
+}
+
+<table class="table table-striped table-hover" [style.width.%]="100">
+  <thead>
+    <tr>
+      <th>Коллекция</th>
+      <th>Документов</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track row.name) {
+      <tr>
+        <td>{{ row.name }}</td>
+        <td>{{ row.count === null ? '…' : row.count }}</td>
+      </tr>
+    }
+  </tbody>
+</table>
