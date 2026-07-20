@@ -6,7 +6,7 @@ import {
   signOut,
   UserCredential,
 } from '@angular/fire/auth';
-import { User, UsersCollection } from './collections/users.collection';
+import { ADMIN_ROLE, User, UsersCollection } from './collections/users.collection';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +18,11 @@ export class AuthService {
 
   public getIdentity(): User | null {
     return this.user;
+  }
+
+  /** Админ — только точное значение роли admin, любое другое значение и его отсутствие означают обычного пользователя. */
+  public isAdmin(): boolean {
+    return this.user?.role === ADMIN_ROLE;
   }
 
   public async loadUser(): Promise<void> {

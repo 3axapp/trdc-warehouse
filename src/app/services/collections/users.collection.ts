@@ -19,7 +19,10 @@ export class UsersCollection extends AbstractCollection<User> {
     return super.getList(orderField, orderDirection, ...queryConstraints);
   }
 
-  public async addWithUid(uid: string, item: Omit<User, 'id' | 'number'>): Promise<string> {
+  public async addWithUid(
+    uid: string,
+    item: Omit<User, 'id' | 'number' | 'role'>,
+  ): Promise<string> {
     const userRef = doc(this.getCollection(), uid);
 
     await runTransaction(this.firestore, async (transaction) => {
@@ -40,9 +43,18 @@ export class UsersCollection extends AbstractCollection<User> {
   }
 }
 
+/** Роль администратора. Проставляется только вручную через консоль Firebase. */
+export const ADMIN_ROLE = 'admin';
+
 export interface User extends Deletable {
   email: string;
   fullName: string;
   position: string;
   number: number;
+  /**
+   * Роль пользователя. Отсутствие поля означает обычного пользователя.
+   * В интерфейсе не редактируется: addWithUid принимает Omit<User, 'id' | 'number' | 'role'>,
+   * поэтому регистрация технически не может её выставить.
+   */
+  role?: string;
 }

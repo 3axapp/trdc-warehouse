@@ -4,6 +4,7 @@ import { Register } from './components/register/register';
 import { Supplies } from './components/guard-area/supplies/supplies';
 import { AuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 import { authGuardWithUser } from './services/auth.guard';
+import { adminGuard } from './services/admin.guard';
 import { Layout } from './components/guard-area/layout/layout';
 import { Positions } from './components/guard-area/positions/positions';
 import { Suppliers } from './components/guard-area/suppliers/suppliers';
@@ -12,6 +13,7 @@ import { Manufacturing } from './components/guard-area/manufacturing/manufacturi
 import { chipRecipe, packRecipe, shipRecipe } from './recipes';
 import { Quarantine } from './components/guard-area/quarantine/quarantine';
 import { ReserveComponent } from './components/guard-area/reserve/reserve';
+import { Backup } from './components/guard-area/backup/backup';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['login']);
 const redirectLoggedInToItems = () => redirectLoggedInTo(['']);
@@ -32,6 +34,7 @@ export const routes: Routes = [
       { path: 'positions', component: Positions },
       { path: 'suppliers', component: Suppliers },
       { path: 'executors', component: Executors },
+      { path: 'backup', component: Backup, canActivate: [adminGuard] },
     ],
   },
   {
